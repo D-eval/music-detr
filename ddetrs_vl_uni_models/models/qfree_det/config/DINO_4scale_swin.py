@@ -74,7 +74,7 @@ modelname = 'dino'
 frozen_weights = None
 backbone = 'swin_T_224_1k'  # 'swin_S_224_22k'  # swin_L_384_22k
 use_checkpoint = False
-backbone_dir = "./pretrained"
+backbone_dir = "../pretrained"
 
 dilation = False
 position_embedding = 'sine'

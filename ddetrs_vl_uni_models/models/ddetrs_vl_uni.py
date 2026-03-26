@@ -147,9 +147,9 @@ class DDETRSVLUni(nn.Module):
             # Use absolute base_dir from repository root to avoid relative path issues
             from pathlib import Path
             repo_root = Path(__file__).resolve().parents[2]  # .../my
-            if not (repo_root / "projects" / "DDETRS" / "ddetrs").exists():
-                repo_root = repo_root.parent  # /Open-Det2
-            base_dir = repo_root / "projects" / "DDETRS" / "ddetrs" / "models" / "qfree_det" / "config"
+            # if not (repo_root / "projects" / "DDETRS" / "ddetrs").exists():
+            #     repo_root = repo_root.parent  # /Open-Det2
+            base_dir = repo_root / "ddetrs_vl_uni_models" / "models" / "qfree_det" / "config"
             if not base_dir.exists():
                 raise FileNotFoundError(f"Expected qfree_det config directory not found: {base_dir}")
             model, criterion, postprocessors = build_qfree_det(str(base_dir / cfg.MODEL.CONFIG_FILE), cfg)
