@@ -1,0 +1,5 @@
+PYTHONPATH=$PWD
+
+python3.9 test_model.py
+
+https://homes.cs.washington.edu/~ranjay/visualgenome/api.html
