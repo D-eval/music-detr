@@ -214,23 +214,29 @@ class TimeAttention(nn.Module):
         return self.o_proj(out)
 
 
-class PitchPredictor(nn.Module):
+class PitchTransformer(nn.Module):
     def __init__(self):
         super().__init__()
         cfg = get_config()
         
         pitch_num = cfg.pitch_vocab_size
         
+        self.pitch_embed = nn.Linear(cfg.pitch_vocab_size, cfg.d_model)
+        self.text_embed = nn.Linear(cfg.text_input_dim, cfg.d_model)
+        self.audio_embed = nn.Linear(cfg.audio_input_dim, cfg.d_model)
         
     def forward(self,
                 pitch_spec,
                 pitchs,
-                spec,
+                pitch_centre,
+                freq_spec,
                 freqs,
-                text_embedding):
+                freq_centre,
+                text_emb):
         """
         inputs
-            pitch_spec: (B, T, P)
+            pitch_spec: (B, P, T)
+            freq_spec: (B, F, T)
         return: 
             pitch_bar: (B, T, P, 3)
         """
@@ -263,8 +269,6 @@ class PitchPredictor(nn.Module):
 #         super().__init__()
 #         cfg = get_config()
         
-#         self.pitch_embed = nn.Linear(cfg.pitch_vocab_size, cfg.d_model)
-#         self.text_embed = nn.Linear(cfg.text_input_dim, cfg.d_model)
-#         self.audio_embed = nn.Linear(cfg.audio_input_dim, cfg.d_model)
+
         
         

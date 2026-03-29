@@ -28,8 +28,8 @@ for batch in loader:
 
 from utils import wav2cqt, wav2spec
 
-pitch_spec, pitch_centre, pitch_freqs = wav2cqt(audio)
-spec, spec_centre, spec_freqs = wav2spec(audio)
+pitch_spec, pitch_centre, pitchs = wav2cqt(audio)
+freq_spec, freq_centre, freqs = wav2spec(audio)
 
 
 from models.tokenizer import MusicDetrTokenizer
@@ -38,11 +38,12 @@ tokenizer = MusicDetrTokenizer()
 
 audio_emb, text_emb = tokenizer(audio, texts)
 
-text_id = 0
-temp_text_emb = text_emb[0][text_id]
-text_id_idx = (events[0][:, 3] == text_id)
+from utils.equipTarget import get_target_map
 
-events[0][text_id_idx]
+
+target_pitchMap = get_target_map(events, pitch_centre)
+
+
 
 # events[2]-= 24
 
