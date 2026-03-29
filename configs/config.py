@@ -1,0 +1,68 @@
+
+import argparse
+import numpy as np
+from pathlib import Path
+
+def midi2freq(midi):
+    """
+    midi: int or np.array
+    return: frequency (Hz)
+    """
+    midi = np.asarray(midi)
+    return 440.0 * (2.0 ** ((midi - 69) / 12.0))
+
+def freq2midi(freq):
+    """
+    freq: float or np.array
+    return: midi (float, not rounded)
+    """
+    freq = np.asarray(freq)
+    return 69 + 12 * np.log2(freq / 440.0)
+
+def get_config():
+    cfg = argparse.Namespace()
+
+    cfg.sr = 44100
+    
+    # cfg.min_len = int(cfg.sr * 0.5)
+    # cfg.max_len = int(cfg.sr * 1)
+    cfg.wav_len = int(cfg.sr * 3)
+    
+    cfg.window_len = int(cfg.sr * 0.1)
+    cfg.stride = int(cfg.window_len * 0.25)
+    cfg.window_type = "hann"
+    
+    # cfg.min_midi_freq = 50
+    # cfg.max_midi_freq = 5000
+    cfg.min_midi = 24 # freq2midi(cfg.min_midi_freq)
+    cfg.max_midi = 107 # freq2midi(cfg.max_midi_freq)
+    
+    cfg.pitch_vocab_size = cfg.max_midi - cfg.min_midi + 1
+    cfg.music_scale = "12tone"
+    
+    cfg.min_freq = 50
+    cfg.max_freq = 16000
+    cfg.freq_scale = "log" # mel, linear
+    cfg.num_freqs = 128
+    
+    cfg.dataset_read_py_path = Path("/home/vipuser/wby/proj_params/musicNotebook/web")
+    cfg.dataset_data_path = Path("/home/vipuser/wby/proj_params/musicNotebook/preprocess11")
+    
+    cfg.batch_size = 2
+    
+    cfg.text_encoder_name = "BAAI/bge-small-zh-v1.5"
+    cfg.audio_encoder_name = "facebook/wav2vec2-base-960h"
+    
+    cfg.text_input_dim = 512 # 参考你使用的文本编码器
+    cfg.audio_input_dim = 512 # 参考你使用的音频编码器
+    
+    cfg.d_model = 512
+    
+    cfg.n_attn_heads = 8
+    cfg.n_kv_heads = 4
+    cfg.head_dim = 64
+    
+    
+    
+    return cfg
+

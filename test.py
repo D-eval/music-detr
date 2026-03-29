@@ -1,0 +1,58 @@
+import torch
+
+from configs.config import get_config
+cfg = get_config()
+
+import sys
+sys.path.append(str(cfg.dataset_read_py_path))
+# 帮我看看为啥我test.py里from read import AudioDataset, collate_fn找不到read，我已经sys.path.append了
+
+from read1 import AudioDataset, collate_fn
+from torch.utils.data import DataLoader
+dataset = AudioDataset(cfg.dataset_data_path)
+loader = DataLoader(
+    dataset,
+    batch_size=1, # 必须是1
+    shuffle=True,
+    # num_workers=4,
+    collate_fn=collate_fn,
+    pin_memory=True
+)
+for batch in loader:
+    audio, events, texts = batch
+    break
+
+# from datasets_al import get_dummy
+# x = get_dummy()
+# x = x[None,:]
+
+from utils import wav2cqt, wav2spec
+
+pitch_spec, pitch_centre, pitch_freqs = wav2cqt(audio)
+spec, spec_centre, spec_freqs = wav2spec(audio)
+
+
+from models.tokenizer import MusicDetrTokenizer
+tokenizer = MusicDetrTokenizer()
+
+
+audio_emb, text_emb = tokenizer(audio, texts)
+
+text_id = 0
+temp_text_emb = text_emb[0][text_id]
+text_id_idx = (events[0][:, 3] == text_id)
+
+events[0][text_id_idx]
+
+# events[2]-= 24
+
+# 24, 107
+
+# target[0]['boxes'].shape >> (33,2)
+# target[0]['tones'].shape >> (33) midiIdx, -1表示瞬态无音高音色，例如鼓
+# target[0]['text_emb'].shape >> (33,512) text句子向量
+# target[0]['text'].__len__() >> 34 List[str] text
+
+# cqt.shape >> (B, P, T), (B, 84, 117)
+# h_pitch.shape >> (B, T, P)
+# h_
