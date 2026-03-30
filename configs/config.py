@@ -83,6 +83,7 @@ def get_config():
     cfg.save_dir = "./tiny_save"
     cfg.large_save_dir = "../params"
     
+    cfg.use_diff_input = True
     cfg.output_mode = "TriggerBool_ConditionalSustain" # "Exclusion_MuteTriggerSustain"
     cfg.output_dim_dict = {
             "TriggerBool_ConditionalSustain": 2,
@@ -90,6 +91,8 @@ def get_config():
         }
     
     cfg.distinguish_pitch_freq = True
+    
+    cfg.pos_weight = 1000.0
 
     return cfg
 

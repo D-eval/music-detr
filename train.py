@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from utils.visualizer import compare_result
 
 import os
 from configs.config import get_config
@@ -35,6 +36,12 @@ print("device:",device)
 
 model = PitchTransformer().to(device)
 
+
+checkpoint_path = "/home/vipuser/wby/proj_params/params/ckpt_epoch_90.pt"
+state_dict = torch.load(checkpoint_path)
+model.load_state_dict(state_dict=state_dict)
+
+
 # -------- optimizer --------
 optimizer = optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-4)
 
@@ -44,9 +51,9 @@ scaler = torch.cuda.amp.GradScaler()
 # -------- 训练 --------
 model.train()
 
-num_epochs = 100
+num_epochs = 500
 
-for epoch in range(num_epochs):
+for epoch in range(100, num_epochs):
     total_loss = 0
 
     for step, batch in enumerate(loader):
@@ -98,7 +105,8 @@ for epoch in range(num_epochs):
         # ---------- log ----------
         if step % 10 == 0:
             print(f"[Epoch {epoch}] step {step} loss: {loss.item():.4f}")
-
+            compare_result(torch.sigmoid(output[0]).detach().cpu().numpy()[...,0],
+                           target_pitchMap[0].detach().cpu().numpy()[...,0])
     print(f"==== Epoch {epoch} avg loss: {total_loss / (step+1):.4f} ====")
 
     # ---------- 保存 ----------

@@ -457,12 +457,18 @@ class PitchTransformer(nn.Module):
         
         pitch_num = cfg.pitch_vocab_size
         
-        self.pitch_embed = nn.Linear(1, self.d_model)
+        self.use_diff_input = cfg.use_diff_input
+        if self.use_diff_input == "TriggerBool_ConditionalSustain":
+            input_dim = 2
+        else:
+            input_dim = 1
+
+        self.pitch_embed = nn.Linear(input_dim, self.d_model)
         self.pitchless_embedding = nn.Parameter(torch.randn((self.d_model)))
         if cfg.use_same_pitch_freq:
             self.freq_embed = self.pitch_embed
         else:
-            self.freq_embed = nn.Linear(1, self.d_model)
+            self.freq_embed = nn.Linear(input_dim, self.d_model)
         
         self.distinguish_pitch_freq = cfg.distinguish_pitch_freq
         if self.distinguish_pitch_freq:
@@ -484,6 +490,8 @@ class PitchTransformer(nn.Module):
         self.output_mode = cfg.output_mode
         output_dim = cfg.output_dim_dict[cfg.output_mode]
         self.cls_head = nn.Linear(self.d_model, output_dim)
+        
+        self.pos_weight = cfg.pos_weight
         
     def forward(self,
                 pitch_spec,
@@ -513,8 +521,17 @@ class PitchTransformer(nn.Module):
         N, L, _ = text_emb.shape
         assert pitch_spec.shape[0]==freq_spec.shape[0]==N, "N不一样"
         
-        pitch_embedding = self.pitch_embed(pitch_spec.unsqueeze(-1))
-        freq_embedding = self.freq_embed(freq_spec.unsqueeze(-1))
+        if self.use_diff_input == "TriggerBool_ConditionalSustain":
+            d_pitch_spec = pitch_spec[:,1:,:] - pitch_spec[:,:-1,:]
+            d_freq_spec = freq_spec[:1:,:] - freq_spec[:,:-1,:]
+            pitch_spec = torch.stack([pitch_spec, d_pitch_spec], dim=-1)
+            freq_spec = torch.stack([freq_spec, d_freq_spec], dim=-1)
+        else:
+            pitch_spec = pitch_spec.unsqueeze(-1)
+            freq_spec = freq_spec.unsqueeze(-1)
+            
+        pitch_embedding = self.pitch_embed(pitch_spec)
+        freq_embedding = self.freq_embed(freq_spec)
 
         if self.use_abs_pos_encoding:
             pitch_pos_encoding = self.freq_time_encoding(pitchs, pitch_centre, self.d_model)
@@ -579,7 +596,7 @@ class PitchTransformer(nn.Module):
             loss_start = F.binary_cross_entropy_with_logits(
                 onset_logits,
                 onset_target,
-                pos_weight=torch.tensor(1000, device=output.device)  # 解决不平衡
+                pos_weight=torch.tensor(self.pos_weight, device=output.device)  # 解决不平衡
             )
             
             mask = onset_target > 0

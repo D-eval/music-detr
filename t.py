@@ -73,9 +73,8 @@ input_dict = {
     "text_emb": text_emb[0][:,None,:].to(device)
 }
 
-checkpoint_path = "/home/vipuser/wby/proj_params/my/ckpt_epoch_30.pt"
+checkpoint_path = "/home/vipuser/wby/proj_params/params/ckpt_epoch_90.pt"
 state_dict = torch.load(checkpoint_path)
-
 model.load_state_dict(state_dict=state_dict)
 
 output = model(**input_dict)
