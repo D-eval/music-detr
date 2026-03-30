@@ -69,6 +69,8 @@ def get_config():
     cfg.attention_dropout = 0.1
     cfg.rms_norm_eps = 1e-6
     
+    cfg.attn_type = "flash"
+    
     # 笑容部分
     cfg.use_same_pitch_freq = True
     

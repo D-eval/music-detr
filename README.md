@@ -63,3 +63,12 @@ music information retrieval (MIR)
 
 好饿，我得去吃会。
 
+ok我回来了。
+现在我们来写 DecoderLayer，
+先做 F, T 的 self_attn
+然后和 text 做 cross_attn
+权重矩阵是 `L * F*T * 2` 个，挺好的。
+
+还有一个法子，就是crossAttention的时候，直接就把text加上。
+
+哎呀我去，3/30 19:43，显存没爆炸，前向传播完成
