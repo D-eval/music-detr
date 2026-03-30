@@ -72,10 +72,43 @@ input_dict = {
     "freq_centre": freq_centre.to(device),
     "text_emb": text_emb[0][:,None,:].to(device)
 }
-output = model(**input_dict)
 
+checkpoint_path = "/home/vipuser/wby/proj_params/my/ckpt_epoch_30.pt"
+state_dict = torch.load(checkpoint_path)
+
+model.load_state_dict(state_dict=state_dict)
+
+output = model(**input_dict)
 loss = model.get_loss(output, target_pitchMap.to(device))
 
+onset_logits = torch.sigmoid(output[:,:,:,0])
+onset_gt = target_pitchMap[:,:,:,0]
+
+onset_gt_idx = torch.where(onset_gt)
+
+
+import matplotlib.pyplot as plt
+import torch
+
+pred = torch.sigmoid(onset_logits[0]).detach().cpu().numpy()
+gt = onset_gt[0].detach().cpu().numpy()
+
+plt.figure(figsize=(12,5))
+
+# 预测
+plt.subplot(1,2,1)
+plt.imshow(pred.T, aspect='auto', origin='lower')
+plt.title("Prediction (sigmoid)")
+plt.colorbar()
+
+# GT
+plt.subplot(1,2,2)
+plt.imshow(gt.T, aspect='auto', origin='lower')
+plt.title("Ground Truth")
+plt.colorbar()
+
+plt.tight_layout()
+plt.savefig(os.path.join(cfg.save_dir,"compare.pdf"))
 
 # events[2]-= 24
 

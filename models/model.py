@@ -548,7 +548,7 @@ class PitchTransformer(nn.Module):
         # ], dim=1) # (N, L+Tf*F+Tp*P, C)
         
         for layer in self.decoder_layers:
-            print('哇')
+            # print('哇')
             modal_dict = layer(modal_dict)
         
         # hidden_text = hidden_state[:, :L, :]
@@ -557,6 +557,9 @@ class PitchTransformer(nn.Module):
         
         # hidden_freq = hidden_pitch_freq[:, pitch_len:pitch_len+freq_len, :]  
         output = self.cls_head(hidden_pitch)
+
+        # output[..., 0] = F.sigmoid(output[..., 0]) # 二分类
+        # output[..., 1] = F.tanh(output[..., 1]) # 回归, 预测 log(sustain + 1e-3)
         return output
 
 
@@ -567,17 +570,26 @@ class PitchTransformer(nn.Module):
         """
         if self.output_mode == "TriggerBool_ConditionalSustain":
             assert output.shape[-1] == 2
-            
-            weights = torch.tensor([0.1, 1.0], device=output.device)
+            output = output.flatten(1, 2)   # (N, All, 2)
+            target = target.flatten(1, 2)
+            # ---------- onset ----------
+            onset_logits = output[..., 0]              # (N, All)
+            onset_target = target[..., 0].float()
 
-            output = torch.flatten(output, 1, 2) # (N, All, 2)
-            target = torch.flatten(target, 1, 2).long() # (N, All, 2)
-            loss_start = F.cross_entropy(output[:, :, 0], target[:, :, 0], weight=weights)
+            loss_start = F.binary_cross_entropy_with_logits(
+                onset_logits,
+                onset_target,
+                pos_weight=torch.tensor(1000, device=output.device)  # 解决不平衡
+            )
             
-            target_sustain = torch.log(target[:, :, 1] + 1e-3)
-            loss_sustain = F.smooth_l1_loss(output[:, :, 1]*target[:, :, 0], target_sustain)
-            
-            return loss_start + loss_sustain
+            mask = onset_target > 0
+            if mask.sum() > 0:
+                pred = output[..., 1][mask]   # raw
+                gt   = torch.log(target[..., 1][mask] + 1e-3)
+                loss_sustain = F.smooth_l1_loss(pred, gt)
+            else:
+                loss_sustain = torch.tensor(0.0, device=output.device)
+            return loss_start + 0.5 * loss_sustain
         else:
             raise NotImplementedError("非常抱歉")
 

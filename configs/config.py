@@ -57,10 +57,10 @@ def get_config():
     cfg.audio_input_dim = 512 # 参考你使用的音频编码器
     
     # 模型设置
-    cfg.d_model = 64
-    cfg.intermediate_size = 256
+    cfg.d_model = 48
+    cfg.intermediate_size = 128
     
-    cfg.num_decoder_layer = 8
+    cfg.num_decoder_layer = 6
     
     cfg.n_attn_heads = 8
     cfg.n_kv_heads = 4
@@ -81,6 +81,7 @@ def get_config():
     cfg.abs_pos_encoding.sigma = 1
     
     cfg.save_dir = "./tiny_save"
+    cfg.large_save_dir = "../params"
     
     cfg.output_mode = "TriggerBool_ConditionalSustain" # "Exclusion_MuteTriggerSustain"
     cfg.output_dim_dict = {
