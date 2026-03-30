@@ -20,9 +20,9 @@ def get_target_map(events, pitch_centre):
         temp_events = temp_events[valid,:]
         starts = temp_events[:,0]
         starts_idx = starts * sr
-        time_idx = torch.argmin(torch.abs(pitch_centre[0,:][:,None] - starts_idx[None,:]), dim=0)
+        time_idx = torch.argmin(torch.abs(pitch_centre[:,None] - starts_idx[None,:]), dim=0)
         pitch_idx = (temp_events[:, 2] - cfg.min_midi).to(int)
-        target_pitchMap = torch.zeros((pitch_centre.shape[1], cfg.pitch_vocab_size + 1, 2))
+        target_pitchMap = torch.zeros((pitch_centre.shape[0], cfg.pitch_vocab_size + 1, 2))
         for i in range(starts.shape[0]):
             target_pitchMap[time_idx[i], pitch_idx[i], 0] = 1
             target_pitchMap[time_idx[i], pitch_idx[i], 1] = temp_events[i, 1]

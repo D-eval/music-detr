@@ -63,7 +63,7 @@ def wav2cqt(wav):
     
     # 时间中心
     centers = torch.arange(T, device=device) * stride + window_len // 2
-    pos = centers[None, :] # (1, T)
+    pos = centers # (T)
     
     return spec, pos, freqs
 

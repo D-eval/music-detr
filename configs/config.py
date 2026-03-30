@@ -62,7 +62,16 @@ def get_config():
     cfg.n_kv_heads = 4
     cfg.head_dim = 64
     
+    # 笑容部分
+    cfg.use_same_pitch_freq = True
     
+    cfg.abs_pos_encoding = argparse.Namespace()
+    cfg.use_abs_pos_encoding = True
+    cfg.abs_pos_encoding.ref_freq = 50
+    cfg.abs_pos_encoding.ref_time = cfg.wav_len
+    cfg.abs_pos_encoding.sigma = 1
+    
+    cfg.save_dir = "./tiny_save"
     
     return cfg
 

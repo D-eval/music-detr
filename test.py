@@ -1,5 +1,5 @@
 import torch
-
+import os
 from configs.config import get_config
 cfg = get_config()
 
@@ -39,9 +39,20 @@ tokenizer = MusicDetrTokenizer()
 audio_emb, text_emb = tokenizer(audio, texts)
 
 from utils.equipTarget import get_target_map
-
-
 target_pitchMap = get_target_map(events, pitch_centre)
+
+# >>> target_pitchMap.shape
+# torch.Size([3, 117, 85, 2])
+# 这个是 (N, T, P, 2), 
+# 其中 N 表示 N 个文本描述 （可变）
+# 其中2表示是否触发0/1 和 持续时间 /秒
+
+from models.model import apply_freq_time_encoding
+
+pos_encoding = apply_freq_time_encoding(freqs, freq_centre, 512)
+
+from utils.visualizer import show_attn_alpha
+show_attn_alpha(pos_encoding, 1, 1)
 
 
 

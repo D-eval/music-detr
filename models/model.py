@@ -214,14 +214,63 @@ class TimeAttention(nn.Module):
         return self.o_proj(out)
 
 
+def apply_freq_time_encoding(freqs, times, d_model):
+    # freqs: (F)
+    # times: (T)
+    # return: (T, F, C)
+    T = times.shape[0]
+    F = freqs.shape[0]
+    assert d_model % 2 == 0, "wtf"
+    
+    cfg = get_config()
+    
+    # freqs_rel 表示在 C 上震荡了几下
+    freqs_rel = freqs / cfg.abs_pos_encoding.ref_freq
+    
+    half = d_model // 2
+    half_arange = torch.arange(half) / half
+    
+    # times 作为相位的偏移
+    # 2 * pi * f * x + t
+    # 这样，t相同时，如果波形和谐，内积就小
+    # 相邻的 t 会互相看到
+    times_rel = times / cfg.abs_pos_encoding.ref_time
+    
+    phase = 2 * math.pi * (freqs_rel[None,:,None] * half_arange[None,None,:] + times_rel[:,None,None])
+    
+    amps = torch.exp(-(half_arange[None,None,:] - times_rel[:,None,None])**2 / cfg.abs_pos_encoding.sigma**2) \
+        * 1/cfg.abs_pos_encoding.sigma / math.sqrt(2 * math.pi)
+    cos, sin = torch.cos(phase), torch.sin(phase)
+    
+    cos = cos * amps
+    sin = sin * amps
+    
+    pos_encoding = torch.zeros((T, F, d_model))
+    pos_encoding[:,:,::2] = cos
+    pos_encoding[:,:,1::2] = sin
+    
+    return pos_encoding
+
+
 class PitchTransformer(nn.Module):
     def __init__(self):
         super().__init__()
         cfg = get_config()
         
+        self.d_model = cfg.d_model
+        
         pitch_num = cfg.pitch_vocab_size
         
-        self.pitch_embed = nn.Linear(cfg.pitch_vocab_size, cfg.d_model)
+        self.pitch_embed = nn.Linear(1, cfg.d_model)
+        if cfg.use_same_pitch_freq:
+            self.freq_embed = self.pitch_embed
+        else:
+            self.freq_embed = nn.Linear(1, cfg.d_model)
+        
+        self.use_abs_pos_encoding = cfg.use_abs_pos_encoding
+        if self.use_abs_pos_encoding:
+            self.freq_time_encoding = apply_freq_time_encoding
+        
         self.text_embed = nn.Linear(cfg.text_input_dim, cfg.d_model)
         self.audio_embed = nn.Linear(cfg.audio_input_dim, cfg.d_model)
         
@@ -235,13 +284,30 @@ class PitchTransformer(nn.Module):
                 text_emb):
         """
         inputs
-            pitch_spec: (B, P, T)
-            freq_spec: (B, F, T)
+            pitch_spec: (N, T, P)
+            freq_spec: (N, T, F)
+            text_emb: (N, C)
         return: 
-            pitch_bar: (B, T, P, 3)
+            pitch_bar: (N, T, P, 3)
         """
+        pitch_size = pitch_spec.shape[1:]
+        freq_size = freq_spec.shape[1:]
+        N = text_emb.shape[0]
+        assert pitch_spec.shape[0]==freq_spec.shape[0]==N
         
+        pitch_embedding = self.pitch_embed(pitch_spec.unsqueeze(-1))
+        freq_embedding = self.freq_embed(freq_spec.unsqueeze(-1))
 
+        if self.use_abs_pos_encoding:
+            pitch_pos_encoding = self.freq_time_encoding(pitchs, pitch_centre, self.d_model)
+            pitch_embedding = pitch_embedding + pitch_pos_encoding
+
+            freq_pos_encoding = self.freq_time_encoding(freqs, freq_centre, self.d_model)
+            freq_embedding = freq_embedding + freq_pos_encoding
+        
+        text_embedding = self.text_embed(text_emb)
+        
+        
 
 # class PitchSpecEmbedding(nn.Module):
 #     def __init__(self):
