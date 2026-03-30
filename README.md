@@ -31,3 +31,35 @@ music information retrieval (MIR)
 
 我突然意识到我可以直接把freq本身当作它的F编码，比如说对100->20000的频率，直接用sin(freq * k / d)和cos 当作编码，这样pitch_spec和spec的语义空间就对齐了，concat后可以直接做注意力
 
+# 第一次冲击
+3/30
+
+把所有人展平之后，会出现 out of memory,
+
+`[text_emb, pitch_emb, freq_emb]`
+
+三个人下来，长度是 `1+ T*P + T*F = 1 + 117*85 + 117*128 = 24922`
+
+这个上下文也太长了吧，我们首先应该压缩上下文长度，要不然要计算
+`(24922, C) @ (C, 24922)`，结果是 `621106084`
+
+主要是如果我把频率和时间分别做attention，我就没办法解码 text 了，我心中最理想的情况是，如果 [text, pitch, freq] 直接self_attn，那text位置后续就可以作为query了，这个query会同时把pitch变成target，同时把自己变成text_prompt，这个prompt经过一个语言模型就得到了text
+
+但是如果我分别做的话，我能把text融合给它们，但是我不知怎样把它们融合给text。
+
+然后chatgpt告诉我，可以做双向attention，就是说 freq, pitch 之间
+做 factorized 的 self attention，
+然后他俩分别和 text 做 crossAttention，
+
+然后 text, 和 [freq, pitch] 分别经过不同的 FFN，
+
+这就有2个问题，
+1、首先，text应该做self attention吗，如果不做的话，[pitch, freq]那边做了一个self和一个cross，text这边只做一个cross，感觉不太对称。
+2、其次，text这边本身就是用text encoder提取的，哦哦，后续会替换成query，这样的话self attention的确要做，突然就感觉十分的合理。但是detr的self attention是在不同的类型之间做的，也就是在 N 维度上，顺带一说，text_emb 的维度是 `(N, L, C)`，其中 N 是不同的类别，L 是截取的句子长度。但是如果是detr的话，应该是 `(B, N, C)` 才对，也就是说 query 是在 N 之间做注意力的。
+
+但是另一边，[pitch, freq] 似乎没有在 N 方向上做。因为我们需要让 pitch 在 N 方向上表示不同的类别。我们一开始只用了查询的思路。直接把N当成了不同的batch。
+
+也就是说目前的思绪其实是有点乱的。难道说真实的做法是，[pitch, freq]要在 在 F, T, N 三个方向做注意力然后相加。在 N 方向做的时候把 query 镶嵌在前面，同时通过一个N编码让特定的n和 n的 query 能互相认识。
+
+好饿，我得去吃会。
+
