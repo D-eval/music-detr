@@ -48,7 +48,7 @@ def get_config():
     cfg.dataset_read_py_path = Path("/home/vipuser/wby/proj_params/musicNotebook/web")
     cfg.dataset_data_path = Path("/home/vipuser/wby/proj_params/musicNotebook/preprocess11")
     
-    cfg.batch_size = 2
+    cfg.batch_size = 1
     
     cfg.text_encoder_name = "BAAI/bge-small-zh-v1.5"
     cfg.audio_encoder_name = "facebook/wav2vec2-base-960h"
@@ -56,11 +56,16 @@ def get_config():
     cfg.text_input_dim = 512 # 参考你使用的文本编码器
     cfg.audio_input_dim = 512 # 参考你使用的音频编码器
     
+    # 模型设置
     cfg.d_model = 512
+    
+    cfg.num_decoder_layer = 16
     
     cfg.n_attn_heads = 8
     cfg.n_kv_heads = 4
     cfg.head_dim = 64
+    
+    
     
     # 笑容部分
     cfg.use_same_pitch_freq = True
@@ -73,5 +78,13 @@ def get_config():
     
     cfg.save_dir = "./tiny_save"
     
+    cfg.output_mode = "TriggerBool_ConditionalDecay" # "Exclusion_MuteTriggerSustain"
+    cfg.output_dim_dict = {
+            "TriggerBool_ConditionalDecay": 2,
+            "Exclusion_MuteTriggerSustain": 3
+        }
+    
+    cfg.distinguish_pitch_freq = True
+
     return cfg
 

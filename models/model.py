@@ -251,6 +251,11 @@ def apply_freq_time_encoding(freqs, times, d_model):
     
     return pos_encoding
 
+class DecoderLayer(nn.Module):
+    def __init__(self):
+        super().__init__()
+    def forward(self):
+        pass
 
 class PitchTransformer(nn.Module):
     def __init__(self):
@@ -261,11 +266,17 @@ class PitchTransformer(nn.Module):
         
         pitch_num = cfg.pitch_vocab_size
         
-        self.pitch_embed = nn.Linear(1, cfg.d_model)
+        self.pitch_embed = nn.Linear(1, self.d_model)
+        self.pitchless_embedding = nn.Parameter(torch.randn((self.d_model)))
         if cfg.use_same_pitch_freq:
             self.freq_embed = self.pitch_embed
         else:
-            self.freq_embed = nn.Linear(1, cfg.d_model)
+            self.freq_embed = nn.Linear(1, self.d_model)
+        
+        self.distinguish_pitch_freq = cfg.distinguish_pitch_freq
+        if self.distinguish_pitch_freq:
+            self.pitch_token_embedding = nn.Parameter(torch.randn((self.d_model)))
+            self.freq_token_embedding = nn.Parameter(torch.randn((self.d_model)))
         
         self.use_abs_pos_encoding = cfg.use_abs_pos_encoding
         if self.use_abs_pos_encoding:
@@ -273,6 +284,14 @@ class PitchTransformer(nn.Module):
         
         self.text_embed = nn.Linear(cfg.text_input_dim, cfg.d_model)
         self.audio_embed = nn.Linear(cfg.audio_input_dim, cfg.d_model)
+        
+        self.decoder_layers = nn.ModuleList([
+            DecoderLayer()
+            for _ in range(cfg.num_decoder_layer)
+        ])
+        
+        output_dim = cfg.output_dim_dict[cfg.output_mode]
+        self.cls_head = nn.Linear(self.d_model, output_dim)
         
     def forward(self,
                 pitch_spec,
@@ -286,13 +305,20 @@ class PitchTransformer(nn.Module):
         inputs
             pitch_spec: (N, T, P)
             freq_spec: (N, T, F)
-            text_emb: (N, C)
+            text_emb: (N, L, C)
         return: 
-            pitch_bar: (N, T, P, 3)
+            pitch_bar: (N, T, P+1, cls)
         """
         pitch_size = pitch_spec.shape[1:]
         freq_size = freq_spec.shape[1:]
-        N = text_emb.shape[0]
+        
+        pitch_output_size = list(pitch_size)
+        pitch_output_size[1] += 1 # 加一个 pitchless
+        
+        pitch_len = pitch_output_size[0] * pitch_output_size[1]
+        freq_len = freq_size[0] * freq_size[1]
+        
+        N, L, _ = text_emb.shape
         assert pitch_spec.shape[0]==freq_spec.shape[0]==N
         
         pitch_embedding = self.pitch_embed(pitch_spec.unsqueeze(-1))
@@ -300,14 +326,43 @@ class PitchTransformer(nn.Module):
 
         if self.use_abs_pos_encoding:
             pitch_pos_encoding = self.freq_time_encoding(pitchs, pitch_centre, self.d_model)
-            pitch_embedding = pitch_embedding + pitch_pos_encoding
+            pitch_embedding = pitch_embedding + pitch_pos_encoding[None,...] # (N, Tf, F, C)
 
             freq_pos_encoding = self.freq_time_encoding(freqs, freq_centre, self.d_model)
-            freq_embedding = freq_embedding + freq_pos_encoding
-        
-        text_embedding = self.text_embed(text_emb)
+            freq_embedding = freq_embedding + freq_pos_encoding[None,...]
         
         
+        pitchless = self.pitchless_embedding[None, None, None, :].expand(N, pitch_size[0], 1, self.d_model)
+        pitch_embedding = torch.concat([pitch_embedding, 
+                                        pitchless],
+                                       dim=2) # (N, Tp, P, C)
+        
+        if self.distinguish_pitch_freq:
+            pitch_embedding = pitch_embedding + self.pitch_token_embedding[None,None,None,:]
+            freq_embedding = freq_embedding + self.freq_token_embedding[None,None,None,:]
+        
+        text_embedding = self.text_embed(text_emb) # (N, L, C)
+        
+        hidden_state = torch.concat([
+            text_embedding,
+            torch.flatten(pitch_embedding, 1,2),
+            torch.flatten(freq_embedding, 1,2)
+        ], dim=1) # (N, L+Tf*F+Tp*P, C)
+        
+        for layer in self.decoder_layers:
+            hidden_state = layer(hidden_state)
+        
+        # hidden_text = hidden_state[:, :L, :]
+        
+        hidden_pitch_freq = hidden_state[:, L:, :]
+        
+        hidden_pitch = hidden_pitch_freq[:, :pitch_len, :]
+        # hidden_freq = hidden_pitch_freq[:, pitch_len:pitch_len+freq_len, :]
+        
+        hidden_pitch = hidden_pitch.reshape((N, pitch_output_size[0], pitch_output_size[1], -1)) # (N, T, P+1, C)
+  
+        output = self.cls_head(hidden_pitch)
+        return output
 
 # class PitchSpecEmbedding(nn.Module):
 #     def __init__(self):
