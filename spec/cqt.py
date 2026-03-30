@@ -19,7 +19,7 @@ def wav2cqt(wav):
     """
     wav: (B, L)
     return:
-    spec: (B, F, T) # 余弦的投影
+    spec: (B, T, F) # 余弦的投影
     pos: (1, T) # 中心位置
     """
     
@@ -58,8 +58,7 @@ def wav2cqt(wav):
     t = torch.arange(-window_len//2, window_len//2, device=device) / cfg.sr
     cos_basis = torch.cos(2 * math.pi * freqs[:, None] * t[None, :])
 
-    spec = torch.einsum("btw,fw->btf", x_unfold, cos_basis)
-    spec = spec.permute(0, 2, 1) # (B,F,T)
+    spec = torch.einsum("btw,fw->btf", x_unfold, cos_basis) # (B,T,F)
     
     # 时间中心
     centers = torch.arange(T, device=device) * stride + window_len // 2

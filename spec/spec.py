@@ -54,7 +54,7 @@ def wav2spec(wav):
     wav: (B, L)
 
     return:
-        spec: (B, F, T)
+        spec: (B, T, F)
         pos:  (1, T)
     """
 
@@ -96,8 +96,7 @@ def wav2spec(wav):
     cos_basis = torch.cos(2 * math.pi * freqs[:, None] * t[None, :])
 
     # ===== 投影 =====
-    spec = torch.einsum("btw,fw->btf", x_unfold, cos_basis)
-    spec = spec.permute(0, 2, 1)  # (B, F, T)
+    spec = torch.einsum("btw,fw->btf", x_unfold, cos_basis) # (B, T, F)
 
     # ===== 时间中心 =====
     centers = torch.arange(T, device=device) * stride + window_len // 2

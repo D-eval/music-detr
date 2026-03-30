@@ -57,15 +57,17 @@ def get_config():
     cfg.audio_input_dim = 512 # 参考你使用的音频编码器
     
     # 模型设置
-    cfg.d_model = 512
+    cfg.d_model = 64
+    cfg.intermediate_size = 256
     
-    cfg.num_decoder_layer = 16
+    cfg.num_decoder_layer = 8
     
     cfg.n_attn_heads = 8
     cfg.n_kv_heads = 4
-    cfg.head_dim = 64
+    cfg.head_dim = 16
     
-    
+    cfg.attention_dropout = 0.1
+    cfg.rms_norm_eps = 1e-6
     
     # 笑容部分
     cfg.use_same_pitch_freq = True
@@ -78,10 +80,10 @@ def get_config():
     
     cfg.save_dir = "./tiny_save"
     
-    cfg.output_mode = "TriggerBool_ConditionalDecay" # "Exclusion_MuteTriggerSustain"
+    cfg.output_mode = "TriggerBool_ConditionalSustain" # "Exclusion_MuteTriggerSustain"
     cfg.output_dim_dict = {
-            "TriggerBool_ConditionalDecay": 2,
-            "Exclusion_MuteTriggerSustain": 3
+            "TriggerBool_ConditionalSustain": 2,
+            "Exclusion_MuteSustain": 2
         }
     
     cfg.distinguish_pitch_freq = True

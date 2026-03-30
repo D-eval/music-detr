@@ -1,4 +1,7 @@
 import torch
+device = torch.device("cuda" if torch.cuda.is_available else "cpu")
+print("device:",device)
+
 import os
 from configs.config import get_config
 cfg = get_config()
@@ -18,6 +21,7 @@ loader = DataLoader(
     collate_fn=collate_fn,
     pin_memory=True
 )
+
 for batch in loader:
     audio, events, texts = batch
     break
@@ -54,6 +58,21 @@ pos_encoding = apply_freq_time_encoding(freqs, freq_centre, 512)
 from utils.visualizer import show_attn_alpha
 show_attn_alpha(pos_encoding, 1, 1)
 
+from models.model import PitchTransformer
+
+model = PitchTransformer().to(device)
+
+N = text_emb[0].shape[0]
+input_dict = {
+    "pitch_spec": pitch_spec.expand(N, -1, -1).to(device),
+    "pitchs": pitchs.to(device),
+    "pitch_centre": pitch_centre.to(device),
+    "freq_spec": freq_spec.expand(N, -1, -1).to(device),
+    "freqs": freqs.to(device),
+    "freq_centre": freq_centre.to(device),
+    "text_emb": text_emb[0][:,None,:].to(device)
+}
+output = model(**input_dict)
 
 
 # events[2]-= 24
