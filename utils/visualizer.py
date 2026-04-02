@@ -31,7 +31,7 @@ def show_attn_alpha(pos_encoding, num_time=1, num_freq=1):
 
 
 
-def compare_result(onset_logits, onset_gt):
+def compare_result(onset_logits, onset_gt, name="compare"):
     # onset_logits onset_gt: (T, P)
     cfg = get_config()
     
@@ -53,7 +53,7 @@ def compare_result(onset_logits, onset_gt):
     plt.colorbar()
 
     plt.tight_layout()
-    plt.savefig(os.path.join(cfg.save_dir,"compare.pdf"))
+    plt.savefig(os.path.join(cfg.save_dir, name + ".pdf"))
 
 import cv2
 import numpy as np

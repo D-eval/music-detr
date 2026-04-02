@@ -34,10 +34,11 @@ print("device:",device)
 
 model = PitchTransformer().to(device)
 
+tokenizer = MusicDetrTokenizer() # .to(device)
 
-checkpoint_path = "/home/vipuser/wby/proj_params/params/ckpt_epoch_90.pt"
-state_dict = torch.load(checkpoint_path)
-model.load_state_dict(state_dict=state_dict)
+# checkpoint_path = "/home/vipuser/wby/proj_params/params/ckpt_epoch_90.pt"
+# state_dict = torch.load(checkpoint_path)
+# model.load_state_dict(state_dict=state_dict)
 
 
 # -------- optimizer --------
@@ -49,9 +50,10 @@ scaler = torch.cuda.amp.GradScaler()
 # -------- 训练 --------
 model.train()
 
+start_epoch = 0
 num_epochs = 500
 
-for epoch in range(100, num_epochs):
+for epoch in range(start_epoch, num_epochs):
     total_loss = 0
 
     for step, batch in enumerate(loader):
@@ -83,7 +85,7 @@ for epoch in range(100, num_epochs):
         target = target_pitchMap.to(device)
 
         # ---------- forward + loss（AMP）----------
-        with torch.cuda.amp.autocast():
+        with torch.amp.autocast("cuda"):
             output = model(**input_dict)
             loss = model.get_loss(output, target)
 
@@ -103,8 +105,10 @@ for epoch in range(100, num_epochs):
         # ---------- log ----------
         if step % 10 == 0:
             print(f"[Epoch {epoch}] step {step} loss: {loss.item():.4f}")
+            compare_result(torch.sigmoid(pitch_spec[0]).detach().cpu().numpy(),
+                           target_pitchMap.sum(0).detach().cpu().numpy()[...,0], "cqt")
             compare_result(torch.sigmoid(output[0]).detach().cpu().numpy()[...,0],
-                           target_pitchMap[0].detach().cpu().numpy()[...,0])
+                           target_pitchMap.sum(0).detach().cpu().numpy()[...,0], "pred")
     print(f"==== Epoch {epoch} avg loss: {total_loss / (step+1):.4f} ====")
 
     # ---------- 保存 ----------

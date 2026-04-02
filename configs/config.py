@@ -59,7 +59,7 @@ def get_config():
     cfg.audio_input_dim = 512 # 参考你使用的音频编码器
     
     # 模型设置
-    cfg.d_model = 48
+    cfg.d_model = 1
     cfg.intermediate_size = 128
     
     cfg.num_decoder_layer = 6
