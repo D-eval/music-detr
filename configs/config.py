@@ -28,9 +28,11 @@ def get_config():
     # cfg.max_len = int(cfg.sr * 1)
     cfg.wav_len = int(cfg.sr * 3)
     
-    cfg.window_len = int(cfg.sr * 0.1)
-    cfg.stride = int(cfg.window_len * 0.25)
+    cfg.window_len = int(cfg.sr * 0.2)
+    cfg.stride = int(cfg.window_len * 0.125)
     cfg.window_type = "hann"
+    
+    cfg.cqt_scale = 7
     
     # cfg.min_midi_freq = 50
     # cfg.max_midi_freq = 5000
@@ -42,11 +44,11 @@ def get_config():
     
     cfg.min_freq = 50
     cfg.max_freq = 16000
-    cfg.freq_scale = "log" # mel, linear
+    cfg.freq_scale = "mel" # mel, linear, log
     cfg.num_freqs = 128
     
-    cfg.dataset_read_py_path = Path("/home/vipuser/wby/proj_params/musicNotebook/web")
-    cfg.dataset_data_path = Path("/home/vipuser/wby/proj_params/musicNotebook/preprocess11")
+    cfg.dataset_read_py_path = Path("../musicNotebook/web")
+    cfg.dataset_data_path = Path("../musicNotebook/preprocess11")
     
     cfg.batch_size = 1
     

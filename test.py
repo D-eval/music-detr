@@ -1,6 +1,7 @@
 import torch
-device = torch.device("cuda" if torch.cuda.is_available else "cpu")
-print("device:",device)
+import torch.nn as nn
+import torch.optim as optim
+from utils.visualizer import compare_result, export_event_flash_mp4
 
 import os
 from configs.config import get_config
@@ -8,84 +9,60 @@ cfg = get_config()
 
 import sys
 sys.path.append(str(cfg.dataset_read_py_path))
-# 帮我看看为啥我test.py里from read import AudioDataset, collate_fn找不到read，我已经sys.path.append了
 
 from read1 import AudioDataset, collate_fn
 from torch.utils.data import DataLoader
 dataset = AudioDataset(cfg.dataset_data_path)
-loader = DataLoader(
-    dataset,
-    batch_size=1, # 必须是1
-    shuffle=True,
-    # num_workers=4,
-    collate_fn=collate_fn,
-    pin_memory=True
-)
-
-for batch in loader:
-    audio, events, texts = batch
-    break
-
-# from datasets_al import get_dummy
-# x = get_dummy()
-# x = x[None,:]
-
-from utils import wav2cqt, wav2spec
-
-pitch_spec, pitch_centre, pitchs = wav2cqt(audio)
-freq_spec, freq_centre, freqs = wav2spec(audio)
 
 
-from models.tokenizer import MusicDetrTokenizer
-tokenizer = MusicDetrTokenizer()
-
-
-audio_emb, text_emb = tokenizer(audio, texts)
-
-from utils.equipTarget import get_target_map
-target_pitchMap = get_target_map(events, pitch_centre)
-
-# >>> target_pitchMap.shape
-# torch.Size([3, 117, 85, 2])
-# 这个是 (N, T, P, 2), 
-# 其中 N 表示 N 个文本描述 （可变）
-# 其中2表示是否触发0/1 和 持续时间 /秒
-
-from models.model import apply_freq_time_encoding
-
-pos_encoding = apply_freq_time_encoding(freqs, freq_centre, 512)
-
-from utils.visualizer import show_attn_alpha
-show_attn_alpha(pos_encoding, 1, 1)
 
 from models.model import PitchTransformer
+from utils import wav2cqt, wav2spec
+from models.tokenizer import MusicDetrTokenizer
+from utils.equipTarget import get_target_map
 
-model = PitchTransformer().to(device)
-
-N = text_emb[0].shape[0]
-input_dict = {
-    "pitch_spec": pitch_spec.expand(N, -1, -1).to(device),
-    "pitchs": pitchs.to(device),
-    "pitch_centre": pitch_centre.to(device),
-    "freq_spec": freq_spec.expand(N, -1, -1).to(device),
-    "freqs": freqs.to(device),
-    "freq_centre": freq_centre.to(device),
-    "text_emb": text_emb[0][:,None,:].to(device)
-}
-output = model(**input_dict)
-
-loss = model.get_loss(output, target_pitchMap.to(device))
+# tokenizer = MusicDetrTokenizer()
 
 
-# events[2]-= 24
+device = torch.device("cuda" if torch.cuda.is_available else "cpu")
+print("device:",device)
 
-# 24, 107
 
-# target[0]['boxes'].shape >> (33,2)
-# target[0]['tones'].shape >> (33) midiIdx, -1表示瞬态无音高音色，例如鼓
-# target[0]['text_emb'].shape >> (33,512) text句子向量
-# target[0]['text'].__len__() >> 34 List[str] text
+audio, events, texts = dataset[50]
 
-# cqt.shape >> (B, P, T), (B, 84, 117)
-# h_pitch.shape >> (B, T, P)
-# h_
+# ---------- spec ----------
+pitch_spec, pitch_centre, pitchs = wav2cqt(audio[None,:])
+freq_spec, freq_centre, freqs = wav2spec(audio[None,:])
+# ---------- target ----------
+target_pitchMap = get_target_map([events], pitch_centre)
+
+
+compare_result(torch.sigmoid(pitch_spec).detach().cpu().numpy(),
+                target_pitchMap[...,0].detach().cpu().numpy().sum(0))
+
+# 把 event 对齐到
+
+import soundfile as sf
+
+audio_np = audio.detach().cpu().numpy()
+events_np = events[:,0].detach().cpu().numpy()
+
+sf.write("output.wav", audio_np, cfg.sr)
+
+export_event_flash_mp4(audio_np, events_np, sr=cfg.sr, save_path="align.mp4")
+
+# >>> events[:,0].shape
+# torch.Size([34])
+# 34 个开始时间
+# >>> audio.shape
+# torch.Size([132300])
+
+# import matplotlib.pyplot as plt
+
+# plt.close()
+
+# plt.imshow(freq_spec[0].T, aspect='auto', origin='lower')
+# plt.colorbar()
+# plt.show()
+
+

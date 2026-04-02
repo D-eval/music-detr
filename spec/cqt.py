@@ -52,13 +52,26 @@ def wav2cqt(wav):
     x_unfold = x.unfold(dimension=1, size=window_len, step=stride)
     B, T, _ = x_unfold.shape
     
+    t = torch.arange(-window_len//2, window_len//2, device=device) / cfg.sr
+    
     x_unfold = x_unfold * window # 广播
     
+    scale = cfg.cqt_scale
+    sigma = scale / (freqs + 1e-6)  # (F,)
+    # (F, W)
+    mask = torch.exp(- (t[None, :] ** 2) / (2 * (sigma[:, None] ** 2)))
+    # normalize（防止能量偏移）
+    mask = mask / (mask.sum(dim=-1, keepdim=True) + 1e-8)
     
-    t = torch.arange(-window_len//2, window_len//2, device=device) / cfg.sr
+    sin_basis = torch.sin(2 * math.pi * freqs[:, None] * t[None, :])
     cos_basis = torch.cos(2 * math.pi * freqs[:, None] * t[None, :])
+    
+    sin_basis = sin_basis * mask
+    cos_basis = cos_basis * mask
 
-    spec = torch.einsum("btw,fw->btf", x_unfold, cos_basis) # (B,T,F)
+    spec_cos = torch.einsum("btw,fw->btf", x_unfold, cos_basis) # (B,T,F)
+    spec_sin = torch.einsum("btw,fw->btf", x_unfold, sin_basis) # (B,T,F)
+    spec = torch.sqrt(spec_cos**2 + spec_sin**2) # (B,T,F)
     
     # 时间中心
     centers = torch.arange(T, device=device) * stride + window_len // 2

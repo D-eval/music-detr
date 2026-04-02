@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import os
 from configs.config import get_config
 import torch
+import cv2
+import numpy as np
 
 def show_attn_alpha(pos_encoding, num_time=1, num_freq=1):
     cfg = get_config()
@@ -52,3 +54,102 @@ def compare_result(onset_logits, onset_gt):
 
     plt.tight_layout()
     plt.savefig(os.path.join(cfg.save_dir,"compare.pdf"))
+
+import cv2
+import numpy as np
+import soundfile as sf
+import subprocess
+import sys
+import cv2
+import numpy as np
+import soundfile as sf
+import subprocess
+import os
+
+def export_event_flash_mp4(audio, events, sr=44100, save_path="output.mp4"):
+    """
+    audio: (L,)
+    events: (E,) sample index
+
+    效果：
+        平时：灰色背景
+        event：闪蓝色
+    """
+
+    # ----------------------
+    # 0. numpy + normalize
+    # ----------------------
+    if "torch" in str(type(audio)):
+        audio = audio.detach().cpu().numpy()
+    if "torch" in str(type(events)):
+        events = events.detach().cpu().numpy()
+
+    audio = audio.astype(np.float32)
+    audio = audio / (np.abs(audio).max() + 1e-8)
+
+    # ----------------------
+    # 1. 参数
+    # ----------------------
+    H, W = 240, 240
+    fps = 25
+    duration = len(audio) / sr
+    total_frames = int(duration * fps)
+
+    # event 转成时间（秒）
+    event_times = events # / sr
+
+    # 每次闪持续时间（秒）
+    flash_duration = 0.05
+
+    # ----------------------
+    # 2. 写视频
+    # ----------------------
+    tmp_video = "tmp_video.mp4"
+    tmp_audio = "tmp_audio.wav"
+
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    out = cv2.VideoWriter(tmp_video, fourcc, fps, (W, H))
+
+    for frame_idx in range(total_frames):
+        t = frame_idx / fps
+
+        # 判断是否在某个 event 附近
+        is_event = np.any(np.abs(event_times - t) < flash_duration)
+
+        if is_event:
+            color = (255, 0, 0)   # 蓝（BGR）
+        else:
+            color = (200, 200, 200)  # 灰
+
+        img = np.ones((H, W, 3), dtype=np.uint8)
+        img[:] = color
+
+        # 时间文字（可选）
+        cv2.putText(img, f"{t:.2f}s", (20, H//2),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,0), 2)
+
+        out.write(img)
+
+    out.release()
+
+    # ----------------------
+    # 3. 写音频
+    # ----------------------
+    sf.write(tmp_audio, audio, sr)
+
+    # ----------------------
+    # 4. ffmpeg 合成
+    # ----------------------
+    subprocess.run([
+        "ffmpeg", "-y",
+        "-i", tmp_video,
+        "-i", tmp_audio,
+        "-c:v", "copy",
+        "-c:a", "aac",
+        save_path
+    ], check=True)
+
+    os.remove(tmp_video)
+    os.remove(tmp_audio)
+
+    print(f"✅ 已生成: {save_path}")

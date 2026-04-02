@@ -28,8 +28,6 @@ from utils import wav2cqt, wav2spec
 from models.tokenizer import MusicDetrTokenizer
 from utils.equipTarget import get_target_map
 
-tokenizer = MusicDetrTokenizer()
-
 
 device = torch.device("cuda" if torch.cuda.is_available else "cpu")
 print("device:",device)
