@@ -5,6 +5,14 @@ import torch
 import cv2
 import numpy as np
 
+"""
+import matplotlib.font_manager as fm
+fonts = [f.name for f in fm.fontManager.ttflist if 'Hei' in f.name or 'Song' in f.name or 'Wen' in f.name]
+print(fonts)
+"""
+
+plt.rcParams['font.sans-serif'] = ['WenQuanYi Micro Hei']  
+
 def show_attn_alpha(pos_encoding, num_time=1, num_freq=1):
     cfg = get_config()
     for time_idx in range(num_time):
@@ -31,7 +39,7 @@ def show_attn_alpha(pos_encoding, num_time=1, num_freq=1):
 
 
 
-def compare_result(onset_logits, onset_gt, name="compare"):
+def compare_result(onset_logits, onset_gt, name="compare", title=None):
     # onset_logits onset_gt: (T, P)
     cfg = get_config()
     
@@ -43,7 +51,10 @@ def compare_result(onset_logits, onset_gt, name="compare"):
     # 预测
     plt.subplot(1,2,1)
     plt.imshow(pred.T, aspect='auto', origin='lower')
-    plt.title("Prediction (sigmoid)")
+    if title is not None:
+        plt.title(f"{title}")
+    else:
+        plt.title("Prediction")
     plt.colorbar()
 
     # GT
@@ -54,6 +65,42 @@ def compare_result(onset_logits, onset_gt, name="compare"):
 
     plt.tight_layout()
     plt.savefig(os.path.join(cfg.save_dir, name + ".pdf"))
+
+
+
+def compare_result_3(onset_logits, onset_gt, cqt, name="compare", title=None):
+    # onset_logits onset_gt: (T, P)
+    cfg = get_config()
+    
+    pred = onset_logits
+    gt = onset_gt
+
+    plt.figure(figsize=(12,5))
+
+    # 预测
+    plt.subplot(1,3,1)
+    plt.imshow(pred.T, aspect='auto', origin='lower')
+    if title is not None:
+        plt.title(f"{title}")
+    else:
+        plt.title("Prediction")
+    plt.colorbar()
+
+    # GT
+    plt.subplot(1,3,2)
+    plt.imshow(gt.T, aspect='auto', origin='lower')
+    plt.title("Ground Truth")
+    plt.colorbar()
+
+    # CQT
+    plt.subplot(1,3,3)
+    plt.imshow(cqt.T, aspect='auto', origin='lower')
+    plt.title("CQT")
+    plt.colorbar()
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(cfg.save_dir, name + ".pdf"))
+
 
 import cv2
 import numpy as np

@@ -48,7 +48,7 @@ def get_config():
     cfg.num_freqs = 128
     
     cfg.dataset_read_py_path = Path("../musicNotebook/web")
-    cfg.dataset_data_path = Path("../musicNotebook/preprocess11")
+    cfg.dataset_data_path = Path("../musicNotebook/preprocess12")
     
     cfg.batch_size = 1
     
@@ -101,5 +101,10 @@ def get_config():
     cfg.map_type = "sustain_map"
 
     cfg.time_mask_len = 5 # None
+    
+    # detr
+    cfg.num_querys = 8
+    
+    
     return cfg
 

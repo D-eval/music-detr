@@ -1,7 +1,9 @@
+"""textwise"""
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from utils.visualizer import compare_result
+from utils.visualizer import compare_result_3
 
 import os
 from configs.config import get_config
@@ -43,9 +45,9 @@ model = PitchTransformer().to(device)
 
 tokenizer = MusicDetrTokenizer() # .to(device)
 
-# checkpoint_path = "/home/vipuser/wby/proj_params/params/ckpt_epoch_90.pt"
-# state_dict = torch.load(checkpoint_path)
-# model.load_state_dict(state_dict=state_dict)
+checkpoint_path = "/home/vipuser/wby/proj_params/params/ckpt_epoch_100.pt"
+state_dict = torch.load(checkpoint_path)
+model.load_state_dict(state_dict=state_dict)
 
 
 # -------- optimizer --------
@@ -76,17 +78,14 @@ for epoch in range(start_epoch, num_epochs):
         # ---------- target ----------
         target_pitchMap = get_map(events, pitch_centre)
 
-        # ---------- expand N ----------
-        N = text_emb[0].shape[0]
-
         input_dict = {
-            "pitch_spec": pitch_spec.expand(N, -1, -1).to(device),
+            "pitch_spec": pitch_spec.to(device), # (B, T, F)
             "pitchs": pitchs.to(device),
             "pitch_centre": pitch_centre.to(device),
-            "freq_spec": freq_spec.expand(N, -1, -1).to(device),
+            "freq_spec": freq_spec.to(device), # (B, T, F)
             "freqs": freqs.to(device),
             "freq_centre": freq_centre.to(device),
-            "text_emb": text_emb[0][:, None, :].to(device)
+            "text_emb": torch.stack(text_emb).to(device) # (B, 1, D)
         }
 
         target = target_pitchMap.to(device)
@@ -112,10 +111,10 @@ for epoch in range(start_epoch, num_epochs):
         # ---------- log ----------
         if step % 10 == 0:
             print(f"[Epoch {epoch}] step {step} loss: {loss.item():.4f}")
-            compare_result(torch.sigmoid(pitch_spec[0]).detach().cpu().numpy(),
-                           target_pitchMap.sum(0).detach().cpu().numpy()[...,1], "cqt")
-            compare_result(torch.sigmoid(output[0]).detach().cpu().numpy()[...,0],
-                           target_pitchMap.sum(0).detach().cpu().numpy()[...,1], "pred")
+            compare_result_3(torch.sigmoid(output[0]).detach().cpu().numpy()[..., 0],
+                           target_pitchMap[0].detach().cpu().numpy()[...,1],
+                           pitch_spec[0].detach().cpu().numpy(),
+                           "compare", title=f"{texts[0]}")
     print(f"==== Epoch {epoch} avg loss: {total_loss / (step+1):.4f} ====")
 
     # ---------- 保存 ----------
