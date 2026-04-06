@@ -82,3 +82,22 @@ transformer does well
 
 1. time mask
 2. supervise signal, both sustain and trigger
+
+好了，今天训练的效果比较正常了，但是离能用还差得远。
+具体来说，今天做好了 textwise 的样本加载，
+我发现相关性是比较重要的，
+比如说在text的提示中，应该加入演奏的方法，甚至具体到和弦
+另一个极端，就是只指明这个乐器是combo
+我发现这个就比较接近query了，
+如果我输入的是combo，输出的时候变成了 combo，funk guitar，这样就非常好，
+再极端一点，直接是一个query，
+嗯，能感觉到一点了。
+不过如果我text里面如果没有指明pitchless，
+有的bass是pitch，有的是pitchless的，
+model似乎无法通过频谱判断出应该做哪种的bass，
+这个事情我觉得不能加上额外的提示了！
+它必须从数据规律中学到，而不是从query中，
+换种想法，如果query输入没有pitchless的提示，
+然后我在预测中希望query有pitchless的信息，
+这样或许能帮助pitch预测到pitchless位。
+
