@@ -45,7 +45,7 @@ model = PitchTransformer().to(device)
 
 tokenizer = MusicDetrTokenizer() # .to(device)
 
-checkpoint_path = "/home/vipuser/wby/proj_params/params/ckpt_epoch_100.pt"
+checkpoint_path = "/home/vipuser/wby/proj_params/params/ckpt_epoch_50.pt"
 state_dict = torch.load(checkpoint_path)
 model.load_state_dict(state_dict=state_dict)
 

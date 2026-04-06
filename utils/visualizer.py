@@ -99,7 +99,7 @@ def compare_result_3(onset_logits, onset_gt, cqt, name="compare", title=None):
     plt.colorbar()
 
     plt.tight_layout()
-    plt.savefig(os.path.join(cfg.save_dir, name + ".pdf"))
+    plt.savefig(os.path.join(cfg.save_dir, name + ".png"))
 
 
 import cv2
