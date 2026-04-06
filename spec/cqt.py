@@ -15,7 +15,7 @@ def get_freqs(min_midi, max_midi):
     return freqs
 
 
-def wav2cqt(wav):
+def wav2cqt(wav, shift=0):
     """
     wav: (B, L)
     return:
@@ -33,6 +33,10 @@ def wav2cqt(wav):
     min_midi, max_midi = cfg.min_midi, cfg.max_midi
     freqs = get_freqs(min_midi, max_midi)
     
+    # 🔥 加 shift（核心）
+    if shift != 0:
+        freqs = freqs * (2 ** (shift / 1200.0))
+
     wav_len = cfg.wav_len
     _, L = wav.shape
     assert L==wav_len, f"长度不匹配，预期长度{wav_len}，实际获得{L}"
@@ -80,3 +84,53 @@ def wav2cqt(wav):
     return spec, pos, freqs
 
 
+
+def estimate_shift(wav, shift_range=(-50, 50), step=1):
+    """
+    wav: (1, L) torch tensor
+    return: best_shift (cents)
+    """
+
+    shifts = np.arange(shift_range[0], shift_range[1] + 1, step)
+
+    scores = []
+
+    for shift in shifts:
+        spec, _, _ = wav2cqt(wav, shift=shift)  # (B,T,F)
+
+        spec = spec.detach().cpu().numpy()
+
+        # ----------------------
+        # 1. 时间平均
+        # ----------------------
+        energy_f = spec.mean(axis=1)[0]  # (F,)
+
+        # ----------------------
+        # 2. mask（核心）
+        # ----------------------
+        # 👉 方法 A：平方增强 peak
+        weight = energy_f ** 2
+
+        # 👉 可选：频率范围限制
+        F = len(energy_f)
+        mask = np.ones(F)
+
+        # 比如去掉极低频（前10%）和极高频（后10%）
+        low = int(0.5 * F)
+        high = int(0.9 * F)
+        mask[:low] = 0
+        mask[high:] = 0
+
+        # ----------------------
+        # 3. 计算 score
+        # ----------------------
+        score = np.sum(weight * mask)
+
+        scores.append(score)
+
+    scores = np.array(scores)
+
+    best_idx = np.argmax(scores)
+    best_shift = shifts[best_idx]
+
+    return best_shift, shifts, scores
