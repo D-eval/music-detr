@@ -59,7 +59,7 @@ def get_config():
     cfg.audio_input_dim = 512 # 参考你使用的音频编码器
     
     # 模型设置
-    cfg.d_model = 1
+    cfg.d_model = 64
     cfg.intermediate_size = 128
     
     cfg.num_decoder_layer = 6
@@ -86,15 +86,20 @@ def get_config():
     cfg.large_save_dir = "../params"
     
     cfg.use_diff_input = True
-    cfg.output_mode = "TriggerBool_ConditionalSustain" # "Exclusion_MuteTriggerSustain"
+    cfg.output_mode = "sustain_only" # "Exclusion_MuteTriggerSustain"
     cfg.output_dim_dict = {
             "TriggerBool_ConditionalSustain": 2,
-            "Exclusion_MuteSustain": 2
+            "Exclusion_MuteSustain": 2,
+            "sustain_only": 1
         }
+    
+    cfg.use_diff_input = False
     
     cfg.distinguish_pitch_freq = True
     
-    cfg.pos_weight = 1000.0
+    cfg.pos_weight = 10.0
+    cfg.map_type = "sustain_map"
 
+    cfg.time_mask_len = 5 # None
     return cfg
 

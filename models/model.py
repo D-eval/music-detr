@@ -279,6 +279,8 @@ class Qwen2DecoderLayer(nn.Module):
         self.input_layernorm_F = Qwen2RMSNorm()
         self.input_layernorm_T = Qwen2RMSNorm()
         self.post_attention_layernorm = Qwen2RMSNorm()
+        cfg = get_config()
+        self.time_mask_len = cfg.time_mask_len
     def forward(
         self,
         modal_dict: Dict[str, torch.Tensor],
@@ -321,6 +323,7 @@ class Qwen2DecoderLayer(nn.Module):
         hidden_states_F = self.input_layernorm_F(hidden_states_F)
         # Self Attention
         
+
         hidden_states_F = self.self_attn_F(
             hidden_states=hidden_states_F,
             attention_mask=None,
@@ -348,9 +351,27 @@ class Qwen2DecoderLayer(nn.Module):
         
         hidden_states_T = self.input_layernorm_T(hidden_states_T)
         
+
+        if self.time_mask_len is None:
+            attention_mask = None
+        else:
+            attention_mask = torch.ones((TaL, TaL), device=freq.device) * float("-inf")
+            # 1. 每个 T 都能看见 L 和前后 self.time_mask_len 的 T
+            # 2. 每个 L 都能看见所有
+            text_idx = torch.arange(T, T+L)
+            time_idx = torch.arange(T)
+            # 每个 time token 能看到自身 ± time_mask_len + 所有文本
+            for t in time_idx:
+                start = max(0, t - self.time_mask_len)
+                end = min(T, t + self.time_mask_len + 1)
+                attention_mask[t, start:end] = 0  # 允许看到的 T
+                attention_mask[t, text_idx] = 0   # 允许看到所有文本
+            # 文本 token 全可见
+            attention_mask[text_idx[:, None], :] = 0
+
         hidden_states_T = self.self_attn_T(
             hidden_states=hidden_states_T,
-            attention_mask=None,
+            attention_mask=attention_mask,
         )
         
         # hidden_states_F (NT, FaPaL, C)
@@ -458,7 +479,7 @@ class PitchTransformer(nn.Module):
         pitch_num = cfg.pitch_vocab_size
         
         self.use_diff_input = cfg.use_diff_input
-        if self.use_diff_input == "TriggerBool_ConditionalSustain":
+        if self.use_diff_input:
             input_dim = 2
         else:
             input_dim = 1
@@ -521,7 +542,7 @@ class PitchTransformer(nn.Module):
         N, L, _ = text_emb.shape
         assert pitch_spec.shape[0]==freq_spec.shape[0]==N, "N不一样"
         
-        if self.use_diff_input == "TriggerBool_ConditionalSustain":
+        if self.use_diff_input:
             d_pitch_spec = pitch_spec[:,1:,:] - pitch_spec[:,:-1,:]
             d_freq_spec = freq_spec[:1:,:] - freq_spec[:,:-1,:]
             pitch_spec = torch.stack([pitch_spec, d_pitch_spec], dim=-1)
@@ -575,6 +596,11 @@ class PitchTransformer(nn.Module):
         # hidden_freq = hidden_pitch_freq[:, pitch_len:pitch_len+freq_len, :]  
         output = self.cls_head(hidden_pitch)
 
+        # pitch_spec_pitchless = torch.mean(pitch_spec, dim=2, keepdim=True) # (N, T, 1, 1)
+        # pitch_spec_extend = torch.concat([pitch_spec, pitch_spec_pitchless], dim=2) # (N, T, P+1, 1)
+        # pitch_spec_extend = pitch_spec_extend # (N, T, P+1, 1)
+        # output = pitch_spec_extend * output
+        
         # output[..., 0] = F.sigmoid(output[..., 0]) # 二分类
         # output[..., 1] = F.tanh(output[..., 1]) # 回归, 预测 log(sustain + 1e-3)
         return output
@@ -584,6 +610,7 @@ class PitchTransformer(nn.Module):
         """
             output: (N, T, P+1, cls)
             target: (N, T, P+1, 2) TriggerBool_ConditionalSustain
+                    (N, T, P+1, 2) sustain_only [start, sustain]
         """
         if self.output_mode == "TriggerBool_ConditionalSustain":
             assert output.shape[-1] == 2
@@ -607,6 +634,21 @@ class PitchTransformer(nn.Module):
             else:
                 loss_sustain = torch.tensor(0.0, device=output.device)
             return loss_start + 0.5 * loss_sustain
+        elif self.output_mode == "sustain_only":
+            assert output.shape[-1] == 1
+            output = output.flatten(1, 2)   # (N, All, 2)
+            target = target.flatten(1, 2)
+            # ---------- onset ----------
+            onset_logits = output[..., 0]              # (N, All)
+            onset_target = target[..., 1].float()
+
+            loss_start = F.binary_cross_entropy_with_logits(
+                onset_logits,
+                onset_target,
+                pos_weight=torch.tensor(self.pos_weight, device=output.device)  # 解决不平衡
+            )
+            
+            return loss_start
         else:
             raise NotImplementedError("非常抱歉")
 

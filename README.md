@@ -72,3 +72,13 @@ ok我回来了。
 还有一个法子，就是crossAttention的时候，直接就把text加上。
 
 哎呀我去，3/30 19:43，显存没爆炸，前向传播完成
+
+# first hope
+
+4/6
+transformer works better than cqt
+something that cqt cannot capture
+transformer does well
+
+1. time mask
+2. supervise signal, both sustain and trigger

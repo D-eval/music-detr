@@ -24,9 +24,16 @@ loader = DataLoader(
 
 
 from models.model import PitchTransformer
-from utils import wav2cqt, wav2spec
+from spec import wav2cqt, wav2spec
 from models.tokenizer import MusicDetrTokenizer
-from utils.equipTarget import get_target_map
+from utils.equipTarget import get_target_map, get_sustain_map
+
+if cfg.map_type == "target_map":
+    get_map = get_target_map
+elif cfg.map_type == "sustain_map":
+    get_map = get_sustain_map
+else:
+    raise NotImplementedError("wtf")
 
 
 device = torch.device("cuda" if torch.cuda.is_available else "cpu")
@@ -58,7 +65,7 @@ for epoch in range(start_epoch, num_epochs):
 
     for step, batch in enumerate(loader):
         audio, events, texts = batch
-
+        assert events[0].numel() != 0
         # ---------- spec ----------
         pitch_spec, pitch_centre, pitchs = wav2cqt(audio)
         freq_spec, freq_centre, freqs = wav2spec(audio)
@@ -67,7 +74,7 @@ for epoch in range(start_epoch, num_epochs):
         audio_emb, text_emb = tokenizer(audio, texts)
 
         # ---------- target ----------
-        target_pitchMap = get_target_map(events, pitch_centre)
+        target_pitchMap = get_map(events, pitch_centre)
 
         # ---------- expand N ----------
         N = text_emb[0].shape[0]
@@ -106,9 +113,9 @@ for epoch in range(start_epoch, num_epochs):
         if step % 10 == 0:
             print(f"[Epoch {epoch}] step {step} loss: {loss.item():.4f}")
             compare_result(torch.sigmoid(pitch_spec[0]).detach().cpu().numpy(),
-                           target_pitchMap.sum(0).detach().cpu().numpy()[...,0], "cqt")
+                           target_pitchMap.sum(0).detach().cpu().numpy()[...,1], "cqt")
             compare_result(torch.sigmoid(output[0]).detach().cpu().numpy()[...,0],
-                           target_pitchMap.sum(0).detach().cpu().numpy()[...,0], "pred")
+                           target_pitchMap.sum(0).detach().cpu().numpy()[...,1], "pred")
     print(f"==== Epoch {epoch} avg loss: {total_loss / (step+1):.4f} ====")
 
     # ---------- 保存 ----------

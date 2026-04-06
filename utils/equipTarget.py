@@ -59,8 +59,14 @@ def get_sustain_map(events, pitch_centre):
             
             time_sustain = temp_events[i, 1]
             time_sustain_frames_num = int(time_sustain * sr // cfg.stride)
-            sustain_idxs = torch.arange(time_idx[i], time_idx[i] + time_sustain_frames_num)
-            target_pitchMap[sustain_idxs, pitch_idx[i], 1] = 1 # sustain
+
+            start = max(0, time_idx[i])
+            end = min(pitch_centre.shape[0], start + time_sustain_frames_num)
+
+            if end >= start:
+                target_pitchMap[start:end, pitch_idx[i], 1] = 1
+            else:
+                raise ValueError("wtf")
             
         target_pitchMap_lst.append(target_pitchMap)
     # (T,P,2): 是否触发，sustain时间 /s
