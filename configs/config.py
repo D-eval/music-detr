@@ -103,8 +103,20 @@ def get_config():
     cfg.time_mask_len = 5 # None
     
     # detr
-    cfg.num_querys = 8
+    cfg.num_querys = 100
     
+    # detr 的输出维度
+    cfg.detr_output_dim_dict = {"text":cfg.text_input_dim,
+                                "event":2, # [start, log sustain]
+                                "pitch":cfg.pitch_vocab_size + 1}
+    # 每个 query 预测一个事件token
+    # 事件token需要我们提前通过某种算法得到
+    cfg.detr_d_model_list = [64] * 3 + [128] * 3 + [256] * 3 + [512] * 2 + [1024]
+    cfg.pool_stride = [None, None, 4, None, None, 3, None, None, 2, None, None, 5]
+    cfg.head_dim_list = [16] * 3 + [32] * 3 + [64] * 3 + [128] * 2 + [256]
+    assert len(cfg.detr_d_model_list) == cfg.num_decoder_layer
+    cfg.ffn_dim_up = [1,1,2, 1,1,2, 1,1,2, 1,2,1]
+    cfg.ffn_intermediate_up_list = [2,2,4, 2,2,4, 2,2,2, 2,2,2]
     
     return cfg
 
