@@ -268,10 +268,9 @@ def split_head(x, H):
 
 
 class Qwen2RMSNorm(nn.Module):
-    def __init__(self, eps: float = 1e-6) -> None:
+    def __init__(self, d_model, eps: float = 1e-6) -> None:
         super().__init__()
-        cfg = get_config()
-        hidden_size = cfg.d_model
+        hidden_size = d_model
         self.weight = nn.Parameter(torch.ones(hidden_size))
         self.variance_epsilon = eps
 
@@ -287,14 +286,16 @@ class Qwen2RMSNorm(nn.Module):
 class Qwen2DecoderLayer(nn.Module):
     def __init__(self, layer_idx: int):
         super().__init__()
+        cfg = get_config()
+        
         self.layer_idx = layer_idx
         self.self_attn_F = Qwen2Attention(layer_idx=layer_idx)
         self.self_attn_T = Qwen2Attention(layer_idx=layer_idx)
         self.mlp = Qwen2MLP(layer_idx=layer_idx)
-        self.input_layernorm_F = Qwen2RMSNorm()
-        self.input_layernorm_T = Qwen2RMSNorm()
-        self.post_attention_layernorm = Qwen2RMSNorm()
-        cfg = get_config()
+        self.input_layernorm_F = Qwen2RMSNorm(cfg.detr_d_model_list[layer_idx])
+        self.input_layernorm_T = Qwen2RMSNorm(cfg.detr_d_model_list[layer_idx])
+        self.post_attention_layernorm = Qwen2RMSNorm(cfg.detr_d_model_list[layer_idx])
+        
         self.time_mask_len = cfg.time_mask_len
         
         self.ffn_dim_up = cfg.ffn_dim_up[layer_idx]
@@ -451,13 +452,13 @@ class Qwen2DecoderLayer(nn.Module):
         
         _freq = self.post_attention_layernorm(freq)
         _freq = self.mlp(_freq)
-        freq_repeated = freq.unsqueeze(-1).expand(-1,-1,-1,ffn_dim_up)
+        freq_repeated = freq.unsqueeze(-1).expand(-1,-1,-1,-1,ffn_dim_up)
         freq_repeated = torch.flatten(freq_repeated, -2, -1)
         freq = freq_repeated + _freq
         
         _pitch = self.post_attention_layernorm(pitch)
         _pitch = self.mlp(_pitch)
-        pitch_repeated = pitch.unsqueeze(-1).expand(-1,-1,-1,ffn_dim_up)
+        pitch_repeated = pitch.unsqueeze(-1).expand(-1,-1,-1,-1,ffn_dim_up)
         pitch_repeated = torch.flatten(pitch_repeated, -2, -1)
         pitch = pitch_repeated + _pitch
         
@@ -569,11 +570,11 @@ class PitchTransformer(nn.Module):
         self.num_querys = cfg.num_querys
         self.querys = nn.Parameter(torch.randn((self.num_querys, self.d_model_list[0])))
         
-        self.audio_embed = nn.Linear(cfg.audio_input_dim, cfg.d_model_list[0])
+        self.audio_embed = nn.Linear(cfg.audio_input_dim, self.d_model_list[0])
         
         self.decoder_layers = nn.ModuleList([
             Qwen2DecoderLayer(i)
-            for i in range(cfg.num_decoder_layer)
+            for i in range(cfg.detr_num_decoder_layers)
         ])
         
         self.output_mode = cfg.output_mode
@@ -630,14 +631,14 @@ class PitchTransformer(nn.Module):
         freq_embedding = self.freq_embed(freq_spec)
 
         if self.use_abs_pos_encoding:
-            pitch_pos_encoding = self.freq_time_encoding(pitchs, pitch_centre, self.d_model)
+            pitch_pos_encoding = self.freq_time_encoding(pitchs, pitch_centre, self.d_model_list[0])
             pitch_embedding = pitch_embedding + pitch_pos_encoding[None,...] # (B, T, F, C)
 
-            freq_pos_encoding = self.freq_time_encoding(freqs, freq_centre, self.d_model)
+            freq_pos_encoding = self.freq_time_encoding(freqs, freq_centre, self.d_model_list[0])
             freq_embedding = freq_embedding + freq_pos_encoding[None,...]
         
         
-        pitchless = self.pitchless_embedding[None, None, None, :].expand(B, T, 1, self.d_model)
+        pitchless = self.pitchless_embedding[None, None, None, :].expand(B, T, 1, self.d_model_list[0])
         pitch_embedding = torch.concat([pitch_embedding, 
                                         pitchless],
                                        dim=2) # (B, T, P, C)
@@ -658,7 +659,11 @@ class PitchTransformer(nn.Module):
             modal_dict = layer(modal_dict)
             
         # hidden_text = hidden_state[:, :L, :]
-        # hidden_pitch = modal_dict['pitch'] # (N, T, P, C)
+        hidden_pitch = modal_dict['pitch'] # (N, T, P, C)
+        hidden_freq = modal_dict['freq'] # (N, T, F, C)
+        # 确保聚合完成
+        assert hidden_pitch.shape[1] == 1
+        assert hidden_freq.shape[1] == 1
         
         hidden_text = modal_dict['text'] # (N, L, C)
         
