@@ -104,13 +104,10 @@ def get_config():
     
     # detr
     cfg.num_querys = 100
-    
-    # detr 的输出维度
     cfg.detr_output_dim_dict = {"text":cfg.text_input_dim,
                                 "event":2, # [start, log sustain]
-                                "pitch":cfg.pitch_vocab_size + 1}
-    # 每个 query 预测一个事件token
-    # 事件token需要我们提前通过某种算法得到
+                                "pitch":cfg.pitch_vocab_size + 1,
+                                "exist": 1}
     cfg.detr_num_decoder_layers = 12
     cfg.detr_d_model_list = [64] * 3 + [128] * 3 + [256] * 3 + [512] * 2 + [1024]
     cfg.pool_stride = [None, None, 4, None, None, 3, None, None, 2, None, None, 5]
@@ -118,6 +115,22 @@ def get_config():
     assert len(cfg.detr_d_model_list) == cfg.detr_num_decoder_layers
     cfg.ffn_dim_up = [1,1,2, 1,1,2, 1,1,2, 1,2,1]
     cfg.ffn_intermediate_up_list = [2,2,4, 2,2,4, 2,2,2, 2,2,2]
+    
+    cfg.detr_cost_weight = {
+        "pitch": 1.0,
+        "start": 1.0,
+        "logSustain": 1.0,
+        "IoU": 2.0,
+        "text": 1.0
+    }
+    
+    cfg.detr_loss_weight = {
+        "pitch": 1.0,
+        "start": 1.0,
+        "logSustain": 1.0,
+        "text": 1.0,
+        "exist": 1.0
+    }
     
     return cfg
 

@@ -4,7 +4,66 @@ from torch import nn
 import math
 import torch.nn.functional as F
 from typing import Callable, Optional, Union, Dict
+from scipy.optimize import linear_sum_assignment
 
+
+def hungarian_match(cost_matrix):
+    """
+    cost_matrix: (N, Q)
+    return:
+        row_ind: (M,)  GT index
+        col_ind: (M,)  query index
+    """
+    cost = cost_matrix.detach().cpu().numpy()
+    row_ind, col_ind = linear_sum_assignment(cost)
+    return row_ind, col_ind
+
+
+def cal_pitch_cost(gt, pred):
+    """
+    gt: (N,) long, 取值 0~P 或 -1（无效）
+    pred: (Q, P+1) logits
+
+    return: (N, Q)
+    """
+    Pa1 = pred.shape[1]
+    neg_idx = (gt == -1)
+    gt[neg_idx] = Pa1 - 1
+    log_prob = F.log_softmax(pred, dim=-1)  # (Q, P+1)
+    # gather
+    cost = -log_prob[:, gt].T  # (N, Q)
+    return cost
+
+def cal_start_cost(gt, pred):
+    """
+    gt: (N,)
+    pred: (Q,)
+    return: (N, Q)
+    """
+    return torch.abs(gt[:, None] - pred[None, :])
+
+def cal_logSustain_cost(gt, pred):
+    """
+    gt: (N,)
+    pred: (Q,)
+    return: (N, Q)
+    """
+    return torch.abs(gt[:, None] - pred[None, :])
+
+def cal_text_cost(gt, pred):
+    """
+    gt: (N, C)
+    pred: (Q, C)
+
+    return: (N, Q)
+    """
+    gt_norm = F.normalize(gt, dim=-1)
+    pred_norm = F.normalize(pred, dim=-1)
+
+    sim = torch.matmul(gt_norm, pred_norm.T)  # (N, Q)
+
+    cost = 1 - sim
+    return cost
 
 class Qwen2MLP(nn.Module):
     def __init__(self, layer_idx):
@@ -543,7 +602,7 @@ class PitchTransformer(nn.Module):
         
         self.d_model_list = cfg.detr_d_model_list
         
-        pitch_num = cfg.pitch_vocab_size
+        self.pitch_num = cfg.pitch_vocab_size
         
         self.use_diff_input = cfg.use_diff_input
         if self.use_diff_input:
@@ -571,6 +630,7 @@ class PitchTransformer(nn.Module):
         self.querys = nn.Parameter(torch.randn((self.num_querys, self.d_model_list[0])))
         
         self.audio_embed = nn.Linear(cfg.audio_input_dim, self.d_model_list[0])
+        self.text_input_dim = cfg.text_input_dim
         
         self.decoder_layers = nn.ModuleList([
             Qwen2DecoderLayer(i)
@@ -585,12 +645,14 @@ class PitchTransformer(nn.Module):
         output_dim_text = output_dim_dict["text"]
         output_dim_event = output_dim_dict["event"]
         output_dim_pitch = output_dim_dict["pitch"]
+        output_dim_exist = output_dim_dict["exist"]
         
-        output_dim = output_dim_text + output_dim_event + output_dim_pitch
+        output_dim = output_dim_text + output_dim_event + output_dim_pitch + output_dim_exist
         
         self.cls_head = nn.Linear(self.d_model_list[-1], output_dim)
         
-        self.pos_weight = cfg.pos_weight
+        self.cost_weight = cfg.detr_cost_weight
+        self.loss_weight = cfg.detr_loss_weight
         
     def forward(self,
                 pitch_spec,
@@ -673,82 +735,133 @@ class PitchTransformer(nn.Module):
         query_out_text = query_out[:, :, :self.output_dim_dict["text"]]
         query_out_event = query_out[:, :, self.output_dim_dict["text"]:self.output_dim_dict["text"]+self.output_dim_dict["event"]]
         query_out_pitch = query_out[:, :, self.output_dim_dict["text"]+self.output_dim_dict["event"]:self.output_dim_dict["text"]+self.output_dim_dict["event"]+self.output_dim_dict["pitch"]]
-        
-        output = {
-            'text_out': query_out_text, # (B, Q, C_text)
-            'event_out': query_out_event, # (B, Q, 2)
-            'pitch_logits': query_out_pitch, # (B, Q, P+1)
-            'hidden': hidden_text # (B, Q, C)
-        }
+        query_out_exist = query_out[:, :, self.output_dim_dict["text"]+self.output_dim_dict["event"]+self.output_dim_dict["pitch"]:]
 
-        # output作为midi, hidden_text用于生成音色描述
+        output = [{
+            'text_out': query_out_text[b,...], # (Q, C_text)
+            'event_out': query_out_event[b,...], # (Q, 2)
+            'pitch_logits': query_out_pitch[b,...], # (Q, P+1)
+            'hidden': hidden_text[b,...], # (Q, C)
+            'exist': query_out_exist[b,...] # (Q, 1)
+        } for b in range(B)]
+
         return output
+
+    def get_sample_loss(self, output, target):
+        """
+            target: {
+                "text": (N, C_text),
+                "start": (N, 1),
+                "sustain": (N, 1),
+                "pitch": (N, 1) # -1 ~ 84
+            }
+        """
+        cost_matrix = self.get_sample_cost_matrix(output, target) # (N, Q)
+        gt_idxs, query_idxs = hungarian_match(cost_matrix) # (M,), (M,)
+
+        device = cost_matrix.device
+        
+        # matched
+        matched_q = torch.as_tensor(query_idxs, device=device)
+        matched_gt = torch.as_tensor(gt_idxs, device=device)
+
+        Q = self.num_querys
+        N = len(gt_idxs)
+
+        # ========== 3. exist label ==========
+        exist_gt = torch.zeros(Q, device=device)
+        exist_gt[matched_q] = 1.0
+
+        exist_pred = output["exist"].squeeze(-1)
+
+        loss_exist = F.binary_cross_entropy_with_logits(
+            exist_pred,
+            exist_gt,
+            pos_weight=torch.tensor([self.pos_weight_exist], device=device)
+        )
+
+        # ========== 4. 取 matched ==========
+        text_pred = output["text_out"][matched_q]
+        event_pred = output["event_out"][matched_q]
+        pitch_logits = output["pitch_logits"][matched_q]
+
+        text_gt = target["text"][matched_gt]
+        start_gt = target["start"][matched_gt].squeeze(-1)
+        sustain_gt = target["sustain"][matched_gt].squeeze(-1)
+        logSustain_gt = torch.log(sustain_gt + 1e-6)
+        pitch_gt = target["pitch"][matched_gt].long()
+
+        start_pred = event_pred[..., 0]
+        logSustain_pred = event_pred[..., 1]
+
+        # ========== 5. 各项 loss ==========
+        loss_start = F.l1_loss(start_pred, start_gt)
+
+        loss_sustain = F.l1_loss(logSustain_pred, logSustain_gt)
+
+        neg_idx = (pitch_gt == -1)
+        pitch_gt[neg_idx] = self.pitch_num # 多1个pitchless类
+        loss_pitch = F.cross_entropy(pitch_logits, pitch_gt)
+
+        loss_text = F.mse_loss(text_pred, text_gt)
+
+        # IoU（可选）
+        # loss_iou = cal_iou_loss(
+        #     start_pred, logSustain_pred,
+        #     start_gt, logSustain_gt
+        # )
+
+        # ========== 6. 汇总 ==========
+        loss = (
+            self.loss_weight["exist"] * loss_exist +
+            self.loss_weight["start"] * loss_start +
+            self.loss_weight["sustain"] * loss_sustain +
+            self.loss_weight["pitch"] * loss_pitch +
+            self.loss_weight["text"] * loss_text
+            # self.loss_weight["IoU"] * loss_iou
+        )
+
+        return loss
+
+    def get_sample_cost_matrix(self, output, target):
+        C_text = self.text_input_dim
+        assert target.shape[1]==C_text+3
+
+        text_gt = target['text']
+        start_gt = target['start']
+        logSustain_gt = math.log(target['sustain'])
+        pitch_gt = target['pitch']
+        
+        text_pred = output["text_out"]
+        event_pred = output["event_out"]
+        start_pred = event_pred[..., 0]
+        logSustain_pred = event_pred[..., 1]
+        pitch_logits = output["pitch_logits"] # (Q, P+1)
+        
+        cost_pitch = cal_pitch_cost(gt = pitch_gt, pred = pitch_logits) # (N, Q)
+        cost_start = cal_start_cost(gt = start_gt, pred = start_pred) # (N, Q)
+        cost_logSustain = cal_logSustain_cost(gt = logSustain_gt, pred = logSustain_pred) # (N, Q)
+        cost_text = cal_text_cost(gt = text_gt, pred = text_pred) # (N, Q)
+        
+        # cost_IoU = cal_startSustain_IoU_cost(gt_start = start_gt, gt_sustain = logSustain_gt, pred_start = start_pred, pred_sustain = logSustain_pred) # (N, Q)
+        
+        cost =  self.cost_weight["pitch"] * cost_pitch + \
+                self.cost_weight["start"] * cost_start + \
+                self.cost_weight["sustain"] * cost_logSustain + \
+                self.cost_weight["text"] * cost_text
+            # self.cost_weight["IoU"] * cost_IoU
+        
+        return cost
 
     def get_loss(self, output, target):
         """
-            output: {
-                'pitch_pred': (N, T, P+1, cls),
-                'text_prompt': (N, L, C)
-            }
-            target: {
-                'pitch_target': (N, T, P+1, 2),
-                'text_target': (N, L, C)
-            }
+            target: [ {} ] * B
+            output: [ {} ] * B
         """
-        text_loss = self.get_text_loss(output['text_prompt'], target['text_target'])
-        pitch_loss = self.get_pitch_loss(output['pitch_pred'], target['pitch_target'])
-        return text_loss + pitch_loss
-
-    def get_text_loss(self, hidden_text, text_target):
-        # hidden_text, text_target: (N, L, C)
-        loss = F.mse_loss(hidden_text, text_target)
+        loss = 0
+        for b in range(len(target)):
+            loss += self.get_sample_loss(output[b], target[b])
         return loss
-        
-    def get_pitch_loss(self, output, target):
-        """
-            output: (N, T, P+1, cls)
-            target: (N, T, P+1, 2) TriggerBool_ConditionalSustain
-                    (N, T, P+1, 2) sustain_only [start, sustain]
-        """
-        if self.output_mode == "TriggerBool_ConditionalSustain":
-            assert output.shape[-1] == 2
-            output = output.flatten(1, 2)   # (N, All, 2)
-            target = target.flatten(1, 2)
-            # ---------- onset ----------
-            onset_logits = output[..., 0]              # (N, All)
-            onset_target = target[..., 0].float()
-
-            loss_start = F.binary_cross_entropy_with_logits(
-                onset_logits,
-                onset_target,
-                pos_weight=torch.tensor(self.pos_weight, device=output.device)  # 解决不平衡
-            )
-            
-            mask = onset_target > 0
-            if mask.sum() > 0:
-                pred = output[..., 1][mask]   # raw
-                gt   = torch.log(target[..., 1][mask] + 1e-3)
-                loss_sustain = F.smooth_l1_loss(pred, gt)
-            else:
-                loss_sustain = torch.tensor(0.0, device=output.device)
-            return loss_start + 0.5 * loss_sustain
-        elif self.output_mode == "sustain_only":
-            assert output.shape[-1] == 1
-            output = output.flatten(1, 2)   # (N, All, 2)
-            target = target.flatten(1, 2)
-            # ---------- onset ----------
-            onset_logits = output[..., 0]              # (N, All)
-            onset_target = target[..., 1].float()
-
-            loss_start = F.binary_cross_entropy_with_logits(
-                onset_logits,
-                onset_target,
-                pos_weight=torch.tensor(self.pos_weight, device=output.device)  # 解决不平衡
-            )
-            
-            return loss_start
-        else:
-            raise NotImplementedError("非常抱歉")
 
 
 # def cal_cost_matrix(labors, tasks):

@@ -2,6 +2,14 @@
 hungarianMatching:
 events: (N, 4) [start_time, sustain_time, pitch, text_id]
 output: (T, P, 2) [是否触发，sustain时间 /s]
+
+output = {
+    'text_out': query_out_text, # (B, Q, C_text)
+    'event_out': query_out_event, # (B, Q, 2)
+    'pitch_logits': query_out_pitch, # (B, Q, P+1)
+    'hidden': hidden_text, # (B, Q, C)
+    'exist': query_out_exist # (B, Q, 1)
+}
 """
 
 import torch
@@ -21,7 +29,6 @@ def pitch_dist(p1, p2):
         return _dp
 
 
-# 我不会起名
 def concat_output(output, times):
     """
     output: (T, P, 2) [是否触发，log sustain /s]
