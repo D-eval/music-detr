@@ -20,7 +20,7 @@ def wav2cqt(wav, shift=0):
     wav: (B, L)
     return:
     spec: (B, T, F) # 余弦的投影
-    pos: (1, T) # 中心位置
+    pos: (T) # 中心位置
     """
     
     cfg = get_config()

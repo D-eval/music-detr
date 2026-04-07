@@ -21,7 +21,7 @@ def hungarian_match(cost_matrix):
 
 def cal_pitch_cost(gt, pred):
     """
-    gt: (N,) long, 取值 0~P 或 -1（无效）
+    gt: (N,) long, 取值 0~P 或 -1（pitchless 音高）
     pred: (Q, P+1) logits
 
     return: (N, Q)
@@ -838,6 +838,15 @@ class PitchTransformer(nn.Module):
         logSustain_pred = event_pred[..., 1]
         pitch_logits = output["pitch_logits"] # (Q, P+1)
         
+
+        # print("pitch_gt.shape =", pitch_gt.shape)
+        # print("pitch_gt.dtype =", pitch_gt.dtype)
+        # print("pitch_gt.min =", pitch_gt.min().item())
+        # print("pitch_gt.max =", pitch_gt.max().item())
+        # print("pitch_logits.shape =", pitch_logits.shape)
+        # print("pitch unique =", torch.unique(pitch_gt).detach().cpu())
+
+        
         cost_pitch = cal_pitch_cost(gt = pitch_gt, pred = pitch_logits) # (N, Q)
         cost_start = cal_start_cost(gt = start_gt, pred = start_pred) # (N, Q)
         cost_logSustain = cal_logSustain_cost(gt = logSustain_gt, pred = logSustain_pred) # (N, Q)
@@ -863,6 +872,73 @@ class PitchTransformer(nn.Module):
             loss += self.get_sample_loss(output[b], target[b])
         return loss
 
+    def infer(self, output, text_query=None, threshold=0.5, text_weight=1.0):
+        """
+        return:
+            Dict[str, Tensor]
+        """
+
+        event = output["event_out"]            # (Q, 2)
+        pitch_logits = output["pitch_logits"]  # (Q, P+1)
+        exist_logits = output["exist"].squeeze(-1)  # (Q,)
+        text_out = output["text_out"]          # (Q, C_text)
+
+        # ===== 1. exist =====
+        exist_prob = torch.sigmoid(exist_logits)  # (Q,)
+
+        # ===== 2. text matching =====
+        if text_query is not None:
+            text_out_norm = F.normalize(text_out, dim=-1)
+            text_query_norm = F.normalize(text_query, dim=-1)
+
+            sim = torch.matmul(text_out_norm, text_query_norm.T)  # (Q, K)
+            text_score, _ = sim.max(dim=-1)  # (Q,)
+
+            score = exist_prob * (1 + text_weight * text_score)
+        else:
+            text_score = torch.zeros_like(exist_prob)
+            score = exist_prob
+
+        # ===== 3. 过滤 =====
+        keep = score > threshold
+
+        if keep.sum() == 0:
+            # 返回空 tensor（保持接口一致）
+            return {
+                "start": torch.empty(0),
+                "end": torch.empty(0),
+                "sustain": torch.empty(0),
+                "pitch": torch.empty(0, dtype=torch.long),
+                "confidence": torch.empty(0),
+                "text_emb": torch.empty(0, text_out.shape[-1]),
+                "text_score": torch.empty(0)
+            }
+
+        # ===== 4. 筛选 =====
+        event = event[keep]               # (M, 2)
+        pitch_logits = pitch_logits[keep] # (M, P+1)
+        text_out = text_out[keep]         # (M, C)
+        score = score[keep]               # (M,)
+        text_score = text_score[keep]     # (M,)
+
+        # ===== 5. decode =====
+        start = event[:, 0].float()                     # (M,)
+        sustain = torch.exp(event[:, 1].float())        # (M,)
+        end = start + sustain
+
+        pitch_prob = torch.softmax(pitch_logits, dim=-1)
+        pitch = torch.argmax(pitch_prob, dim=-1)  # (M,)
+
+        # ===== 6. 输出 =====
+        return {
+            "start": start,
+            "end": end,
+            "sustain": sustain,
+            "pitch": pitch,
+            "confidence": score,
+            "text_emb": text_out,
+            "text_score": text_score
+        }
 
 # def cal_cost_matrix(labors, tasks):
 #     # labors: 

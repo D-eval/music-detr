@@ -12,12 +12,14 @@ cfg = get_config()
 import sys
 sys.path.append(str(cfg.dataset_read_py_path))
 
-from read import AudioDataset, collate_fn
+from read import AudioDataset, collate_fn, to_device
 from torch.utils.data import DataLoader
 dataset = AudioDataset(cfg.dataset_data_path)
+
+
 loader = DataLoader(
     dataset,
-    batch_size=8,
+    batch_size=4,
     shuffle=True,
     # num_workers=4,
     collate_fn=collate_fn,
@@ -28,7 +30,7 @@ loader = DataLoader(
 from models.detr import PitchTransformer
 from spec import wav2cqt, wav2spec
 from models.tokenizer import MusicDetrTokenizer
-from utils.equipTarget import get_target_map, get_sustain_map, get_sustain_map_textwise
+from utils.equipTarget import get_target_map, get_sustain_map, get_sustain_map_textwise, normalize_targets_pitch, render_pred_pitch_map
 
 if cfg.map_type == "target_map":
     get_map = get_target_map
@@ -45,9 +47,9 @@ model = PitchTransformer().to(device)
 
 tokenizer = MusicDetrTokenizer() # .to(device)
 
-# checkpoint_path = "/home/vipuser/wby/proj_params/params/ckpt_epoch_50.pt"
-# state_dict = torch.load(checkpoint_path)
-# model.load_state_dict(state_dict=state_dict)
+checkpoint_path = "/home/vipuser/wby/proj_params/params/detr/ckpt_epoch_100.pt"
+state_dict = torch.load(checkpoint_path)
+model.load_state_dict(state_dict=state_dict)
 
 # -------- optimizer --------
 optimizer = optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-4)
@@ -63,19 +65,14 @@ num_epochs = 500
 
 for epoch in range(start_epoch, num_epochs):
     total_loss = 0
-
     for step, batch in enumerate(loader):
-        audio, events, texts = batch
-        assert events[0].numel() != 0
+        audio, target = batch
+        target = normalize_targets_pitch(target)
+        target = to_device(target, device)
+        
         # ---------- spec ----------
         pitch_spec, pitch_centre, pitchs = wav2cqt(audio)
         freq_spec, freq_centre, freqs = wav2spec(audio)
-
-        # ---------- tokenizer ----------
-        audio_emb, text_emb = tokenizer(audio, texts)
-
-        # ---------- target ----------
-        target_pitchMap = get_map(events, pitch_centre)
 
         input_dict = {
             "pitch_spec": pitch_spec.to(device), # (B, T, F)
@@ -84,11 +81,8 @@ for epoch in range(start_epoch, num_epochs):
             "freq_spec": freq_spec.to(device), # (B, T, F)
             "freqs": freqs.to(device),
             "freq_centre": freq_centre.to(device),
-            "text_emb": torch.stack(text_emb).to(device) # (B, 1, D)
         }
-
-        target = target_pitchMap.to(device)
-
+        # assert 0
         # ---------- forward + loss（AMP）----------
         with torch.amp.autocast("cuda"):
             output = model(**input_dict)
@@ -110,13 +104,21 @@ for epoch in range(start_epoch, num_epochs):
         # ---------- log ----------
         if step % 10 == 0:
             print(f"[Epoch {epoch}] step {step} loss: {loss.item():.4f}")
-            compare_result_3(torch.sigmoid(output[0]).detach().cpu().numpy()[..., 0],
-                           target_pitchMap[0].detach().cpu().numpy()[...,1],
+            with torch.no_grad():
+                event_pred = model.infer(output[0])
+                pitch_centre = pitch_centre.to(device)
+                pred_pitchmap = render_pred_pitch_map(event_pred, pitch_centre)
+                gt_pitchmap = render_pred_pitch_map(target[0], pitch_centre)
+            
+            compare_result_3(pred_pitchmap.detach().cpu().numpy()[...,1],
+                           gt_pitchmap.detach().cpu().numpy()[...,1],
                            pitch_spec[0].detach().cpu().numpy(),
-                           "compare", title=f"{texts[0]}")
+                           "compare")
     print(f"==== Epoch {epoch} avg loss: {total_loss / (step+1):.4f} ====")
 
     # ---------- 保存 ----------
     if epoch % 10 == 0:
         torch.save(model.state_dict(), os.path.join(cfg.large_save_dir, f"ckpt_epoch_{epoch}.pt"))
+
+
 

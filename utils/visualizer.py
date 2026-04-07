@@ -100,6 +100,8 @@ def compare_result_3(onset_logits, onset_gt, cqt, name="compare", title=None):
 
     plt.tight_layout()
     plt.savefig(os.path.join(cfg.save_dir, name + ".png"))
+    
+    plt.close()
 
 
 import cv2
@@ -200,3 +202,52 @@ def export_event_flash_mp4(audio, events, sr=44100, save_path="output.mp4"):
     os.remove(tmp_audio)
 
     print(f"✅ 已生成: {save_path}")
+
+
+
+
+def render_roll(events, T, P, use_prob=False):
+    """
+    events: infer_events 输出
+    T: 时间长度
+    P: pitch_vocab_size（含 pitchless）
+
+    return:
+        roll: (T, P)
+    """
+
+    roll = torch.zeros(T, P)
+
+    for ev in events:
+        s = int(ev["start"] * T)
+        e = int(ev["end"] * T)
+
+        s = max(0, min(T-1, s))
+        e = max(s+1, min(T, e))
+
+        p = ev["pitch"]
+
+        if p >= P:
+            continue  # 可选：忽略 pitchless
+
+        if use_prob:
+            # 用 soft 分布
+            roll[s:e] += ev["pitch_prob"][:P]
+        else:
+            roll[s:e, p] += ev["confidence"]
+
+    return roll
+
+def plot_roll(roll, name="roll"):
+    """roll: (T, P)"""
+    cfg = get_config()
+    
+    plt.figure(figsize=(12, 4))
+    plt.imshow(roll.T, aspect='auto', origin='lower')
+    plt.xlabel("Time")
+    plt.ylabel("Pitch")
+    plt.colorbar()
+    plt.title("Piano Roll")
+    
+    plt.savefig(os.path.join(cfg.save_dir, name + ".png"))
+    plt.close()

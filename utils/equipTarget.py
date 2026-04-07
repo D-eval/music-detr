@@ -125,3 +125,121 @@ def get_sustain_map_textwise(events, pitch_centre):
     # (T,P,2): 是否触发，sustain时间 /s
     return torch.stack(target_pitchMap_lst)
 
+
+
+def normalize_targets_pitch(targets):
+    """
+    targets: list[dict]
+    每个 target["pitch"]: (N,) tensor (long)
+
+    处理规则：
+    1. 如果 pitch == -1 → 设为 vocab_size（最后一类）
+    2. 否则：
+        - 用 ±12 折叠到 [min_midi, max_midi]
+        - 再减去 min_midi → 映射到 [0, vocab_size-1]
+    """
+    cfg = get_config()
+
+    min_midi = cfg.min_midi
+    max_midi = cfg.max_midi
+    vocab_size = cfg.pitch_vocab_size  # = max - min + 1
+
+    for t in targets:
+        pitch = t["pitch"]  # (N,)
+
+        # ===== 1. 处理 -1 =====
+        neg_mask = (pitch == -1)
+
+        # ===== 2. fold 到合法区间 =====
+        valid_mask = ~neg_mask
+        p = pitch[valid_mask]
+
+        # 折叠到区间（按12循环）
+        # while版 → vector版
+        # 公式：((p - min) % 12) + min + k*12  → 再 clamp
+        # 更简单：循环逼近
+        while True:
+            too_low = p < min_midi
+            too_high = p > max_midi
+
+            if not (too_low.any() or too_high.any()):
+                break
+
+            p[too_low] += 12
+            p[too_high] -= 12
+
+        pitch[valid_mask] = p
+
+        # ===== 3. 映射到 index =====
+        pitch[valid_mask] = pitch[valid_mask] - min_midi  # → [0, vocab_size-1]
+
+        # ===== 4. -1 → 最后一类 =====
+        pitch[neg_mask] = vocab_size
+
+        # ===== 5. 写回 =====
+        t["pitch"] = pitch.long()
+
+    return targets
+
+def render_pred_pitch_map(events, pitch_centre):
+    """
+    events: Dict[str, Tensor]
+    pitch_centre: (T,)  每帧对应 sample index
+
+    return:
+        (T, P+1, 2)
+    """
+
+    cfg = get_config()
+    sr = cfg.sr
+    stride = cfg.stride
+
+    T = pitch_centre.shape[0]
+    P = cfg.pitch_vocab_size + 1
+
+    device = pitch_centre.device
+
+    # ===== 1. 取数据 =====
+    start = events["start"]        # (M,)
+    sustain = events["sustain"]    # (M,)
+    pitch = events["pitch"]        # (M,)
+
+    if start.numel() == 0:
+        return torch.zeros((T, P, 2), device=device)
+
+    # ===== 2. clamp =====
+    # start = torch.clamp(start, 0, 1)
+    # sustain = torch.clamp(sustain, 0, 1)
+
+    # ===== 3. 转 sample =====
+    start_idx_sample = start * sr  # (M,)
+
+    # ===== 4. 找最近时间帧（vectorized）=====
+    # (T, M)
+    diff = torch.abs(pitch_centre[:, None] - start_idx_sample[None, :])
+    time_idx = torch.argmin(diff, dim=0)  # (M,)
+
+    # ===== 5. sustain → frame数 =====
+    sustain_frames = (sustain * sr // stride).long()  # (M,)
+
+    # ===== 6. pitch index =====
+    pitch_idx = torch.clamp(pitch, 0, P-1)
+
+    # ===== 7. 初始化 =====
+    pred_map = torch.zeros((T, P, 2), device=device)
+
+    # ===== 8. trigger（scatter）=====
+    pred_map[time_idx, pitch_idx, 0] = 1
+    pred_map[time_idx, pitch_idx, 1] = 1
+
+    # ===== 9. sustain（向量化区间填充）=====
+    # 构造 (T, M)
+
+    start_t = time_idx                # (M)
+    end_t = time_idx + sustain_frames # (M)
+    end_t = torch.clamp(end_t, 0, T)
+
+    for m in range(start_idx_sample.shape[0]):
+        pred_map[start_t[m]:end_t[m], pitch_idx[m], 1] = 1
+
+    return pred_map
