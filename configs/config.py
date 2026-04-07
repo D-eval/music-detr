@@ -120,8 +120,8 @@ def get_config():
         "pitch": 1.0,
         "start": 1.0,
         "logSustain": 1.0,
-        "IoU": 2.0,
         "text": 1.0
+        # "IoU": 2.0,
     }
     
     cfg.detr_loss_weight = {
@@ -131,6 +131,8 @@ def get_config():
         "text": 1.0,
         "exist": 1.0
     }
+    
+    cfg.detr_pos_weight = 10.0
     
     return cfg
 

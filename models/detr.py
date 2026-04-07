@@ -27,7 +27,7 @@ def cal_pitch_cost(gt, pred):
     return: (N, Q)
     """
     Pa1 = pred.shape[1]
-    neg_idx = (gt == -1)
+    neg_idx = (gt < 0)
     gt[neg_idx] = Pa1 - 1
     log_prob = F.log_softmax(pred, dim=-1)  # (Q, P+1)
     # gather
@@ -654,6 +654,8 @@ class PitchTransformer(nn.Module):
         self.cost_weight = cfg.detr_cost_weight
         self.loss_weight = cfg.detr_loss_weight
         
+        self.pos_weight_exist = cfg.detr_pos_weight
+        
     def forward(self,
                 pitch_spec,
                 pitchs,
@@ -751,9 +753,9 @@ class PitchTransformer(nn.Module):
         """
             target: {
                 "text": (N, C_text),
-                "start": (N, 1),
-                "sustain": (N, 1),
-                "pitch": (N, 1) # -1 ~ 84
+                "start": (N,),
+                "sustain": (N,),
+                "pitch": (N,) # -1 ~ 84
             }
         """
         cost_matrix = self.get_sample_cost_matrix(output, target) # (N, Q)
@@ -786,8 +788,8 @@ class PitchTransformer(nn.Module):
         pitch_logits = output["pitch_logits"][matched_q]
 
         text_gt = target["text"][matched_gt]
-        start_gt = target["start"][matched_gt].squeeze(-1)
-        sustain_gt = target["sustain"][matched_gt].squeeze(-1)
+        start_gt = target["start"][matched_gt]
+        sustain_gt = target["sustain"][matched_gt]
         logSustain_gt = torch.log(sustain_gt + 1e-6)
         pitch_gt = target["pitch"][matched_gt].long()
 
@@ -799,7 +801,7 @@ class PitchTransformer(nn.Module):
 
         loss_sustain = F.l1_loss(logSustain_pred, logSustain_gt)
 
-        neg_idx = (pitch_gt == -1)
+        neg_idx = (pitch_gt < 0)
         pitch_gt[neg_idx] = self.pitch_num # 多1个pitchless类
         loss_pitch = F.cross_entropy(pitch_logits, pitch_gt)
 
@@ -815,7 +817,7 @@ class PitchTransformer(nn.Module):
         loss = (
             self.loss_weight["exist"] * loss_exist +
             self.loss_weight["start"] * loss_start +
-            self.loss_weight["sustain"] * loss_sustain +
+            self.loss_weight["logSustain"] * loss_sustain +
             self.loss_weight["pitch"] * loss_pitch +
             self.loss_weight["text"] * loss_text
             # self.loss_weight["IoU"] * loss_iou
@@ -824,12 +826,10 @@ class PitchTransformer(nn.Module):
         return loss
 
     def get_sample_cost_matrix(self, output, target):
-        C_text = self.text_input_dim
-        assert target.shape[1]==C_text+3
 
         text_gt = target['text']
         start_gt = target['start']
-        logSustain_gt = math.log(target['sustain'])
+        logSustain_gt = torch.log(target['sustain'] + 1e-6)
         pitch_gt = target['pitch']
         
         text_pred = output["text_out"]
@@ -847,7 +847,7 @@ class PitchTransformer(nn.Module):
         
         cost =  self.cost_weight["pitch"] * cost_pitch + \
                 self.cost_weight["start"] * cost_start + \
-                self.cost_weight["sustain"] * cost_logSustain + \
+                self.cost_weight["logSustain"] * cost_logSustain + \
                 self.cost_weight["text"] * cost_text
             # self.cost_weight["IoU"] * cost_IoU
         

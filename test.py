@@ -10,7 +10,7 @@ cfg = get_config()
 import sys
 sys.path.append(str(cfg.dataset_read_py_path))
 
-from read import AudioDataset, collate_fn
+from read import AudioDataset, collate_fn, to_device
 from torch.utils.data import DataLoader
 dataset = AudioDataset(cfg.dataset_data_path)
 loader = DataLoader(
@@ -40,6 +40,7 @@ model = PitchTransformer().to(device)
 
 for step, batch in enumerate(loader):
     audio, target = batch
+    target = to_device(target, device)
     break
 
 # ---------- spec ----------
@@ -56,8 +57,9 @@ input_dict = {
 }
 
 # ---------- forward + loss（AMP）----------
-output = model(**input_dict)
-loss = model.get_loss(output, target)
+with torch.amp.autocast("cuda"):
+    output = model(**input_dict)
+    loss = model.get_loss(output, target)
 
 
 # compare_result(torch.sigmoid(pitch_spec).detach().cpu().numpy(),
