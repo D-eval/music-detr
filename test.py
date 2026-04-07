@@ -10,11 +10,17 @@ cfg = get_config()
 import sys
 sys.path.append(str(cfg.dataset_read_py_path))
 
-from read12 import AudioDataset, collate_fn
+from read import AudioDataset, collate_fn
 from torch.utils.data import DataLoader
 dataset = AudioDataset(cfg.dataset_data_path)
-
-
+loader = DataLoader(
+    dataset,
+    batch_size=2,
+    shuffle=True,
+    # num_workers=4,
+    collate_fn=collate_fn,
+    pin_memory=True
+)
 
 from models.detr import PitchTransformer
 from spec import wav2cqt, wav2spec
@@ -27,16 +33,18 @@ from utils.equipTarget import get_target_map
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("device:",device)
 
-
-audio, events, texts = dataset[50]
-
-# ---------- spec ----------
-pitch_spec, pitch_centre, pitchs = wav2cqt(audio[None,:])
-freq_spec, freq_centre, freqs = wav2spec(audio[None,:])
 # ---------- target ----------
 # target_pitchMap = get_target_map([events], pitch_centre)
 
 model = PitchTransformer().to(device)
+
+for step, batch in enumerate(loader):
+    audio, target = batch
+    break
+
+# ---------- spec ----------
+pitch_spec, pitch_centre, pitchs = wav2cqt(audio)
+freq_spec, freq_centre, freqs = wav2spec(audio)
 
 input_dict = {
     "pitch_spec": pitch_spec.to(device), # (B, T, F)
@@ -47,7 +55,10 @@ input_dict = {
     "freq_centre": freq_centre.to(device),
 }
 
+# ---------- forward + loss（AMP）----------
 output = model(**input_dict)
+loss = model.get_loss(output, target)
+
 
 # compare_result(torch.sigmoid(pitch_spec).detach().cpu().numpy(),
 #                 target_pitchMap[...,0].detach().cpu().numpy().sum(0))

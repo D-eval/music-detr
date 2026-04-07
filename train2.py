@@ -12,7 +12,7 @@ cfg = get_config()
 import sys
 sys.path.append(str(cfg.dataset_read_py_path))
 
-from read12 import AudioDataset, collate_fn
+from read import AudioDataset, collate_fn
 from torch.utils.data import DataLoader
 dataset = AudioDataset(cfg.dataset_data_path)
 loader = DataLoader(
@@ -45,10 +45,9 @@ model = PitchTransformer().to(device)
 
 tokenizer = MusicDetrTokenizer() # .to(device)
 
-checkpoint_path = "/home/vipuser/wby/proj_params/params/ckpt_epoch_50.pt"
-state_dict = torch.load(checkpoint_path)
-model.load_state_dict(state_dict=state_dict)
-
+# checkpoint_path = "/home/vipuser/wby/proj_params/params/ckpt_epoch_50.pt"
+# state_dict = torch.load(checkpoint_path)
+# model.load_state_dict(state_dict=state_dict)
 
 # -------- optimizer --------
 optimizer = optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-4)

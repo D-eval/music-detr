@@ -48,7 +48,7 @@ def get_config():
     cfg.num_freqs = 128
     
     cfg.dataset_read_py_path = Path("../musicNotebook/web")
-    cfg.dataset_data_path = Path("../musicNotebook/preprocess12")
+    cfg.dataset_data_path = Path("../musicNotebook/preprocess2")
     
     cfg.batch_size = 1
     
