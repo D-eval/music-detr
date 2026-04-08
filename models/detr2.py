@@ -372,8 +372,8 @@ class Qwen2DecoderLayer(nn.Module):
         # hidden_state: (N_cells, L_cell, C)
         
         _hidden_state = self.input_layernorm(hidden_state)
-        _hidden_states = self.self_attn_F(
-            hidden_states= _hidden_states,
+        _hidden_state = self.self_attn(
+            hidden_states= _hidden_state,
             attention_mask=None,
             # position_ids=position_ids,
             # past_key_values=past_key_values,
@@ -384,7 +384,7 @@ class Qwen2DecoderLayer(nn.Module):
         )
         
         # == 残差连接
-        hidden_state = hidden_state + _hidden_states
+        hidden_state = hidden_state + _hidden_state
         
         ffn_dim_up = self.ffn_dim_up
         
@@ -430,6 +430,8 @@ class TFDecoderLayer(nn.Module):
         freq = modal_dict['freq'] # (B, T, F, C)
         pitch = modal_dict['pitch'] # (B, T, P, C)
         text = modal_dict['text'] # (B, Q, C)
+        
+        assert text.shape[-1]==freq.shape[-1]
         
         assert pitch.shape[1] == freq.shape[1], "无法对齐时间"
         T = freq.shape[1]
@@ -560,11 +562,12 @@ class TFDecoderLayer(nn.Module):
         ffn_dim_up = self.ffn_dim_up
         
         # 升维残差连接
-        _text = self.post_attention_layernorm(text)
-        _text = self.mlp(_text)
-        text_repeated = text.unsqueeze(-1).expand(-1,-1,-1,ffn_dim_up)
-        text_repeated = torch.flatten(text_repeated, -2, -1)
-        text = text_repeated + _text
+        # _text = self.post_attention_layernorm(text)
+        # _text = self.mlp(_text)
+        # text_repeated = text.unsqueeze(-1).expand(-1,-1,-1,ffn_dim_up)
+        # text_repeated = torch.flatten(text_repeated, -2, -1)
+        # text = text_repeated + _text
+        text = text # text 不走 mlp升维
         
         _freq = self.post_attention_layernorm(freq)
         _freq = self.mlp(_freq)
@@ -658,6 +661,7 @@ class PitchTransformer(nn.Module):
         cfg = get_config()
         
         self.d_model_list = cfg.detr_d_model_list
+        self.dim_up = cfg.ffn_dim_up
         
         self.pitch_num = cfg.pitch_vocab_size
         
@@ -699,9 +703,7 @@ class PitchTransformer(nn.Module):
             self.event_tokens = nn.Parameter(torch.randn((self.num_event_tokens, self.d_model_list[0])))
         else:
             raise NotImplementedError("wtf")
-        
-        self.num_cls_querys = cfg.num_cls_querys
-        
+                
         self.audio_embed = nn.Linear(cfg.audio_input_dim, self.d_model_list[0])
         self.text_input_dim = cfg.text_input_dim
         
@@ -831,18 +833,19 @@ class PitchTransformer(nn.Module):
         }
         
         for i in range(self.num_layers):
-            modal_dict = self.inter_decoder_layers[i](modal_dict)
+            modal_dict = self.inter_decoder_layers[i](modal_dict) # (B, ..., C2)
             # 此时 receptors 已经融合了信息
-            new_receptors = modal_dict['text'] # (B, Q, C)
+            new_receptors = modal_dict['text'] # (B, Q, C1)
+            # 注意，我们要避免 inter_decoder_layers 中 new_receptors 升维
             new_receptors = new_receptors.reshape(B, N_cell, -1, self.d_model_list[i])
             cells[:,:,:N_rec,:] = new_receptors # 因为 inter_decoder_layers 的 receptors 有残差连接
             cells = cells.flatten(0,1) # (B*N_cell, L_cell, C)
             cells = self.inner_decoder_layers[i](cells)
-            cells = cells.reshape(B, N_cell, -1, self.d_model_list[i])
+            cells = cells.reshape(B, N_cell, -1, self.d_model_list[i]*self.dim_up[i])
             # 更新 modal_dict
             new_query_emb = cells[:,:,:N_rec,:] # (B, N_cell, N_rec, C)
             new_query_emb = new_query_emb.flatten(1,2) # (B, N_cell*N_rec, C)
-            modal_dict['text'] = new_query_emb
+            modal_dict['text'] = new_query_emb # (B, Q, C2)
 
         output_distillation = cells[:,:,N_rec:N_rec+N_teacher,:] # (B, N, 1, C)
         output_prompts = cells[:,:,N_rec+N_teacher:N_rec+N_teacher+N_prompt,:] # (B, N, prompt, C)
@@ -883,7 +886,9 @@ class PitchTransformer(nn.Module):
         
         exist_bool = torch.zeros_like(text_exist, device=text_exist.device, dtype=bool)
         exist_bool[gt_idxs] = True
-        loss_exist = F.binary_cross_entropy_with_logits(text_exist, exist_bool.float(), pos_weight=self.pos_weight_exist_text)
+        loss_exist = F.binary_cross_entropy_with_logits(text_exist, exist_bool.float(),
+                                                        pos_weight=torch.tensor([self.pos_weight_exist_text],
+                                                                                device=text_exist.device))
         
         text_pred_choiced = text_pred[pred_idxs] # (M, C)
         text_gt_choiced = text_gt[gt_idxs] # (M, C)
@@ -1015,12 +1020,14 @@ class PitchTransformer(nn.Module):
         
         exist_bool = torch.zeros_like(output['exist'], device=output['exist'].device, dtype=bool)
         exist_bool[pred_idx] = True
-        loss_exist = F.binary_cross_entropy_with_logits(output['exist'], exist_bool.float(), pos_weight=self.pos_weight_exist_event)
+        loss_exist = F.binary_cross_entropy_with_logits(output['exist'], exist_bool.float(),
+                                                        pos_weight=torch.tensor([self.pos_weight_exist_event],
+                                                        device=exist_bool.device))
         
-        loss = self.cost_weight['start'] * loss_start +\
-               self.cost_weight['sustain'] * loss_sustain +\
-               self.cost_weight['pitch'] * loss_pitch +\
-               self.cost_weight['exist_event'] * loss_exist
+        loss = self.loss_weight['start'] * loss_start +\
+               self.loss_weight['sustain'] * loss_sustain +\
+               self.loss_weight['pitch'] * loss_pitch +\
+               self.loss_weight['exist_event'] * loss_exist
     
         return loss
     

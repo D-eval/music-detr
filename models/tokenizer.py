@@ -33,7 +33,7 @@ class MusicDetrTokenizer(nn.Module):
         if texts is None:
             text_emb = None
         else:
-            assert texts.__len__() == audio.shape[0], "batch 必须相同"
+            # assert texts.__len__() == audio.shape[0], "batch 必须相同"
             text_emb = self.extract_text_encoding(texts)
         # audio = self.resampler(audio)
         # audio = self.normalize(audio)

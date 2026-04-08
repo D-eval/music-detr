@@ -48,7 +48,7 @@ def get_config():
     cfg.num_freqs = 128
     
     cfg.dataset_read_py_path = Path("../musicNotebook/web")
-    cfg.dataset_data_path = Path("../musicNotebook/preprocess2")
+    cfg.dataset_data_path = Path("../musicNotebook/preprocess11")
     
     cfg.batch_size = 1
     
@@ -113,7 +113,7 @@ def get_config():
     
     cfg.num_prompt_querys = 9
     
-    assert cfg.num_querys % cfg.num_cls_querys == 0
+    # assert cfg.num_querys % cfg.num_cls_querys == 0
     
     
     cfg.detr_output_dim_dict = {"text":cfg.text_input_dim,

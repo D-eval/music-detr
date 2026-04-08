@@ -3,6 +3,34 @@ import torch
 from configs.config import get_config
 from typing import List
 
+# for detr
+def to_device(batch, device):
+    # List[Dict]
+    if torch.is_tensor(batch):
+        return batch.to(device)
+    elif isinstance(batch, dict):
+        return {
+            k: to_device(v, device)
+            for k, v in batch.items()
+            if k != "text"  # ⚠️ 非 tensor 跳过
+        } | {
+            "text": batch["text"]
+        }
+    elif isinstance(batch, list):
+        return [to_device(x, device) for x in batch]
+    else:
+        return batch
+
+
+def embed_text(targets, tokenizer):
+    # targets: list
+    for sample in targets:
+        texts = sample['text']
+        _, text_emb = tokenizer(None, texts)
+        sample['text_emb'] = torch.concat(text_emb, dim=0)
+        # 原地操作
+
+
 def get_target_map(events, pitch_centre):
     # temp_events: (num_event, 4)
     target_pitchMap_lst = []
