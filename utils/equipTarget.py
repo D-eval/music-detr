@@ -209,6 +209,20 @@ def normalize_targets_pitch(targets):
 
     return targets
 
+
+def render_pred_group_pitch_map(events, pitch_centre):
+    """
+    events: List[Dict[str, Tensor]]
+    pitch_centre: (T,)  每帧对应 sample index
+
+    return:
+        (T, P+1, 2)
+    """
+    pred_map = 0
+    for event in events:
+        pred_map += render_pred_pitch_map(event, pitch_centre)
+    return pred_map
+    
 def render_pred_pitch_map(events, pitch_centre):
     """
     events: Dict[str, Tensor]

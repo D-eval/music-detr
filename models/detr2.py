@@ -361,13 +361,6 @@ class Qwen2DecoderLayer(nn.Module):
     def forward(
         self,
         hidden_state: torch.Tensor,
-        # attention_mask: Optional[torch.Tensor] = None,
-        # position_ids: Optional[torch.LongTensor] = None,
-        # past_key_values: Optional[Cache] = None,
-        # use_cache: Optional[bool] = False,
-        # cache_position: Optional[torch.LongTensor] = None,
-        # position_embeddings: Optional[tuple[torch.Tensor, torch.Tensor]] = None,  # necessary, but kept here for BC
-        # **kwargs: Unpack[TransformersKwargs],
     ) -> torch.Tensor:
         # hidden_state: (N_cells, L_cell, C)
         
@@ -375,12 +368,6 @@ class Qwen2DecoderLayer(nn.Module):
         _hidden_state = self.self_attn(
             hidden_states= _hidden_state,
             attention_mask=None,
-            # position_ids=position_ids,
-            # past_key_values=past_key_values,
-            # use_cache=use_cache,
-            # cache_position=cache_position,
-            # position_embeddings=position_embeddings,
-            # **kwargs,
         )
         
         # == 残差连接
@@ -977,9 +964,9 @@ class PitchTransformer(nn.Module):
             results.append({
                 "text_distillation": text_distillation,
                 "text_prompt": text_prompt,
-                "start": starts,
-                "sustain": sustains,
-                "pitch": pitchs                
+                "start": starts.float(),
+                "sustain": sustains.float(),
+                "pitch": pitchs
             })
         return results
         

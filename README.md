@@ -282,3 +282,41 @@ pitchless 的节奏有一点意思，比昨天好一些，昨天pitchless 完全
 17:41
 
 大概把带有cell的detr2搭好了，我先吃个饭去，回来写数据集和test，要注意数据集的pitch，别的就没啥了，跑通test和train之后，就可以做audio-language了
+
+20:38
+
+ok，现在 group query 的 detr 总算是开始训练了
+这个灵感来源于细胞膜
+
+就是细胞膜上的受体蛋白receptor会收到外界的信息因子
+然后这个信息因子就会一路传递到细胞核里
+这个信息因子就会和DNA上的启动子结合，
+然后RNA聚合酶就会挂到上面，开始转录，
+然后核糖体翻译出肽链，然后折叠出蛋白质
+
+然后我就想着，每个组只有少数几个token，也就是细胞膜的receptor，
+和其他的modal进行注意力计算，融合信息，
+然后，每个细胞独立的进行工作，也就是inner_decoder，
+每个cell分为几个部分，
+5个 receptor token 用来获得外部信息，
+1个 distillation token 用来对齐文本编码
+16个 prompt token 接一个LLM用来预测文本
+20个 event token 用来预测事件
+
+好了，现在我们就可以开始做audio-language了
+
+哎？不对劲呀，为啥 start 都在左边...
+
+22:22
+
+开始联合模型，
+首先要选一个语言模型
+
+哎，detr2的精度差一些
+
+![](./tiny_save/20260409/compare.png)
+
+不过现在和 llm 的接口已经好了，
+接下来就可以联合训练了，
+这样一来就能约束 detr2 了。
+

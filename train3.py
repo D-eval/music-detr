@@ -33,7 +33,7 @@ loader = DataLoader(
 from models.detr2 import PitchTransformer
 from spec import wav2cqt, wav2spec
 from models.tokenizer import MusicDetrTokenizer
-from utils.equipTarget import get_target_map, get_sustain_map, get_sustain_map_textwise, normalize_targets_pitch, render_pred_pitch_map, to_device, embed_text
+from utils.equipTarget import get_target_map, get_sustain_map, get_sustain_map_textwise, normalize_targets_pitch, render_pred_pitch_map, render_pred_group_pitch_map, to_device, embed_text
 
 if cfg.map_type == "target_map":
     get_map = get_target_map
@@ -50,7 +50,7 @@ model = PitchTransformer().to(device)
 
 tokenizer = MusicDetrTokenizer()
 
-# checkpoint_path = "/home/vipuser/wby/proj_params/params/detr/ckpt_epoch_100.pt"
+# checkpoint_path = "/home/vipuser/wby/proj_params/params/detr2/ckpt_epoch_20.pt"
 # state_dict = torch.load(checkpoint_path)
 # model.load_state_dict(state_dict=state_dict)
 
@@ -109,8 +109,11 @@ for epoch in range(start_epoch, num_epochs):
             print(f"[Epoch {epoch}] step {step} loss: {loss.item():.4f}")
             with torch.no_grad():
                 event_pred = model.infer(output[0])
+                if len(event_pred) == 0:
+                    print("没有检测到目标")
+                    continue
                 pitch_centre = pitch_centre.to(device)
-                pred_pitchmap = render_pred_pitch_map(event_pred, pitch_centre)
+                pred_pitchmap = render_pred_group_pitch_map(event_pred, pitch_centre)
                 gt_pitchmap = render_pred_pitch_map(target[0], pitch_centre)
             
             compare_result_3(pred_pitchmap.detach().cpu().numpy()[...,1],
@@ -125,3 +128,9 @@ for epoch in range(start_epoch, num_epochs):
 
 
 
+# pitchmap = render_pred_pitch_map(event_pred[0], pitch_centre)
+
+# compare_result_3(pitchmap.detach().cpu().numpy()[...,1],
+#                 pitchmap.detach().cpu().numpy()[...,1],
+#                 pitchmap.detach().cpu().numpy()[...,1],
+#                 "wtf")

@@ -25,7 +25,7 @@ loader = DataLoader(
 )
 
 
-from models.model import PitchTransformer
+from my.models.framemodel import PitchTransformer
 from spec import wav2cqt, wav2spec
 from models.tokenizer import MusicDetrTokenizer
 from utils.equipTarget import get_target_map, get_sustain_map, get_sustain_map_textwise
