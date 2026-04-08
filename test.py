@@ -10,7 +10,7 @@ cfg = get_config()
 import sys
 sys.path.append(str(cfg.dataset_read_py_path))
 
-from read import AudioDataset, collate_fn, to_device
+from read13 import AudioDataset, collate_fn, to_device
 from torch.utils.data import DataLoader
 dataset = AudioDataset(cfg.dataset_data_path)
 loader = DataLoader(
@@ -22,7 +22,7 @@ loader = DataLoader(
     pin_memory=True
 )
 
-from models.detr import PitchTransformer
+from models.detr2 import PitchTransformer
 from spec import wav2cqt, wav2spec
 from models.tokenizer import MusicDetrTokenizer
 from utils.equipTarget import get_target_map
@@ -36,30 +36,35 @@ print("device:",device)
 # ---------- target ----------
 # target_pitchMap = get_target_map([events], pitch_centre)
 
-model = PitchTransformer().to(device)
+tokenizer = MusicDetrTokenizer()
+
 
 for step, batch in enumerate(loader):
     audio, target = batch
     target = to_device(target, device)
     break
 
-# ---------- spec ----------
-pitch_spec, pitch_centre, pitchs = wav2cqt(audio)
-freq_spec, freq_centre, freqs = wav2spec(audio)
 
-input_dict = {
-    "pitch_spec": pitch_spec.to(device), # (B, T, F)
-    "pitchs": pitchs.to(device),
-    "pitch_centre": pitch_centre.to(device),
-    "freq_spec": freq_spec.to(device), # (B, T, F)
-    "freqs": freqs.to(device),
-    "freq_centre": freq_centre.to(device),
-}
 
-# ---------- forward + loss（AMP）----------
-with torch.amp.autocast("cuda"):
-    output = model(**input_dict)
-    loss = model.get_loss(output, target)
+# model = PitchTransformer().to(device)
+
+# # ---------- spec ----------
+# pitch_spec, pitch_centre, pitchs = wav2cqt(audio)
+# freq_spec, freq_centre, freqs = wav2spec(audio)
+
+# input_dict = {
+#     "pitch_spec": pitch_spec.to(device), # (B, T, F)
+#     "pitchs": pitchs.to(device),
+#     "pitch_centre": pitch_centre.to(device),
+#     "freq_spec": freq_spec.to(device), # (B, T, F)
+#     "freqs": freqs.to(device),
+#     "freq_centre": freq_centre.to(device),
+# }
+
+# # ---------- forward + loss（AMP）----------
+# with torch.amp.autocast("cuda"):
+#     output = model(**input_dict)
+#     loss = model.get_loss(output, target)
 
 
 # compare_result(torch.sigmoid(pitch_spec).detach().cpu().numpy(),
