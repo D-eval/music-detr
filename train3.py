@@ -14,10 +14,11 @@ cfg = get_config()
 import sys
 sys.path.append(str(cfg.dataset_read_py_path))
 
-from read import AudioDataset, collate_fn, to_device
+from read13 import AudioDataset, collate_fn
 from torch.utils.data import DataLoader
-dataset = AudioDataset(cfg.dataset_data_path)
-
+dataset = AudioDataset(root_dir=cfg.dataset_data_path,
+                       min_pitch=cfg.min_midi,
+                       max_pitch=cfg.max_midi)
 
 loader = DataLoader(
     dataset,
@@ -29,10 +30,10 @@ loader = DataLoader(
 )
 
 
-from models.detr import PitchTransformer
+from models.detr2 import PitchTransformer
 from spec import wav2cqt, wav2spec
 from models.tokenizer import MusicDetrTokenizer
-from utils.equipTarget import get_target_map, get_sustain_map, get_sustain_map_textwise, normalize_targets_pitch, render_pred_pitch_map
+from utils.equipTarget import get_target_map, get_sustain_map, get_sustain_map_textwise, normalize_targets_pitch, render_pred_pitch_map, to_device, embed_text
 
 if cfg.map_type == "target_map":
     get_map = get_target_map
@@ -47,11 +48,11 @@ print("device:",device)
 
 model = PitchTransformer().to(device)
 
-tokenizer = MusicDetrTokenizer() # .to(device)
+tokenizer = MusicDetrTokenizer()
 
-checkpoint_path = "/home/vipuser/wby/proj_params/params/detr/ckpt_epoch_100.pt"
-state_dict = torch.load(checkpoint_path)
-model.load_state_dict(state_dict=state_dict)
+# checkpoint_path = "/home/vipuser/wby/proj_params/params/detr/ckpt_epoch_100.pt"
+# state_dict = torch.load(checkpoint_path)
+# model.load_state_dict(state_dict=state_dict)
 
 # -------- optimizer --------
 optimizer = optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-4)
@@ -69,7 +70,7 @@ for epoch in range(start_epoch, num_epochs):
     total_loss = 0
     for step, batch in enumerate(loader):
         audio, target = batch
-        target = normalize_targets_pitch(target)
+        embed_text(target, tokenizer)
         target = to_device(target, device)
         
         # ---------- spec ----------

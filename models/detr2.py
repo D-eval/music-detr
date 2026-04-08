@@ -977,9 +977,9 @@ class PitchTransformer(nn.Module):
             results.append({
                 "text_distillation": text_distillation,
                 "text_prompt": text_prompt,
-                "starts": starts,
-                "sustains": sustains,
-                "pitchs": pitchs                
+                "start": starts,
+                "sustain": sustains,
+                "pitch": pitchs                
             })
         return results
         

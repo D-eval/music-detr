@@ -83,7 +83,7 @@ def get_config():
     cfg.abs_pos_encoding.sigma = 1
     
     cfg.save_dir = "./tiny_save"
-    cfg.large_save_dir = "../params/detr"
+    cfg.large_save_dir = "../params/detr2"
     
     cfg.use_diff_input = True
     cfg.output_mode = "sustain_only" # "Exclusion_MuteTriggerSustain"
