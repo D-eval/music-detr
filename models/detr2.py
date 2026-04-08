@@ -1,3 +1,7 @@
+"""
+带有group query和训练策略
+"""
+
 import torch
 from configs.config import get_config
 from torch import nn
@@ -348,6 +352,59 @@ class Qwen2DecoderLayer(nn.Module):
         cfg = get_config()
         
         self.layer_idx = layer_idx
+        self.self_attn = Qwen2Attention(layer_idx=layer_idx)
+        self.mlp = Qwen2MLP(layer_idx=layer_idx)
+        self.input_layernorm = Qwen2RMSNorm(cfg.detr_d_model_list[layer_idx])
+        self.post_attention_layernorm = Qwen2RMSNorm(cfg.detr_d_model_list[layer_idx])
+        
+        self.ffn_dim_up = cfg.ffn_dim_up[layer_idx]
+    def forward(
+        self,
+        hidden_state: torch.Tensor,
+        # attention_mask: Optional[torch.Tensor] = None,
+        # position_ids: Optional[torch.LongTensor] = None,
+        # past_key_values: Optional[Cache] = None,
+        # use_cache: Optional[bool] = False,
+        # cache_position: Optional[torch.LongTensor] = None,
+        # position_embeddings: Optional[tuple[torch.Tensor, torch.Tensor]] = None,  # necessary, but kept here for BC
+        # **kwargs: Unpack[TransformersKwargs],
+    ) -> torch.Tensor:
+        # hidden_state: (N_cells, L_cell, C)
+        
+        _hidden_state = self.input_layernorm(hidden_state)
+        _hidden_states = self.self_attn_F(
+            hidden_states= _hidden_states,
+            attention_mask=None,
+            # position_ids=position_ids,
+            # past_key_values=past_key_values,
+            # use_cache=use_cache,
+            # cache_position=cache_position,
+            # position_embeddings=position_embeddings,
+            # **kwargs,
+        )
+        
+        # == 残差连接
+        hidden_state = hidden_state + _hidden_states
+        
+        ffn_dim_up = self.ffn_dim_up
+        
+        # 升维
+        _hidden_state = self.post_attention_layernorm(hidden_state)
+        _hidden_state = self.mlp(_hidden_state)
+        
+        hidden_state = hidden_state.unsqueeze(-1).expand(-1,-1,-1,ffn_dim_up)
+        hidden_state = torch.flatten(hidden_state, -2, -1)
+        hidden_state = hidden_state + _hidden_state
+        
+        return hidden_state
+
+
+class TFDecoderLayer(nn.Module):
+    def __init__(self, layer_idx: int):
+        super().__init__()
+        cfg = get_config()
+        
+        self.layer_idx = layer_idx
         self.self_attn_F = Qwen2Attention(layer_idx=layer_idx)
         self.self_attn_T = Qwen2Attention(layer_idx=layer_idx)
         self.mlp = Qwen2MLP(layer_idx=layer_idx)
@@ -626,18 +683,36 @@ class PitchTransformer(nn.Module):
         if self.use_abs_pos_encoding:
             self.freq_time_encoding = apply_freq_time_encoding
         
-        self.num_querys = cfg.num_querys
-        self.num_cls_querys = cfg.num_cls_querys
+        # 细胞数
+        self.num_cell = cfg.num_cell
         
-        self.event_querys = nn.Parameter(torch.randn((self.num_querys, self.d_model_list[0]))) # 用来预测 event 和 pitch
-        self.text_querys = nn.Parameter(torch.randn((self.num_cls_querys, self.d_model_list[0]))) # 用来预测文本
+        self.num_receptor_tokens = cfg.cell.num_receptor_tokens # 每个cell要有多个受体，接受多种信息因子
+        self.num_distillation_tokens = cfg.cell.num_distillation_tokens
+        assert self.num_distillation_tokens == 1, "wtf"
+        self.num_prompt_tokens = cfg.cell.num_prompt_tokens
+        self.num_event_tokens = cfg.cell.num_event_tokens
+        
+        self.receptor_tokens = nn.Parameter(torch.randn((self.num_cell, self.num_receptor_tokens, self.d_model_list[0])))
+        if cfg.cell.share_params:
+            self.distillation_tokens = nn.Parameter(torch.randn((1, self.d_model_list[0])))
+            self.prompt_tokens = nn.Parameter(torch.randn((self.num_prompt_tokens, self.d_model_list[0])))
+            self.event_tokens = nn.Parameter(torch.randn((self.num_event_tokens, self.d_model_list[0])))
+        else:
+            raise NotImplementedError("wtf")
+        
+        self.num_cls_querys = cfg.num_cls_querys
         
         self.audio_embed = nn.Linear(cfg.audio_input_dim, self.d_model_list[0])
         self.text_input_dim = cfg.text_input_dim
         
-        self.decoder_layers = nn.ModuleList([
+        self.num_layers = cfg.detr_num_decoder_layers
+        self.inter_decoder_layers = nn.ModuleList([
+            TFDecoderLayer(i)
+            for i in range(self.num_layers)
+        ])
+        self.inner_decoder_layers = nn.ModuleList([
             Qwen2DecoderLayer(i)
-            for i in range(cfg.detr_num_decoder_layers)
+            for i in range(self.num_layers)
         ])
         
         self.output_mode = cfg.output_mode
@@ -649,20 +724,35 @@ class PitchTransformer(nn.Module):
         output_dim_event = output_dim_dict["event"]
         output_dim_pitch = output_dim_dict["pitch"]
         output_dim_exist = output_dim_dict["exist"]
+        output_dim_prompt = output_dim_dict['prompt']
+        
+        self.output_dim_event = output_dim_event
+        self.output_dim_pitch = output_dim_pitch
+        self.output_dim_exist = output_dim_exist
         
         output_Qe_dim =  output_dim_event + output_dim_pitch + output_dim_exist
-        output_Qt_dim = output_dim_text # 每个 text 也需要 confidence
+        output_Qt_dim = output_dim_text + output_dim_exist # 每个 text 也需要 confidence
+        output_Qp_dim = output_dim_prompt # 用于生成句子
         # 要进行两次 hungarian matching
         # 第一次对 text 进行匹配
         # 第二次在 text 内部对 event 和 pitch 进行匹配
         
-        self.event_cls_head = nn.Linear(self.d_model_list[-1], output_Qe_dim)
-        self.text_cls_head = nn.Linear(self.d_model_list[-1], output_Qt_dim)
+        self.distllation_head = nn.Linear(self.d_model_list[-1], output_Qt_dim)
+        self.events_head = nn.Linear(self.d_model_list[-1], output_Qe_dim)
+        self.prompt_head = nn.Linear(self.d_model_list[-1], output_Qp_dim)
         
-        self.cost_weight = cfg.detr_cost_weight
-        self.loss_weight = cfg.detr_loss_weight
+        self.cost_weight = cfg.detr2_cost_weight
+        self.loss_weight = cfg.detr2_loss_weight
+        self.sustain_ref = cfg.sustain_ref
         
-        self.pos_weight_exist = cfg.detr_pos_weight
+        self.pos_weight_exist_text = cfg.detr_pos_weight_text
+        self.pos_weight_exist_event = cfg.detr_pos_weight_event
+        
+        self.text_cost_dist = cfg.text_cost_dist
+        self.text_loss_dist = cfg.text_loss_dist
+        
+        self.infer_text_exist_threshold = cfg.infer_text_exist_threshold
+        self.infer_event_exist_threshold = cfg.infer_event_exist_threshold
         
     def forward(self,
                 pitch_spec,
@@ -687,13 +777,6 @@ class PitchTransformer(nn.Module):
         pitch_len = T * P
         freq_len = T * F
         
-        event_emb = self.event_querys # (Qe, C)
-        text_emb = self.text_querys # (Qt, C)
-        Qe = self.num_querys
-        Qt = self.num_cls_querys
-        query_emb = torch.concat([event_emb, text_emb], dim=0) # (Q, C)
-        query_emb = query_emb[None,:,:].expand(B, -1, -1) # (B, Q, C)
-                
         if self.use_diff_input:
             d_pitch_spec = pitch_spec[:,1:,:] - pitch_spec[:,:-1,:]
             d_freq_spec = freq_spec[:1:,:] - freq_spec[:,:-1,:]
@@ -723,246 +806,269 @@ class PitchTransformer(nn.Module):
             pitch_embedding = pitch_embedding + self.pitch_token_embedding[None,None,None,:]
             freq_embedding = freq_embedding + self.freq_token_embedding[None,None,None,:]
         
-        text_embedding = query_emb # (B, L, C)
+        # 组装 query_emb (B, N_cell * N_receptor, C)
+        query_emb = self.receptor_tokens.flatten(0,1)[None,:,:].expand(B,-1,-1)
+        
+        N_cell = self.num_cell
+        N_rec = self.num_receptor_tokens
+        N_teacher = self.num_distillation_tokens
+        N_prompt = self.num_prompt_tokens
+        N_event = self.num_event_tokens
+        
+        # 组装 cell (B, N_cell, L_cell, C)
+        receptors = self.receptor_tokens[None,:,:,:].expand(B, -1, -1, -1)
+        teachers = self.distillation_tokens[None,None,:,:].expand(B, N_cell, -1, -1)
+        prompts = self.prompt_tokens[None,None,:,:].expand(B, N_cell, -1, -1)
+        events = self.event_tokens[None,None,:,:].expand(B, N_cell, -1, -1)
+        
+        # (B, N_cell, L_cell, C)
+        cells = torch.concat([receptors, teachers, prompts, events], dim=2)
         
         modal_dict = {
-            "text": text_embedding, # (B, Q, C)
+            "text": query_emb, # (B, Q, C)
             "pitch": pitch_embedding, # (B, T, P+1, C)
             "freq": freq_embedding, # (B, T, F, C)
         }
         
-        for layer in self.decoder_layers:
-            modal_dict = layer(modal_dict)
-            
-        # hidden_text = hidden_state[:, :L, :]
-        hidden_pitch = modal_dict['pitch'] # (N, T, P, C)
-        hidden_freq = modal_dict['freq'] # (N, T, F, C)
-        # 确保聚合完成
-        assert hidden_pitch.shape[1] == 1
-        assert hidden_freq.shape[1] == 1
-        
-        hidden_text = modal_dict['text'] # (N, L, C)
-        
-        hidden_Qe = hidden_text[:, :Qe, :] # (N, Qe, C)
-        hidden_Qt = hidden_text[:, Qe:, :] # (N, Qt, C)
-        
-        # hidden_freq = hidden_pitch_freq[:, pitch_len:pitch_len+freq_len, :]  
-        Qe_out = self.event_cls_head(hidden_Qe) # (N, Qe, event_dim+pitch_dim+exist_dim)
-        Qt_out = self.text_cls_head(hidden_Qt) # (N, Qt, text_dim)
-        
-        assert Qe % Qt == 0
-        Qt_out_expand = Qt_out.repeat(1, Qe//Qt, 1) # (N, Qe, text_dim)
-        
-        # Qt_out_expand = Qt_out[:,:,None,:].expand(-1,-1, Qe//Qt, -1)
-        # Qt_out_expand = torch.flatten(Qt_out_expand, 1, 2) # (N, Qe, text_dim)
-        
-        query_out = torch.concat([Qt_out_expand, Qe_out], dim=-1) # (N, Qe, text_dim+event_dim+pitch_dim+exist_dim)
-        
-        query_out_text = query_out[:, :, :self.output_dim_dict["text"]]
-        query_out_event = query_out[:, :, self.output_dim_dict["text"]:self.output_dim_dict["text"]+self.output_dim_dict["event"]]
-        query_out_pitch = query_out[:, :, self.output_dim_dict["text"]+self.output_dim_dict["event"]:self.output_dim_dict["text"]+self.output_dim_dict["event"]+self.output_dim_dict["pitch"]]
-        query_out_exist = query_out[:, :, self.output_dim_dict["text"]+self.output_dim_dict["event"]+self.output_dim_dict["pitch"]:]
+        for i in range(self.num_layers):
+            modal_dict = self.inter_decoder_layers[i](modal_dict)
+            # 此时 receptors 已经融合了信息
+            new_receptors = modal_dict['text'] # (B, Q, C)
+            new_receptors = new_receptors.reshape(B, N_cell, -1, self.d_model_list[i])
+            cells[:,:,:N_rec,:] = new_receptors # 因为 inter_decoder_layers 的 receptors 有残差连接
+            cells = cells.flatten(0,1) # (B*N_cell, L_cell, C)
+            cells = self.inner_decoder_layers[i](cells)
+            cells = cells.reshape(B, N_cell, -1, self.d_model_list[i])
+            # 更新 modal_dict
+            new_query_emb = cells[:,:,:N_rec,:] # (B, N_cell, N_rec, C)
+            new_query_emb = new_query_emb.flatten(1,2) # (B, N_cell*N_rec, C)
+            modal_dict['text'] = new_query_emb
 
-        output = [{
-            'text_out': query_out_text[b,...], # (Q, C_text)
-            'event_out': query_out_event[b,...], # (Q, 2)
-            'pitch_logits': query_out_pitch[b,...], # (Q, P+1)
-            'hidden': hidden_text[b,...], # (Q, C)
-            'exist': query_out_exist[b,...] # (Q, 1)
+        output_distillation = cells[:,:,N_rec:N_rec+N_teacher,:] # (B, N, 1, C)
+        output_prompts = cells[:,:,N_rec+N_teacher:N_rec+N_teacher+N_prompt,:] # (B, N, prompt, C)
+        output_events = cells[:,:,N_rec+N_teacher+N_prompt:N_rec+N_teacher+N_prompt+N_event,:] # (B, N, E, C)
+
+        output_distillation = self.distllation_head(output_distillation) # (B, N, 1, C_text)
+        output_prompts = self.prompt_head(output_prompts) # (B, N, prompt, C_prompts)
+        output_events = self.events_head(output_events) # (B, N, E, C_events)
+
+        assert output_distillation.shape[2]==1
+        output_distillation = output_distillation.squeeze(2) # (B, N, C)
+
+        outputs = [{
+            "text_distillation": output_distillation[b,...], # (Qt, C)
+            "text_prompt": output_prompts[b,...], # (Qt, prompt, C)
+            "event_out": output_events[b,...], # (Qt, Qe, C)
         } for b in range(B)]
 
-        return output
-
+        return outputs
+        
     def get_sample_loss(self, output, target):
         """
+            output: Dict
             target: {
-                "text": (N, C_text),
-                "start": (N,),
-                "sustain": (N,),
-                "pitch": (N,) # -1 ~ 84
+                "text_emb": (Nt, C_text),
+                "start": (Ne,),
+                "sustain": (Ne,),
+                "pitch": (Ne,) # -1 ~ 84
+                "text": List[str] Nt
+                "text_idx": (Ne,)
             }
         """
-        cost_matrix = self.get_sample_cost_matrix(output, target) # (N, Q)
-        gt_idxs, query_idxs = hungarian_match(cost_matrix) # (M,), (M,)
-
-        device = cost_matrix.device
+        text_distillation = output["text_distillation"]
+        text_exist = text_distillation[:, -1]
+        text_pred = text_distillation[:, :-1]
+        text_gt = target['text_emb']
+        gt_idxs, pred_idxs = self.match_text(text_pred, text_gt)
         
-        # matched
-        matched_q = torch.as_tensor(query_idxs, device=device)
-        matched_gt = torch.as_tensor(gt_idxs, device=device)
-
-        Q = self.num_querys
-        N = len(gt_idxs)
-
-        # ========== 3. exist label ==========
-        exist_gt = torch.zeros(Q, device=device)
-        exist_gt[matched_q] = 1.0
-
-        exist_pred = output["exist"].squeeze(-1)
-
-        loss_exist = F.binary_cross_entropy_with_logits(
-            exist_pred,
-            exist_gt,
-            pos_weight=torch.tensor([self.pos_weight_exist], device=device)
-        )
-
-        # ========== 4. 取 matched ==========
-        text_pred = output["text_out"][matched_q]
-        event_pred = output["event_out"][matched_q]
-        pitch_logits = output["pitch_logits"][matched_q]
-
-        text_gt = target["text"][matched_gt]
-        start_gt = target["start"][matched_gt]
-        sustain_gt = target["sustain"][matched_gt]
-        logSustain_gt = torch.log(sustain_gt + 1e-6)
-        pitch_gt = target["pitch"][matched_gt].long()
-
-        start_pred = event_pred[..., 0]
-        logSustain_pred = event_pred[..., 1]
-
-        # ========== 5. 各项 loss ==========
-        loss_start = F.l1_loss(start_pred, start_gt)
-
-        loss_sustain = F.l1_loss(logSustain_pred, logSustain_gt)
-
-        neg_idx = (pitch_gt < 0)
-        pitch_gt[neg_idx] = self.pitch_num # 多1个pitchless类
-        loss_pitch = F.cross_entropy(pitch_logits, pitch_gt)
-
-        loss_text = F.mse_loss(text_pred, text_gt)
-
-        # IoU（可选）
-        # loss_iou = cal_iou_loss(
-        #     start_pred, logSustain_pred,
-        #     start_gt, logSustain_gt
-        # )
-
-        # ========== 6. 汇总 ==========
-        loss = (
-            self.loss_weight["exist"] * loss_exist +
-            self.loss_weight["start"] * loss_start +
-            self.loss_weight["logSustain"] * loss_sustain +
-            self.loss_weight["pitch"] * loss_pitch +
-            self.loss_weight["text"] * loss_text
-            # self.loss_weight["IoU"] * loss_iou
-        )
-
-        return loss
-
-    def get_sample_cost_matrix(self, output, target):
-
-        text_gt = target['text']
-        start_gt = target['start']
-        logSustain_gt = torch.log(target['sustain'] + 1e-6)
-        pitch_gt = target['pitch']
+        exist_bool = torch.zeros_like(text_exist, device=text_exist.device, dtype=bool)
+        exist_bool[gt_idxs] = True
+        loss_exist = F.binary_cross_entropy_with_logits(text_exist, exist_bool.float(), pos_weight=self.pos_weight_exist_text)
         
-        text_pred = output["text_out"]
-        event_pred = output["event_out"]
-        start_pred = event_pred[..., 0]
-        logSustain_pred = event_pred[..., 1]
-        pitch_logits = output["pitch_logits"] # (Q, P+1)
-        
-
-        # print("pitch_gt.shape =", pitch_gt.shape)
-        # print("pitch_gt.dtype =", pitch_gt.dtype)
-        # print("pitch_gt.min =", pitch_gt.min().item())
-        # print("pitch_gt.max =", pitch_gt.max().item())
-        # print("pitch_logits.shape =", pitch_logits.shape)
-        # print("pitch unique =", torch.unique(pitch_gt).detach().cpu())
-
-        
-        cost_pitch = cal_pitch_cost(gt = pitch_gt, pred = pitch_logits) # (N, Q)
-        cost_start = cal_start_cost(gt = start_gt, pred = start_pred) # (N, Q)
-        cost_logSustain = cal_logSustain_cost(gt = logSustain_gt, pred = logSustain_pred) # (N, Q)
-        cost_text = cal_text_cost(gt = text_gt, pred = text_pred) # (N, Q)
-        
-        # cost_IoU = cal_startSustain_IoU_cost(gt_start = start_gt, gt_sustain = logSustain_gt, pred_start = start_pred, pred_sustain = logSustain_pred) # (N, Q)
-        
-        cost =  self.cost_weight["pitch"] * cost_pitch + \
-                self.cost_weight["start"] * cost_start + \
-                self.cost_weight["logSustain"] * cost_logSustain + \
-                self.cost_weight["text"] * cost_text
-            # self.cost_weight["IoU"] * cost_IoU
-        
-        return cost
-
-    def get_loss(self, output, target):
-        """
-            target: [ {} ] * B
-            output: [ {} ] * B
-        """
-        loss = 0
-        for b in range(len(target)):
-            loss += self.get_sample_loss(output[b], target[b])
-        return loss
-
-    def infer(self, output, text_query=None, threshold=0.5, text_weight=1.0):
-        """
-        return:
-            Dict[str, Tensor]
-        """
-
-        event = output["event_out"]            # (Q, 2)
-        pitch_logits = output["pitch_logits"]  # (Q, P+1)
-        exist_logits = output["exist"].squeeze(-1)  # (Q,)
-        text_out = output["text_out"]          # (Q, C_text)
-
-        # ===== 1. exist =====
-        exist_prob = torch.sigmoid(exist_logits)  # (Q,)
-
-        # ===== 2. text matching =====
-        if text_query is not None:
-            text_out_norm = F.normalize(text_out, dim=-1)
-            text_query_norm = F.normalize(text_query, dim=-1)
-
-            sim = torch.matmul(text_out_norm, text_query_norm.T)  # (Q, K)
-            text_score, _ = sim.max(dim=-1)  # (Q,)
-
-            score = exist_prob * (1 + text_weight * text_score)
+        text_pred_choiced = text_pred[pred_idxs] # (M, C)
+        text_gt_choiced = text_gt[gt_idxs] # (M, C)
+        if self.text_loss_dist == "euclidean":
+            loss_text = F.mse_loss(text_pred_choiced, text_gt_choiced)
+        elif self.text_loss_dist == "cosine":
+            text_pred_choiced_normed = F.normalize(text_pred_choiced, dim=-1)
+            text_gt_choiced_normed = F.normalize(text_gt_choiced, dim=-1)
+            cosine = text_pred_choiced_normed @ text_gt_choiced_normed.T # (M,)
+            loss_text = torch.mean(1 - cosine)
         else:
-            text_score = torch.zeros_like(exist_prob)
-            score = exist_prob
+            raise NotImplementedError("wtf")
+        
+        total_event_loss = 0
+        for i in range(pred_idxs.shape[0]):
+            pred_idx = pred_idxs[i]
+            gt_idx = gt_idxs[i]
+            
+            if pred_idxs.shape[0] == 0:
+                return 0
 
-        # ===== 3. 过滤 =====
-        keep = score > threshold
-
-        if keep.sum() == 0:
-            # 返回空 tensor（保持接口一致）
-            return {
-                "start": torch.empty(0),
-                "end": torch.empty(0),
-                "sustain": torch.empty(0),
-                "pitch": torch.empty(0, dtype=torch.long),
-                "confidence": torch.empty(0),
-                "text_emb": torch.empty(0, text_out.shape[-1]),
-                "text_score": torch.empty(0)
+            temp_events_idxs = target['text_idx'] == gt_idx
+            
+            sub_target = {
+                "start" : target['start'][temp_events_idxs], # (n,)
+                "sustain" : target['sustain'][temp_events_idxs], # (n,)
+                "pitch" : target['pitch'][temp_events_idxs], # (n,) long
+                }
+            sub_output = output['event_out'][pred_idx, ...]
+            sub_output_event = sub_output[:, :self.output_dim_event]
+            sub_output_pitch = sub_output[:, self.output_dim_event:self.output_dim_event+self.output_dim_pitch]
+            sub_output_exist = sub_output[:, -1]
+            sub_output = {
+                "start": sub_output_event[:,0], # (Qe)
+                "sustain": sub_output_event[:,1], # (Qe,)
+                "pitch_logits": sub_output_pitch, # (Qe, P)
+                "exist": sub_output_exist, # (Qe,)
             }
+            event_loss = self.get_event_loss(output = sub_output, target = sub_target)
+            total_event_loss += event_loss / (pred_idxs.shape[0] + 1e-6)
+        
+        loss =  self.loss_weight['sub'] * total_event_loss +\
+                self.loss_weight['exist_text'] * loss_exist +\
+                self.loss_weight['text'] * loss_text
 
-        # ===== 4. 筛选 =====
-        event = event[keep]               # (M, 2)
-        pitch_logits = pitch_logits[keep] # (M, P+1)
-        text_out = text_out[keep]         # (M, C)
-        score = score[keep]               # (M,)
-        text_score = text_score[keep]     # (M,)
+        return loss
 
-        # ===== 5. decode =====
-        start = event[:, 0].float()                     # (M,)
-        sustain = torch.exp(event[:, 1].float())        # (M,)
-        end = start + sustain
-
-        pitch_prob = torch.softmax(pitch_logits, dim=-1)
-        pitch = torch.argmax(pitch_prob, dim=-1)  # (M,)
-
-        # ===== 6. 输出 =====
-        return {
-            "start": start,
-            "end": end,
-            "sustain": sustain,
-            "pitch": pitch,
-            "confidence": score,
-            "text_emb": text_out,
-            "text_score": text_score
+    def infer(self, output):
+        """
+        output: Dict
+        {
+            "text_distillation": output_distillation[b,...], # (Qt, C)
+            "text_prompt": output_prompts[b,...], # (Qt, prompt, C)
+            "event_out": output_events[b,...], # (Qt, Qe, C)
         }
+        """
+        threshold_text = self.infer_text_exist_threshold
+        threshold_event = self.infer_event_exist_threshold
+        
+        text_exist_logits = output["text_distillation"][:, -1]
+        text_exist_prob = torch.sigmoid(text_exist_logits)
+        text_exist_bool = text_exist_prob > threshold_text
+        
+        text_exist_idxs = torch.where(text_exist_bool)[0]
+        
+        results = []
+        for text_id in text_exist_idxs:
+            text_distillation = output["text_distillation"][text_id, :-1]
+            text_prompt = output["text_prompt"][text_id, :]
+            temp_event = output["event_out"][text_id, :, :] # (Qe, C)
+            
+            event_exist_logits = temp_event[:,-1]
+            event_exist_prob = torch.sigmoid(event_exist_logits)
+            event_exist_bool = event_exist_prob > threshold_event
+            
+            event_exist_idxs = torch.where(event_exist_bool)[0]
+            
+            if event_exist_idxs.shape[0] == 0:
+                continue
+            event_choiced = temp_event[event_exist_idxs, :-1] # (Ne, C)
+            
+            starts = event_choiced[:,0]
+            sustains = torch.exp(event_choiced[:,1]) * self.sustain_ref
+            pitch_logits = event_choiced[:, self.output_dim_event:self.output_dim_event+self.output_dim_pitch]
+            pitchs = torch.argmax(pitch_logits, dim=-1) # (Ne,)
+            results.append({
+                "text_distillation": text_distillation,
+                "text_prompt": text_prompt,
+                "starts": starts,
+                "sustains": sustains,
+                "pitchs": pitchs                
+            })
+        return results
+        
+
+    def get_loss(self, outputs, targets):
+        loss = 0
+        for b in range(len(outputs)):
+            loss += self.get_sample_loss(outputs[b], targets[b])
+        return loss
+
+    def get_event_loss(self, output, target):
+        """
+            output: {
+                'start': (Q,)
+                'sustain': (Q,) # 这里实际上是 log sustain
+                'pitch_logits': (Q, P)
+                'exist': (Q,)
+            }
+            target: {
+                'start': (N,)
+                'sustain': (N,)
+                'pitch': (N,) long
+            }
+        """
+        gt_idx, pred_idx = self.match_event(output, target)
+        
+        gt_start_choiced = target['start'][gt_idx]
+        gt_sustain_choiced = target['sustain'][gt_idx]
+        gt_pitch_choiced = target['pitch'][gt_idx]
+        
+        pred_start_choiced = output['start'][pred_idx]
+        pred_sustain_choiced = output['sustain'][pred_idx]
+        pred_pitch_choiced = output['pitch_logits'][pred_idx, :]
+        
+        loss_start = F.mse_loss(pred_start_choiced, gt_start_choiced)
+        loss_sustain = F.mse_loss(pred_sustain_choiced, torch.log(gt_sustain_choiced + 1e-6)-math.log(self.sustain_ref))
+        loss_pitch = F.cross_entropy(pred_pitch_choiced, gt_pitch_choiced)
+        
+        exist_bool = torch.zeros_like(output['exist'], device=output['exist'].device, dtype=bool)
+        exist_bool[pred_idx] = True
+        loss_exist = F.binary_cross_entropy_with_logits(output['exist'], exist_bool.float(), pos_weight=self.pos_weight_exist_event)
+        
+        loss = self.cost_weight['start'] * loss_start +\
+               self.cost_weight['sustain'] * loss_sustain +\
+               self.cost_weight['pitch'] * loss_pitch +\
+               self.cost_weight['exist_event'] * loss_exist
+    
+        return loss
+    
+    def match_event(self, output, target):
+        """
+            输入同 get_event_loss
+        """
+        diff_start = target['start'][:,None] - output['start'][None,:] # (N, Q)
+        cost_start = diff_start**2 # (N, Q)
+        
+        diff_sustain = (torch.log(target['sustain'][:,None] + 1e-6)-math.log(self.sustain_ref)) - output['sustain'][None,:] # (N, Q)
+        cost_sustain = diff_sustain**2 # (N, Q)
+        
+        log_prob = F.log_softmax(output['pitch_logits'], dim=-1) # (Q, P)
+        cost_pitch = -log_prob[:, target['pitch']].T # (N, Q)
+        
+        exist_prob = torch.sigmoid(output['exist']) # (Q,)
+        exist_logprob = - torch.log(exist_prob)[None, :]
+        
+        cost = self.cost_weight['start'] * cost_start +\
+                self.cost_weight['sustain'] * cost_sustain +\
+                self.cost_weight['pitch'] * cost_pitch +\
+                self.cost_weight['exist'] * exist_logprob
+                
+        gt_idxs, pred_idxs = hungarian_match(cost)
+        return gt_idxs, pred_idxs
+
+    def match_text(self, output, target):
+        """
+            target: (N, C)
+            output: (Q, C)
+        """
+        assert output.shape[1]==target.shape[1]
+        if self.text_cost_dist == "euclidean":
+            diff = target[:,None,:] - output[None,:,:] # (N, Q, C)
+            cost = torch.sum(diff**2, dim=-1) # (N, Q)
+            gt_idxs, pred_idxs = hungarian_match(cost)
+            return gt_idxs, pred_idxs
+        elif self.text_cost_dist == "cosine":
+            target = F.normalize(target, dim=-1) # (N,C)
+            output = F.normalize(output, dim=-1) # (Q,C)
+            cosine = target @ output.T # (N, Q)
+            cost = 1 - cosine
+            gt_idxs, pred_idxs = hungarian_match(cost)
+            return gt_idxs, pred_idxs
+        else:
+            raise NotImplementedError("wtf")
+
 
 # def cal_cost_matrix(labors, tasks):
 #     # labors: 

@@ -103,11 +103,24 @@ def get_config():
     cfg.time_mask_len = 5 # None
     
     # detr
-    cfg.num_querys = 100
+    cfg.num_cell = 20
+    cfg.cell = argparse.Namespace()
+    cfg.cell.num_receptor_tokens = 5 # 细胞膜受体，和外部信息做注意力
+    cfg.cell.num_distillation_tokens = 1 # 蒸馏token，用于接近 text_emb
+    cfg.cell.num_prompt_tokens = 16 # 用于输入 llm，预测 文本描述
+    cfg.cell.num_event_tokens = 20 # 用于预测事件
+    cfg.cell.share_params = True # 共享细胞内的参数，只有细胞膜不同
+    
+    cfg.num_prompt_querys = 9
+    
+    assert cfg.num_querys % cfg.num_cls_querys == 0
+    
+    
     cfg.detr_output_dim_dict = {"text":cfg.text_input_dim,
                                 "event":2, # [start, log sustain]
                                 "pitch":cfg.pitch_vocab_size + 1,
-                                "exist": 1}
+                                "exist": 1,
+                                "prompt": 512}
     cfg.detr_num_decoder_layers = 12
     cfg.detr_d_model_list = [64] * 3 + [128] * 3 + [256] * 3 + [512] * 2 + [1024]
     cfg.pool_stride = [None, None, 4, None, None, 3, None, None, 2, None, None, 5]
@@ -132,7 +145,33 @@ def get_config():
         "exist": 1.0
     }
     
-    cfg.detr_pos_weight = 1
+    cfg.detr_pos_weight_text = 1
+    cfg.detr_pos_weight_event = 1
+    
+    cfg.detr2_loss_weight = {
+        "sub": 1,
+        "exist_text": 1,
+        "text": 1,
+        "start": 1,
+        "sustain": 1,
+        "pitch": 1,
+        "exist_event": 1
+    }
+    
+    cfg.detr2_cost_weight = {
+        "start": 1,
+        "sustain": 1,
+        "pitch": 1,
+        "exist": 1,
+    }
+    
+    cfg.sustain_ref = 0.1
+    
+    cfg.text_cost_dist = "cosine" # cosine, euclidean
+    cfg.text_loss_dist = "cosine" # cosine, euclidean
+    
+    cfg.infer_text_exist_threshold = 0.5
+    cfg.infer_event_exist_threshold = 0.5
     
     return cfg
 
