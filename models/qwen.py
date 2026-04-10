@@ -201,6 +201,31 @@ def repeat_kv(hidden_states: torch.Tensor, n_rep: int) -> torch.Tensor:
     return hidden_states.reshape(batch, num_key_value_heads * n_rep, slen, head_dim)
 
 
+def build_prefix_causal_mask(hidden_states, Lp):
+    """
+    hidden_states: (B, T, C)
+    return: (B, 1, T, T)  # 适配 attention
+    """
+    device = hidden_states.device
+    B, T, _ = hidden_states.shape
+    L = T - Lp
+    assert L > 0
+    # ===== 1. 初始化全可见 =====
+    mask = torch.ones((T, T), device=device)
+    
+    mask[:Lp, Lp:] = 0 # Lp 不能看到后面的
+    # mask[Lp:, :Lp] = 1 # 后面的能看到 Lp
+    
+    # ===== 2. suffix 内部改为 causal =====
+    causal = torch.tril(torch.ones((L, L), device=device))
+    mask[Lp:, Lp:] = causal
+    
+    # ===== 3. reshape 成 attention 用的格式 =====
+    mask = mask[None, None, :, :]  # (1,1,T,T)
+    mask = mask.expand(B, -1, -1, -1)  # (B,1,T,T)
+
+    return mask
+
 class Qwen2Attention(nn.Module):
     """Multi-headed attention from 'Attention Is All You Need' paper"""
 
@@ -214,28 +239,45 @@ class Qwen2Attention(nn.Module):
         self.scaling = self.head_dim**-0.5
         self.attention_dropout = cfg.llm.attention_dropout
         self.is_causal = True
+        
+        self.external_modal_len = cfg.cell.num_prompt_tokens
+        
         self.q_proj = nn.Linear(cfg.llm.hidden_size, cfg.llm.num_attention_heads * self.head_dim, bias=True)
         self.k_proj = nn.Linear(cfg.llm.hidden_size, cfg.llm.num_key_value_heads * self.head_dim, bias=True)
         self.v_proj = nn.Linear(cfg.llm.hidden_size, cfg.llm.num_key_value_heads * self.head_dim, bias=True)
         self.o_proj = nn.Linear(cfg.llm.num_attention_heads * self.head_dim, cfg.llm.hidden_size, bias=False)
     def forward(
         self,
-        hidden_states: torch.Tensor,
+        hidden_states: torch.Tensor, # (B, L, C)
         position_embeddings: tuple[torch.Tensor, torch.Tensor],
-        attention_mask: Optional[torch.Tensor],
     ) -> tuple[torch.Tensor, Optional[torch.Tensor]]:
 
-        input_shape = hidden_states.shape[:-1]
-        hidden_shape = (*input_shape, -1, self.head_dim)
+        Lp = self.external_modal_len
+        
+        input_shape = hidden_states.shape[:-1] # (B, L)
+        hidden_shape = (*input_shape, -1, self.head_dim) # (B, L, -1, h)
 
-        query_states = self.q_proj(hidden_states).view(hidden_shape).transpose(1, 2)
+        query_states = self.q_proj(hidden_states).view(hidden_shape).transpose(1, 2) # (B, H, L, h)
         key_states = self.k_proj(hidden_states).view(hidden_shape).transpose(1, 2)
         value_states = self.v_proj(hidden_states).view(hidden_shape).transpose(1, 2)
 
+        query_audio = query_states[:, :, :Lp, :]
+        key_audio = key_states[:, :, :Lp, :]
+        
+        query_to_rotate = query_states[:, :, Lp:, :]
+        key_to_rotate = key_states[:, :, Lp:, :]
+
         cos, sin = position_embeddings
-        query_states, key_states = apply_rotary_pos_emb(query_states, key_states, cos, sin)
+        query_to_rotate, key_to_rotate = apply_rotary_pos_emb(query_to_rotate, key_to_rotate, cos, sin)
+
+        query_states = torch.concat([query_audio, query_to_rotate], dim=2)
+        key_states = torch.concat([key_audio, key_to_rotate], dim=2)
 
         attention_interface = AttentionType[self.attn_type]
+
+        # 前 Lp 位置只能互相看到
+        # 后 L 位置是因果的
+        attention_mask = build_prefix_causal_mask(hidden_states, Lp)
 
         attn_output = attention_interface(
             self,
@@ -253,11 +295,15 @@ class Qwen2Attention(nn.Module):
 
 
 class Qwen2RMSNorm(nn.Module):
-    def __init__(self, hidden_size, eps: float = 1e-6) -> None:
+    def __init__(self) -> None:
         """
         Qwen2RMSNorm is equivalent to T5LayerNorm
         """
         super().__init__()
+        cfg = get_config()
+        hidden_size = cfg.llm.hidden_size
+        eps = cfg.llm.rms_norm_eps
+        
         self.weight = nn.Parameter(torch.ones(hidden_size))
         self.variance_epsilon = eps
 
@@ -283,14 +329,13 @@ class Qwen2DecoderLayer(nn.Module):
         self.self_attn = Qwen2Attention(layer_idx=layer_idx)
 
         self.mlp = Qwen2MLP()
-        self.input_layernorm = Qwen2RMSNorm(cfg.llm.hidden_size, eps=cfg.llm.rms_norm_eps)
-        self.post_attention_layernorm = Qwen2RMSNorm(cfg.llm.hidden_size, eps=cfg.llm.rms_norm_eps)
+        self.input_layernorm = Qwen2RMSNorm()
+        self.post_attention_layernorm = Qwen2RMSNorm()
 
     def forward(
         self,
         hidden_states: torch.Tensor,
-        attention_mask: Optional[torch.Tensor] = None,
-        position_ids: Optional[torch.LongTensor] = None,
+        position_embeddings: tuple[torch.Tensor, torch.Tensor],
     ) -> torch.Tensor:
         
         residual = hidden_states
@@ -300,8 +345,7 @@ class Qwen2DecoderLayer(nn.Module):
         # Self Attention
         hidden_states = self.self_attn(
             hidden_states=hidden_states,
-            attention_mask=attention_mask,
-            position_ids=position_ids,
+            position_embeddings=position_embeddings
         )
         hidden_states = residual + hidden_states
         # Fully Connected
@@ -337,6 +381,7 @@ class Qwen2RotaryEmbedding(nn.Module):
 
     @torch.no_grad()
     def forward(self, x, position_ids):
+        # position_ids: (B, T)
         inv_freq_expanded = self.inv_freq[None, :, None].float().expand(position_ids.shape[0], -1, 1).to(x.device)
         position_ids_expanded = position_ids[:, None, :].float()
 
@@ -351,11 +396,11 @@ class Qwen2RotaryEmbedding(nn.Module):
 
 
 class Qwen2Model(nn.Module):
-    def __init__(self):
+    def __init__(self, vocab_size):
         super().__init__()
         cfg = get_config()
         self.num_hidden_layers = cfg.llm.num_hidden_layers
-        self.vocab_size = cfg.llm.vocab_size
+        self.vocab_size = vocab_size
         self.hidden_size = cfg.llm.hidden_size
         self.padding_idx = cfg.llm.padding_idx
         self.embed_tokens = nn.Embedding(self.vocab_size, self.hidden_size, self.padding_idx)
@@ -364,29 +409,24 @@ class Qwen2Model(nn.Module):
         )
         self.norm = Qwen2RMSNorm()
         self.rotary_emb = Qwen2RotaryEmbedding()
+        self.external_modal_len = cfg.cell.num_prompt_tokens
 
     def forward(
         self,
+        prompt_emb: torch.Tensor, # (B, Lp, C)
         input_ids: Optional[torch.LongTensor] = None,
-        attention_mask: Optional[torch.Tensor] = None,
         position_ids: Optional[torch.LongTensor] = None,
-        inputs_embeds: Optional[torch.FloatTensor] = None,
     ):
-        if (input_ids is None) ^ (inputs_embeds is not None):
-            raise ValueError("You must specify exactly one of input_ids or inputs_embeds")
-
-        if inputs_embeds is None:
-            inputs_embeds = self.embed_tokens(input_ids)
-
-        hidden_states = inputs_embeds
+        assert prompt_emb.shape[1]==self.external_modal_len
+        inputs_embeds = self.embed_tokens(input_ids)
+        hidden_states = torch.concat([prompt_emb, inputs_embeds], dim=1)
 
         # create position embeddings to be shared across the decoder layers
-        position_embeddings = self.rotary_emb(hidden_states, position_ids)
+        position_embeddings = self.rotary_emb(inputs_embeds, position_ids)
 
         for decoder_layer in self.layers[: self.num_hidden_layers]:
             hidden_states = decoder_layer(
                 hidden_states,
-                attention_mask=attention_mask,
                 position_embeddings=position_embeddings,
             )
 
@@ -395,36 +435,36 @@ class Qwen2Model(nn.Module):
         return hidden_states
 
 
-class Qwen2ForCausalLM():
-    def __init__(self):
+class Qwen2ForCausalLM(nn.Module):
+    def __init__(self, vocab_size):
         super().__init__()
         cfg = get_config()
-        self.model = Qwen2Model()
-        self.vocab_size = cfg.llm.vocab_size
-        self.lm_head = nn.Linear(cfg.llm.hidden_size, cfg.llm.vocab_size, bias=False)
+        self.model = Qwen2Model(vocab_size)
+        self.vocab_size = vocab_size
+        self.lm_head = nn.Linear(cfg.llm.hidden_size, self.vocab_size, bias=False)
 
         self.ignore_index = cfg.llm.ignore_index
 
     def forward(
         self,
-        input_ids: Optional[torch.LongTensor] = None,
-        attention_mask: Optional[torch.Tensor] = None,
+        prompt_emb: torch.Tensor, # (B, Lp, C)
+        input_ids: Optional[torch.LongTensor] = None, # (B, L)
         position_ids: Optional[torch.LongTensor] = None,
-        inputs_embeds: Optional[torch.FloatTensor] = None,
         labels: Optional[torch.LongTensor] = None,
-        logits_to_keep: Union[int, torch.Tensor] = 0,
+        # logits_to_keep: Union[int, torch.Tensor] = 0, # 训练时逐渐加长序列
     ):
         """
             label: (B, T_select)
         """
+        L = input_ids.shape[1]
         
         hidden_states = self.model(
+            prompt_emb=prompt_emb,
             input_ids=input_ids,
-            attention_mask=attention_mask,
             position_ids=position_ids,
-            inputs_embeds=inputs_embeds,
         ) # (B, T, C)
-
+        
+        logits_to_keep = L
         # Only compute necessary logits, and do not upcast them to float if we are not computing the loss
         slice_indices = slice(-logits_to_keep, None) if isinstance(logits_to_keep, int) else logits_to_keep
         logits = self.lm_head(hidden_states[:, slice_indices, :])
@@ -442,9 +482,9 @@ class Qwen2ForCausalLM():
 
     def loss_function(self, logits, labels, vocab_size):
         # logits: (B, T, V)
-        # labels: (B, T)
+        # labels: (B, T) long
 
-        logits = logits.view(-1, vocab_size)
-        labels = labels.view(-1)
+        logits = logits.reshape(-1, vocab_size)
+        labels = labels.reshape(-1)
 
         return F.cross_entropy(logits, labels, ignore_index=self.ignore_index)

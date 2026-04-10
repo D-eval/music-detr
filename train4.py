@@ -22,7 +22,7 @@ dataset = AudioDataset(root_dir=cfg.dataset_data_path,
 
 loader = DataLoader(
     dataset,
-    batch_size=4,
+    batch_size=1,
     shuffle=True,
     # num_workers=4,
     collate_fn=collate_fn,
@@ -43,7 +43,7 @@ else:
     raise NotImplementedError("wtf")
 
 
-device = torch.device("cuda" if torch.cuda.is_available else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("device:",device)
 
 model = ALUnion().to(device)
@@ -73,11 +73,14 @@ for epoch in range(start_epoch, num_epochs):
         embed_text(target, teacher)
         target = to_device(target, device)
         
+        loss = model.get_loss(audio, target)
+        print("success")
+        raise 0
+    
         # assert 0
         # ---------- forward + loss（AMP）----------
         with torch.amp.autocast("cuda"):
             loss = model.get_loss(audio, target)
-
         # ---------- backward ----------
         optimizer.zero_grad()
 
@@ -90,23 +93,23 @@ for epoch in range(start_epoch, num_epochs):
         scaler.update()
 
         total_loss += loss.item()
-
+        
         # ---------- log ----------
         if step % 10 == 0:
             print(f"[Epoch {epoch}] step {step} loss: {loss.item():.4f}")
-            with torch.no_grad():
-                event_pred = model.infer(output[0])
-                if len(event_pred) == 0:
-                    print("没有检测到目标")
-                    continue
-                pitch_centre = pitch_centre.to(device)
-                pred_pitchmap = render_pred_group_pitch_map(event_pred, pitch_centre)
-                gt_pitchmap = render_pred_pitch_map(target[0], pitch_centre)
+            # with torch.no_grad():
+            #     event_pred = model.infer(output[0])
+            #     if len(event_pred) == 0:
+            #         print("没有检测到目标")
+            #         continue
+            #     pitch_centre = pitch_centre.to(device)
+            #     pred_pitchmap = render_pred_group_pitch_map(event_pred, pitch_centre)
+            #     gt_pitchmap = render_pred_pitch_map(target[0], pitch_centre)
             
-            compare_result_3(pred_pitchmap.detach().cpu().numpy()[...,1],
-                           gt_pitchmap.detach().cpu().numpy()[...,1],
-                           pitch_spec[0].detach().cpu().numpy(),
-                           "compare")
+            # compare_result_3(pred_pitchmap.detach().cpu().numpy()[...,1],
+            #                gt_pitchmap.detach().cpu().numpy()[...,1],
+            #                pitch_spec[0].detach().cpu().numpy(),
+            #                "compare")
     print(f"==== Epoch {epoch} avg loss: {total_loss / (step+1):.4f} ====")
 
     # ---------- 保存 ----------

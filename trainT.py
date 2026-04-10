@@ -33,4 +33,8 @@ from tokenizers import Tokenizer
 
 tokenizer = Tokenizer.from_file(cfg.tokenizer.save_path)
 
-out = tokenizer.encode(corpus[1])
+all_len = []
+for c in corpus:
+    out = tokenizer.encode(c)
+    all_len.append(len(out.ids))
+

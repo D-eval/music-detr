@@ -1,5 +1,7 @@
 from torch.utils.data import DataLoader
 from configs.config import get_config
+from tokenizers import Tokenizer, models, trainers, pre_tokenizers
+
 
 def build_corpus(dataset):
     cfg = get_config()
@@ -44,7 +46,6 @@ def build_corpus(dataset):
                 corpus.append(t)
     return corpus
 
-from tokenizers import Tokenizer, models, trainers, pre_tokenizers
 
 def train_bpe(corpus, vocab_size=8000):
     
@@ -79,3 +80,22 @@ def train_bpe(corpus, vocab_size=8000):
 
     return tokenizer
 
+class ALTokenizer:
+    def __init__(self):
+        cfg = get_config()
+        self.tokenizer = Tokenizer.from_file(cfg.tokenizer.save_path)
+        self.max_length = cfg.llm.max_length
+        self.pad_id = cfg.llm.padding_idx
+    def encode(self, text):
+        return self.tokenizer.encode(text)
+    def encode_and_pad(self, text):
+        
+        ids = self.tokenizer.encode(text).ids
+        # ===== 截断 =====
+        ids = ids[:self.max_length]
+
+        # ===== padding =====
+        if len(ids) < self.max_length:
+            ids = ids + [self.pad_id] * (self.max_length - len(ids))
+
+        return ids

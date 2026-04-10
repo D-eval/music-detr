@@ -356,3 +356,34 @@ llm 可以着重预测最后一个细节描述。
 现在把tokenizer弄好了，
 现在我们来写prompt的拼接
 
+23:40
+
+对于我们的短序列任务，应该减少 cfg.llm.rope_base
+目前序列的平均长度是 10，最长是 22，
+所以我们最好用20作为rope_base，
+
+```
+inv_freq = 1.0 / (
+    base ** (torch.arange(0, dim, 2, device=device).float() / dim)
+)
+```
+
+根据这个公式，0维度的position_ids周期就是1，最后一维的周期是 base，但是base=10000太大了，而max_len只有22，有很多大周期都没有经历过一个完整的周期，太浪费，而且我就是从头训练的，可以把base改成50左右，这样大多数周期都能完整经历
+
+诶，我突然又想到，也许可以直接用所有的 events 来做 hungarian match，
+这样注意力权重也许会跑到 cqt 的相应位置，
+有助于文本预测。
+之后可以试试，先把眼下这个跑通。
+
+# 4/11
+
+00:55
+
+现在算是把 ALUnion 实现了，把 llm 的多模态做了，主要是加了个 prefix attention mask，注意力流动方向:
+prefix 双向 prefix
+prefix 流向 suffix
+suffix 因果 suffix
+
+1:41
+
+ok，get loss 跑通了，明天写好可视化，然后就训练

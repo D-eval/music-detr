@@ -120,7 +120,7 @@ def get_config():
                                 "event":2, # [start, log sustain]
                                 "pitch":cfg.pitch_vocab_size + 1,
                                 "exist": 1,
-                                "prompt": 512}
+                                "prompt": 16}
     cfg.detr_num_decoder_layers = 12
     cfg.detr_d_model_list = [64] * 3 + [128] * 3 + [256] * 3 + [512] * 2 + [1024]
     cfg.pool_stride = [None, None, 4, None, None, 3, None, None, 2, None, None, 5]
@@ -175,23 +175,22 @@ def get_config():
     
     cfg.llm = argparse.Namespace()
     
-    cfg.llm.num_hidden_layers = 16
+    cfg.llm.num_hidden_layers = 2 # 16
     
-    cfg.llm.hidden_size = 128
-    cfg.llm.intermediate_size = 256
+    cfg.llm.hidden_size = 16 # 128
+    cfg.llm.intermediate_size = 16 # 256
+    cfg.llm.rms_norm_eps = 1e-6
 
-    cfg.llm.head_dim = 64
+    cfg.llm.head_dim = 8 # 64
     cfg.llm.num_attention_heads = 8
     cfg.llm.num_key_value_heads = 4
     cfg.llm.attention_dropout = 0.1
     cfg.llm.attn_type = "flash"
 
-    cfg.llm.rope_base = 10000
-    
-    
-    cfg.llm.vocab_size = 1109
     cfg.llm.padding_idx = 0 # embedding 的 0
     cfg.llm.ignore_index = -100 # 忽略的 label idx
+    
+    cfg.llm.max_length = 20
 
     cfg.union_loss_weights = {
         "lm": 0.5,
@@ -210,6 +209,8 @@ def get_config():
     cfg.tokenizer.end = "<eos>"
     cfg.tokenizer.unk = "<unk>"
     
+    cfg.llm.max_length = 22
+    cfg.llm.rope_base = 20
     
     return cfg
 
