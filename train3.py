@@ -32,7 +32,7 @@ loader = DataLoader(
 
 from models.detr2 import PitchTransformer
 from spec import wav2cqt, wav2spec
-from models.tokenizer import MusicDetrTokenizer
+from models.teacher import Teacher
 from utils.equipTarget import get_target_map, get_sustain_map, get_sustain_map_textwise, normalize_targets_pitch, render_pred_pitch_map, render_pred_group_pitch_map, to_device, embed_text
 
 if cfg.map_type == "target_map":
@@ -48,7 +48,7 @@ print("device:",device)
 
 model = PitchTransformer().to(device)
 
-tokenizer = MusicDetrTokenizer()
+teacher = Teacher()
 
 # checkpoint_path = "/home/vipuser/wby/proj_params/params/detr2/ckpt_epoch_20.pt"
 # state_dict = torch.load(checkpoint_path)
@@ -70,7 +70,7 @@ for epoch in range(start_epoch, num_epochs):
     total_loss = 0
     for step, batch in enumerate(loader):
         audio, target = batch
-        embed_text(target, tokenizer)
+        embed_text(target, teacher)
         target = to_device(target, device)
         
         # ---------- spec ----------

@@ -173,5 +173,28 @@ def get_config():
     cfg.infer_text_exist_threshold = 0.5
     cfg.infer_event_exist_threshold = 0.5
     
+    cfg.llm = argparse.Namespace()
+    
+    cfg.llm.num_hidden_layers = 16
+    
+    cfg.llm.hidden_size = 128
+    cfg.llm.intermediate_size = 256
+
+    cfg.llm.head_dim = 64
+    cfg.llm.num_attention_heads = 8
+    cfg.llm.num_key_value_heads = 4
+    cfg.llm.attention_dropout = 0.1
+    cfg.llm.attn_type = "flash"
+
+    cfg.llm.rope_base = 10000
+    
+    cfg.llm.vocab_size = 500 # 亟待修改
+    cfg.llm.padding_idx = 0 # embedding 的 0
+    cfg.llm.ignore_index = -100 # 忽略的 label idx
+    
+    cfg.union_loss_weights = {
+        "lm": 0.5,
+        "detr": 0.5
+    }
     return cfg
 

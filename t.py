@@ -36,7 +36,7 @@ pitch_spec, pitch_centre, pitchs = wav2cqt(audio)
 freq_spec, freq_centre, freqs = wav2spec(audio)
 
 
-from models.tokenizer import MusicDetrTokenizer
+from models.teacher import MusicDetrTokenizer
 tokenizer = MusicDetrTokenizer()
 
 

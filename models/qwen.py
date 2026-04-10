@@ -4,6 +4,10 @@ from typing import Callable, Optional, Union
 import torch
 from torch import nn
 
+from configs.config import get_config
+
+import torch.nn.functional as F
+
 
 def eager_attention_forward(
     module: nn.Module,
@@ -133,15 +137,17 @@ AttentionType = {
 
 
 class Qwen2MLP(nn.Module):
-    def __init__(self, config):
+    def __init__(self):
         super().__init__()
-        self.config = config
-        self.hidden_size = config.hidden_size
-        self.intermediate_size = config.intermediate_size
+        
+        cfg = get_config()
+        
+        self.hidden_size = cfg.llm.hidden_size
+        self.intermediate_size = cfg.llm.intermediate_size
         self.gate_proj = nn.Linear(self.hidden_size, self.intermediate_size, bias=False)
         self.up_proj = nn.Linear(self.hidden_size, self.intermediate_size, bias=False)
         self.down_proj = nn.Linear(self.intermediate_size, self.hidden_size, bias=False)
-        self.act_fn = ACT2FN[config.hidden_act]
+        self.act_fn = nn.GELU()
 
     def forward(self, x):
         # 用gate, 可以表达条件计算
@@ -195,51 +201,23 @@ def repeat_kv(hidden_states: torch.Tensor, n_rep: int) -> torch.Tensor:
     return hidden_states.reshape(batch, num_key_value_heads * n_rep, slen, head_dim)
 
 
-def eager_attention_forward(
-    module: nn.Module,
-    query: torch.Tensor,
-    key: torch.Tensor,
-    value: torch.Tensor,
-    attention_mask: Optional[torch.Tensor],
-    scaling: float,
-    dropout: float = 0.0,
-    **kwargs: Unpack[TransformersKwargs],
-):
-    key_states = repeat_kv(key, module.num_key_value_groups)
-    value_states = repeat_kv(value, module.num_key_value_groups)
-
-    attn_weights = torch.matmul(query, key_states.transpose(2, 3)) * scaling
-    if attention_mask is not None:
-        causal_mask = attention_mask[:, :, :, : key_states.shape[-2]]
-        attn_weights = attn_weights + causal_mask
-
-    attn_weights_before_softmax = attn_weights.clone().detach()
-    attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query.dtype)
-    attn_weights = nn.functional.dropout(attn_weights, p=dropout, training=module.training)
-    attn_output = torch.matmul(attn_weights, value_states)
-    attn_output = attn_output.transpose(1, 2).contiguous()
-
-    return attn_output, attn_weights_before_softmax
-
-
 class Qwen2Attention(nn.Module):
     """Multi-headed attention from 'Attention Is All You Need' paper"""
 
     def __init__(self, layer_idx: int):
         super().__init__()
-        self.config = config
+        cfg = get_config()
         self.layer_idx = layer_idx
-        self.head_dim = getattr(config, "head_dim", config.hidden_size // config.num_attention_heads)
-        self.num_key_value_groups = config.num_attention_heads // config.num_key_value_heads
+        self.attn_type = cfg.llm.attn_type
+        self.head_dim = getattr(cfg.llm, "head_dim", cfg.llm.hidden_size // cfg.llm.num_attention_heads)
+        self.num_key_value_groups = cfg.llm.num_attention_heads // cfg.llm.num_key_value_heads
         self.scaling = self.head_dim**-0.5
-        self.attention_dropout = config.attention_dropout
+        self.attention_dropout = cfg.llm.attention_dropout
         self.is_causal = True
-        self.q_proj = nn.Linear(config.hidden_size, config.num_attention_heads * self.head_dim, bias=True)
-        self.k_proj = nn.Linear(config.hidden_size, config.num_key_value_heads * self.head_dim, bias=True)
-        self.v_proj = nn.Linear(config.hidden_size, config.num_key_value_heads * self.head_dim, bias=True)
-        self.o_proj = nn.Linear(config.num_attention_heads * self.head_dim, config.hidden_size, bias=False)
-        self.sliding_window = config.sliding_window if config.layer_types[layer_idx] == "sliding_attention" else None
-        print("初始化注意力模块")
+        self.q_proj = nn.Linear(cfg.llm.hidden_size, cfg.llm.num_attention_heads * self.head_dim, bias=True)
+        self.k_proj = nn.Linear(cfg.llm.hidden_size, cfg.llm.num_key_value_heads * self.head_dim, bias=True)
+        self.v_proj = nn.Linear(cfg.llm.hidden_size, cfg.llm.num_key_value_heads * self.head_dim, bias=True)
+        self.o_proj = nn.Linear(cfg.llm.num_attention_heads * self.head_dim, cfg.llm.hidden_size, bias=False)
     def forward(
         self,
         hidden_states: torch.Tensor,
@@ -259,7 +237,7 @@ class Qwen2Attention(nn.Module):
 
         attention_interface = AttentionType[self.attn_type]
 
-        attn_output, attn_weights = attention_interface(
+        attn_output = attention_interface(
             self,
             query_states,
             key_states,
@@ -271,7 +249,7 @@ class Qwen2Attention(nn.Module):
 
         attn_output = attn_output.reshape(*input_shape, -1).contiguous()
         attn_output = self.o_proj(attn_output)
-        return attn_output, attn_weights
+        return attn_output
 
 
 class Qwen2RMSNorm(nn.Module):
@@ -299,68 +277,61 @@ class Qwen2RMSNorm(nn.Module):
 class Qwen2DecoderLayer(nn.Module):
     def __init__(self, layer_idx: int):
         super().__init__()
-        self.hidden_size = config.hidden_size
+        cfg = get_config()
+        self.hidden_size = cfg.llm.hidden_size
 
-        self.self_attn = Qwen2Attention(config=config, layer_idx=layer_idx)
+        self.self_attn = Qwen2Attention(layer_idx=layer_idx)
 
         self.mlp = Qwen2MLP()
-        self.input_layernorm = Qwen2RMSNorm(config.hidden_size, eps=config.rms_norm_eps)
-        self.post_attention_layernorm = Qwen2RMSNorm(config.hidden_size, eps=config.rms_norm_eps)
-        self.attention_type = config.layer_types[layer_idx]
+        self.input_layernorm = Qwen2RMSNorm(cfg.llm.hidden_size, eps=cfg.llm.rms_norm_eps)
+        self.post_attention_layernorm = Qwen2RMSNorm(cfg.llm.hidden_size, eps=cfg.llm.rms_norm_eps)
 
     def forward(
         self,
         hidden_states: torch.Tensor,
         attention_mask: Optional[torch.Tensor] = None,
+        position_ids
     ) -> torch.Tensor:
-        
-        hidden_before = hidden_states.clone().detach()  # for ICR calculation, not used in the actual forward pass
         
         residual = hidden_states
         # 我靠，原来attn前后都要加一个layernorm
         hidden_states = self.input_layernorm(hidden_states)
-        hidden_states_after_ffn = hidden_states.clone().detach()
+
         # Self Attention
-        hidden_states, attn_weights = self.self_attn(
+        hidden_states = self.self_attn(
             hidden_states=hidden_states,
             attention_mask=attention_mask,
+            position_ids=position_ids,
         )
         hidden_states = residual + hidden_states
         # Fully Connected
         residual = hidden_states
         hidden_states = self.post_attention_layernorm(hidden_states)
-        print("我要记录after attn，要过norm，保证注意力的输出magnitude稳定")
-        hidden_states_after_attn = hidden_states.clone().detach()
+
         hidden_states = self.mlp(hidden_states)
         hidden_states = residual + hidden_states
         
-        hidden_after = hidden_states.clone().detach()  # for ICR calculation, not used in the actual forward pass
-        
-        irc = compute_icr(hidden_before, hidden_after, attn_weights, token_index=-1, topk=20)
-        
-        return hidden_states, {'h_after_attn':hidden_states_after_attn,
-                               'h_after_ffn':hidden_states_after_ffn,
-                               'icr':irc}  # return both for recording
+        return hidden_states
 
 
 
 class Qwen2RotaryEmbedding(nn.Module):
     inv_freq: torch.Tensor  # fix linting for `register_buffer`
 
-    def __init__(self, config: Qwen2Config, device=None):
+    def __init__(self, device=None):
         super().__init__()
+        cfg = get_config()
         # BC: "rope_type" was originally "type"
-        if hasattr(config, "rope_scaling") and isinstance(config.rope_scaling, dict):
-            self.rope_type = config.rope_scaling.get("rope_type", config.rope_scaling.get("type"))
-        else:
-            self.rope_type = "default"
-        self.max_seq_len_cached = config.max_position_embeddings
-        self.original_max_seq_len = config.max_position_embeddings
-
-        self.config = config
-        self.rope_init_fn = ROPE_INIT_FUNCTIONS[self.rope_type]
-
-        inv_freq, self.attention_scaling = self.rope_init_fn(self.config, device)
+        
+        dim = cfg.llm.head_dim
+        base = cfg.llm.rope_base
+        
+        # 低维高频，i=0 freq=1, 高维低频，i=dim freq=1/base
+        inv_freq = 1.0 / (
+            base ** (torch.arange(0, dim, 2, device=device).float() / dim)
+        )
+        
+        self.attention_scaling = 1.0
         self.register_buffer("inv_freq", inv_freq, persistent=False)
         self.original_inv_freq = self.inv_freq
 
@@ -382,11 +353,14 @@ class Qwen2RotaryEmbedding(nn.Module):
 class Qwen2Model(nn.Module):
     def __init__(self):
         super().__init__()
-        self.padding_idx = config.pad_token_id
-        self.vocab_size = config.vocab_size
-        self.embed_tokens = nn.Embedding(config.vocab_size, config.hidden_size, self.padding_idx)
+        cfg = get_config()
+        self.num_hidden_layers = cfg.llm.num_hidden_layers
+        self.vocab_size = cfg.llm.vocab_size
+        self.hidden_size = cfg.llm.hidden_size
+        self.padding_idx = cfg.llm.padding_idx
+        self.embed_tokens = nn.Embedding(self.vocab_size, self.hidden_size, self.padding_idx)
         self.layers = nn.ModuleList(
-            [Qwen2DecoderLayer(layer_idx) for layer_idx in range(config.num_hidden_layers)]
+            [Qwen2DecoderLayer(layer_idx) for layer_idx in range(self.num_hidden_layers)]
         )
         self.norm = Qwen2RMSNorm()
         self.rotary_emb = Qwen2RotaryEmbedding()
@@ -396,10 +370,7 @@ class Qwen2Model(nn.Module):
         input_ids: Optional[torch.LongTensor] = None,
         attention_mask: Optional[torch.Tensor] = None,
         position_ids: Optional[torch.LongTensor] = None,
-        past_key_values: Optional[Cache] = None,
         inputs_embeds: Optional[torch.FloatTensor] = None,
-        use_cache: Optional[bool] = None,
-        cache_position: Optional[torch.LongTensor] = None,
     ):
         if (input_ids is None) ^ (inputs_embeds is not None):
             raise ValueError("You must specify exactly one of input_ids or inputs_embeds")
@@ -407,125 +378,73 @@ class Qwen2Model(nn.Module):
         if inputs_embeds is None:
             inputs_embeds = self.embed_tokens(input_ids)
 
-        if use_cache and past_key_values is None:
-            past_key_values = DynamicCache(config=self.config)
-
-        if cache_position is None:
-            past_seen_tokens = past_key_values.get_seq_length() if past_key_values is not None else 0
-            cache_position = torch.arange(
-                past_seen_tokens, past_seen_tokens + inputs_embeds.shape[1], device=inputs_embeds.device
-            )
-
-        if position_ids is None:
-            position_ids = cache_position.unsqueeze(0)
-
-        # It may already have been prepared by e.g. `generate`
-        if not isinstance(causal_mask_mapping := attention_mask, dict):
-            # Prepare mask arguments
-            mask_kwargs = {
-                "config": self.config,
-                "input_embeds": inputs_embeds,
-                "attention_mask": attention_mask,
-                "cache_position": cache_position,
-                "past_key_values": past_key_values,
-                "position_ids": position_ids,
-            }
-            # Create the masks
-            causal_mask_mapping = {
-                "full_attention": create_causal_mask(**mask_kwargs),
-            }
-            # The sliding window alternating layers are not always activated depending on the config
-            if self.has_sliding_layers:
-                causal_mask_mapping["sliding_attention"] = create_sliding_window_causal_mask(**mask_kwargs)
-
         hidden_states = inputs_embeds
 
         # create position embeddings to be shared across the decoder layers
         position_embeddings = self.rotary_emb(hidden_states, position_ids)
 
-        for decoder_layer in self.layers[: self.config.num_hidden_layers]:
+        for decoder_layer in self.layers[: self.num_hidden_layers]:
             hidden_states = decoder_layer(
                 hidden_states,
-                attention_mask=causal_mask_mapping[decoder_layer.attention_type],
-                position_ids=position_ids,
-                past_key_values=past_key_values,
-                use_cache=use_cache,
-                cache_position=cache_position,
+                attention_mask=attention_mask,
                 position_embeddings=position_embeddings,
-                **kwargs,
             )
 
         hidden_states = self.norm(hidden_states)
         
-        my_hidden_state_record.append(hidden_states.clone().detach())  # record the final hidden state as well
-        
-        return BaseModelOutputWithPast(
-            last_hidden_state=hidden_states,
-            past_key_values=past_key_values if use_cache else None,
-        )
+        return hidden_states
 
-# @auto_docstring
-class Qwen2ForCausalLM(Qwen2PreTrainedModel):
-    def __init__(self, config):
-        super().__init__(config)
-        self.model = Qwen2Model(config)
-        self.vocab_size = config.vocab_size
-        self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
+
+class Qwen2ForCausalLM():
+    def __init__(self):
+        super().__init__()
+        cfg = get_config()
+        self.model = Qwen2Model()
+        self.vocab_size = cfg.llm.vocab_size
+        self.lm_head = nn.Linear(cfg.llm.hidden_size, cfg.llm.vocab_size, bias=False)
+
+        self.ignore_index = cfg.llm.ignore_index
 
     def forward(
         self,
         input_ids: Optional[torch.LongTensor] = None,
         attention_mask: Optional[torch.Tensor] = None,
         position_ids: Optional[torch.LongTensor] = None,
-        past_key_values: Optional[Cache] = None,
         inputs_embeds: Optional[torch.FloatTensor] = None,
         labels: Optional[torch.LongTensor] = None,
-        use_cache: Optional[bool] = None,
-        cache_position: Optional[torch.LongTensor] = None,
         logits_to_keep: Union[int, torch.Tensor] = 0,
-        **kwargs: Unpack[TransformersKwargs],
-    ) -> CausalLMOutputWithPast:
-        r"""
-        Example:
-
-        ```python
-        >>> from transformers import AutoTokenizer, Qwen2ForCausalLM
-
-        >>> model = Qwen2ForCausalLM.from_pretrained("meta-qwen2/Qwen2-2-7b-hf")
-        >>> tokenizer = AutoTokenizer.from_pretrained("meta-qwen2/Qwen2-2-7b-hf")
-
-        >>> prompt = "Hey, are you conscious? Can you talk to me?"
-        >>> inputs = tokenizer(prompt, return_tensors="pt")
-
-        >>> # Generate
-        >>> generate_ids = model.generate(inputs.input_ids, max_length=30)
-        >>> tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
-        "Hey, are you conscious? Can you talk to me?\nI'm not conscious, but I can talk to you."
-        ```"""
-        outputs = self.model(
+    ):
+        """
+            label: (B, T_select)
+        """
+        
+        hidden_states = self.model(
             input_ids=input_ids,
             attention_mask=attention_mask,
             position_ids=position_ids,
-            past_key_values=past_key_values,
             inputs_embeds=inputs_embeds,
-            use_cache=use_cache,
-            cache_position=cache_position,
-            **kwargs,
-        )
+        ) # (B, T, C)
 
-        hidden_states = outputs.last_hidden_state
         # Only compute necessary logits, and do not upcast them to float if we are not computing the loss
         slice_indices = slice(-logits_to_keep, None) if isinstance(logits_to_keep, int) else logits_to_keep
         logits = self.lm_head(hidden_states[:, slice_indices, :])
+        # logits: (B, T_select, V)
 
         loss = None
         if labels is not None:
-            loss = self.loss_function(logits=logits, labels=labels, vocab_size=self.config.vocab_size, **kwargs)
+            loss = self.loss_function(logits=logits, labels=labels, vocab_size=self.vocab_size)
 
-        return CausalLMOutputWithPast(
-            loss=loss,
-            logits=logits,
-            past_key_values=outputs.past_key_values,
-            hidden_states=outputs.hidden_states,
-            attentions=outputs.attentions,
-        )
+        return {
+            "loss":loss,
+            "logits":logits,
+            "hidden_states":hidden_states,
+        }
+
+    def loss_function(self, logits, labels, vocab_size):
+        # logits: (B, T, V)
+        # labels: (B, T)
+
+        logits = logits.view(-1, vocab_size)
+        labels = labels.view(-1)
+
+        return F.cross_entropy(logits, labels, ignore_index=self.ignore_index)

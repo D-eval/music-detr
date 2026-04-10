@@ -29,7 +29,7 @@ loader = DataLoader(
 
 from models.detr import PitchTransformer
 from spec import wav2cqt, wav2spec
-from models.tokenizer import MusicDetrTokenizer
+from models.teacher import Teacher
 from utils.equipTarget import get_target_map, get_sustain_map, get_sustain_map_textwise, normalize_targets_pitch, render_pred_pitch_map
 
 if cfg.map_type == "target_map":
@@ -45,7 +45,7 @@ print("device:",device)
 
 model = PitchTransformer().to(device)
 
-tokenizer = MusicDetrTokenizer() # .to(device)
+teacher = Teacher() # .to(device)
 
 checkpoint_path = "/home/vipuser/wby/proj_params/params/detr/ckpt_epoch_100.pt"
 state_dict = torch.load(checkpoint_path)

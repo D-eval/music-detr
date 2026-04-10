@@ -27,7 +27,7 @@ loader = DataLoader(
 
 from models.detr2 import PitchTransformer
 from spec import wav2cqt, wav2spec
-from models.tokenizer import MusicDetrTokenizer
+from models.teacher import MusicDetrTokenizer
 from utils.equipTarget import get_target_map, to_device, embed_text
 
 # tokenizer = MusicDetrTokenizer()

@@ -6,7 +6,7 @@ from transformers import AutoProcessor, AutoModel, AutoTokenizer
 from torch import nn
 
 
-class MusicDetrTokenizer(nn.Module):
+class Teacher(nn.Module):
     def __init__(self):
         super().__init__()
         
@@ -73,3 +73,5 @@ class MusicDetrTokenizer(nn.Module):
         hidden_state = outputs.last_hidden_state
         # print(f"features:{features.shape}")
         return hidden_state
+
+
