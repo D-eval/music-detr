@@ -188,13 +188,28 @@ def get_config():
 
     cfg.llm.rope_base = 10000
     
-    cfg.llm.vocab_size = 500 # 亟待修改
+    
+    cfg.llm.vocab_size = 1109
     cfg.llm.padding_idx = 0 # embedding 的 0
     cfg.llm.ignore_index = -100 # 忽略的 label idx
-    
+
     cfg.union_loss_weights = {
         "lm": 0.5,
         "detr": 0.5
     }
+    
+    cfg.tokenizer = argparse.Namespace()
+    cfg.tokenizer.only_last_detail = False
+    cfg.tokenizer.save_path = "./tiny_save/tokenizer.json"
+    
+    cfg.tokenizer.pad = "<pad>"
+    cfg.tokenizer.role = "<role>"
+    cfg.tokenizer.inst = "<inst>"
+    cfg.tokenizer.desc = "<desc>"
+    cfg.tokenizer.begin = "<bos>"
+    cfg.tokenizer.end = "<eos>"
+    cfg.tokenizer.unk = "<unk>"
+    
+    
     return cfg
 

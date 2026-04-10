@@ -290,7 +290,7 @@ class Qwen2DecoderLayer(nn.Module):
         self,
         hidden_states: torch.Tensor,
         attention_mask: Optional[torch.Tensor] = None,
-        position_ids
+        position_ids: Optional[torch.LongTensor] = None,
     ) -> torch.Tensor:
         
         residual = hidden_states

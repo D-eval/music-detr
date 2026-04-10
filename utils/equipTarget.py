@@ -12,9 +12,10 @@ def to_device(batch, device):
         return {
             k: to_device(v, device)
             for k, v in batch.items()
-            if k != "text"  # ⚠️ 非 tensor 跳过
+            if (k not in ["text", "label"])  # ⚠️ 非 tensor 跳过
         } | {
-            "text": batch["text"]
+            "text": batch["text"],
+            "label": batch["label"]
         }
     elif isinstance(batch, list):
         return [to_device(x, device) for x in batch]
