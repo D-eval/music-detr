@@ -54,7 +54,7 @@ model = ALUnion().to(device)
 
 teacher = Teacher()
 
-checkpoint_path = "/home/vipuser/wby/proj_params/params/al/ckpt_epoch_40.pt"
+checkpoint_path = "/home/vipuser/wby/proj_params/params/al/ckpt_epoch_90.pt"
 state_dict = torch.load(checkpoint_path)
 model.load_state_dict(state_dict=state_dict)
 
