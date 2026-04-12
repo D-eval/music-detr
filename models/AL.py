@@ -9,7 +9,7 @@ import math
 import torch.nn.functional as F
 from typing import Callable, Optional, Union, Dict
 
-from .detr2 import PitchTransformer
+from .detr3 import PitchTransformer
 
 from .qwen import Qwen2ForCausalLM
 from spec import wav2cqt, wav2spec
@@ -37,7 +37,6 @@ class ALUnion(nn.Module):
               audio, # (T)
               ):
         assert audio.dim()==1
-        assert audio.shape[0]==1
         audio = audio[None, :]
         
         detr_outputs = self.detr_forward(audio)[0] # Dict
@@ -66,7 +65,7 @@ class ALUnion(nn.Module):
                 output = self.lm(prompt_emb,
                                  seq_ids)
                 logits = output['logits'][0,-1,:] # (V)
-                next_idx = torch.argmax(logits).long()[None, :]
+                next_idx = torch.argmax(logits, dim=-1, keepdim=True).long()[None, :]
                 seq_ids = torch.cat([seq_ids, next_idx], dim=1)
                 if next_idx[0,0] == self.lm_tokenizer.encode("<eos>").ids[0]:
                     break
@@ -98,7 +97,7 @@ class ALUnion(nn.Module):
             # text_exist = text_distillation[:, -1]
             text_pred = text_distillation[:, :-1] # (Q, C)
             text_gt = targets[b]['text_emb'] # (N, C)
-            gt_idxs, pred_idxs = self.detr.match_text(text_pred, text_gt)
+            gt_idxs, pred_idxs = self.detr.match_text(detr_output, targets[b])
             for i in range(len(gt_idxs)):
                 gt_idx = gt_idxs[i]
                 pred_idx = pred_idxs[i]

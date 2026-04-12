@@ -398,3 +398,17 @@ ok，get loss 跑通了，明天写好可视化，然后就训练
 这次主要突出一个文本生成，
 也就是说，既有event又有文本。
 首先写一个llm多步推理。
+
+# 4/12
+
+好了，现在AL训练和可视化都写了，
+
+下一步我们要完善hungarian matching
+也就是说，text层面的hungarian matching
+需要直接应用 event 的 总cost
+
+19:19
+
+好了，现在把 match text 的 total_event + text 的 union cost 写好了，具体来说就是遍历所有的 Qt 和 Nt 计算 total event cost，不是很复杂。
+
+已经开始训练

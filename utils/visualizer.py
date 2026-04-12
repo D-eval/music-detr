@@ -292,7 +292,8 @@ def show_al_result(output, target, cqt, times, name="al_result", title=None):
     save_dir = os.path.join(cfg.save_dir, name)
     os.makedirs(save_dir, exist_ok=True)
 
-    T, P = cqt.shape
+    T, Pm1 = cqt.shape
+    P = Pm1 + 1
 
     # ===== 工具函数：event → roll =====
     def events_to_roll(starts, sustains, pitch, text=None):

@@ -31,7 +31,7 @@ def wav2cqt(wav, shift=0):
     window_type = cfg.window_type # hann
     
     min_midi, max_midi = cfg.min_midi, cfg.max_midi
-    freqs = get_freqs(min_midi, max_midi)
+    freqs = get_freqs(min_midi, max_midi).to(wav.device)
     
     # 🔥 加 shift（核心）
     if shift != 0:

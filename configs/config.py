@@ -83,8 +83,9 @@ def get_config():
     cfg.abs_pos_encoding.sigma = 1
     
     cfg.save_dir = "./tiny_save"
-    cfg.large_save_dir = "../params/detr2"
+    cfg.large_save_dir = "../params/al"
     
+        
     cfg.use_diff_input = True
     cfg.output_mode = "sustain_only" # "Exclusion_MuteTriggerSustain"
     cfg.output_dim_dict = {
@@ -120,7 +121,7 @@ def get_config():
                                 "event":2, # [start, log sustain]
                                 "pitch":cfg.pitch_vocab_size + 1,
                                 "exist": 1,
-                                "prompt": 16}
+                                "prompt": 128}
     cfg.detr_num_decoder_layers = 12
     cfg.detr_d_model_list = [64] * 3 + [128] * 3 + [256] * 3 + [512] * 2 + [1024]
     cfg.pool_stride = [None, None, 4, None, None, 3, None, None, 2, None, None, 5]
@@ -165,6 +166,27 @@ def get_config():
         "exist": 1,
     }
     
+    cfg.detr3_loss_weight = {
+        "sub": 1,
+        "exist_text": 1,
+        "text": 1,
+        "start": 1,
+        "sustain": 1,
+        "pitch": 1,
+        "exist_event": 1
+    }
+    
+    cfg.detr3_cost_weight = {
+        "start": 1,
+        "sustain": 1,
+        "pitch": 1,
+        "exist": 1,
+        "text": 1,
+        "text_exist": 1,
+        "te_text": 1,
+        "te_event": 1,
+    }
+    
     cfg.sustain_ref = 0.1
     
     cfg.text_cost_dist = "cosine" # cosine, euclidean
@@ -175,10 +197,10 @@ def get_config():
     
     cfg.llm = argparse.Namespace()
     
-    cfg.llm.num_hidden_layers = 2 # 16
+    cfg.llm.num_hidden_layers = 16
     
-    cfg.llm.hidden_size = 16 # 128
-    cfg.llm.intermediate_size = 16 # 256
+    cfg.llm.hidden_size = 128
+    cfg.llm.intermediate_size = 256
     cfg.llm.rms_norm_eps = 1e-6
 
     cfg.llm.head_dim = 8 # 64
@@ -211,6 +233,9 @@ def get_config():
     
     cfg.llm.max_length = 22
     cfg.llm.rope_base = 20
+    
+    cfg.lr = 1e-4
+    cfg.save_epoch = 10
     
     return cfg
 

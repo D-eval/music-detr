@@ -1,0 +1,5 @@
+nohup: ignoring input
+Some weights of Wav2Vec2Model were not initialized from the model checkpoint at facebook/wav2vec2-base-960h and are newly initialized: ['masked_spec_embed']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+/home/vipuser/wby/proj_params/my/train4.py:63: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  scaler = torch.cuda.amp.GradScaler()
