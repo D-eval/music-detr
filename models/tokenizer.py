@@ -1,6 +1,6 @@
 from torch.utils.data import DataLoader
 from configs.config import get_config
-from tokenizers import Tokenizer, models, trainers, pre_tokenizers
+from tokenizers import Tokenizer, models, trainers, pre_tokenizers, decoders
 
 
 def build_corpus(dataset):
@@ -86,8 +86,11 @@ class ALTokenizer:
         self.tokenizer = Tokenizer.from_file(cfg.tokenizer.save_path)
         self.max_length = cfg.llm.max_length
         self.pad_id = cfg.llm.padding_idx
-    def encode(self, text):
+        self.tokenizer.decoder = decoders.ByteLevel()
+    def encode(self, text): # str
         return self.tokenizer.encode(text)
+    def decode(self, ids): # List int
+        return self.tokenizer.decode(ids)
     def encode_and_pad(self, text):
         
         ids = self.tokenizer.encode(text).ids

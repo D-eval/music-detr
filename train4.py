@@ -5,7 +5,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from utils.visualizer import compare_result_3
+from utils.visualizer import show_al_result
 
 import os
 from configs.config import get_config
@@ -75,7 +75,6 @@ for epoch in range(start_epoch, num_epochs):
         
         loss = model.get_loss(audio, target)
         print("success")
-        raise 0
     
         # assert 0
         # ---------- forward + loss（AMP）----------
@@ -97,25 +96,18 @@ for epoch in range(start_epoch, num_epochs):
         # ---------- log ----------
         if step % 10 == 0:
             print(f"[Epoch {epoch}] step {step} loss: {loss.item():.4f}")
-            # with torch.no_grad():
-            #     event_pred = model.infer(output[0])
-            #     if len(event_pred) == 0:
-            #         print("没有检测到目标")
-            #         continue
-            #     pitch_centre = pitch_centre.to(device)
-            #     pred_pitchmap = render_pred_group_pitch_map(event_pred, pitch_centre)
-            #     gt_pitchmap = render_pred_pitch_map(target[0], pitch_centre)
-            
-            # compare_result_3(pred_pitchmap.detach().cpu().numpy()[...,1],
-            #                gt_pitchmap.detach().cpu().numpy()[...,1],
-            #                pitch_spec[0].detach().cpu().numpy(),
-            #                "compare")
+            with torch.no_grad():
+                infer_output = model.infer(audio[0, :])
+                cqt, times = wav2cqt(audio[0,:].unsqueeze(0))
+            show_al_result(infer_output,
+                           target[0],
+                           cqt[0],
+                           times)
     print(f"==== Epoch {epoch} avg loss: {total_loss / (step+1):.4f} ====")
 
     # ---------- 保存 ----------
     if epoch % 10 == 0:
         torch.save(model.state_dict(), os.path.join(cfg.large_save_dir, f"ckpt_epoch_{epoch}.pt"))
-
 
 
 # pitchmap = render_pred_pitch_map(event_pred[0], pitch_centre)

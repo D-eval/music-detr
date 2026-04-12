@@ -339,7 +339,6 @@ class Qwen2DecoderLayer(nn.Module):
     ) -> torch.Tensor:
         
         residual = hidden_states
-        # 我靠，原来attn前后都要加一个layernorm
         hidden_states = self.input_layernorm(hidden_states)
 
         # Self Attention
@@ -449,18 +448,21 @@ class Qwen2ForCausalLM(nn.Module):
         self,
         prompt_emb: torch.Tensor, # (B, Lp, C)
         input_ids: Optional[torch.LongTensor] = None, # (B, L)
-        position_ids: Optional[torch.LongTensor] = None,
         labels: Optional[torch.LongTensor] = None,
         # logits_to_keep: Union[int, torch.Tensor] = 0, # 训练时逐渐加长序列
     ):
         """
             label: (B, T_select)
         """
+        B = prompt_emb.shape[0]
+        L = input_ids.shape[1] + 1
+        
+        position_ids = torch.arange(L-1, dtype=torch.long, device=prompt_emb.device)[None, :].expand(B, -1) # (Lp,)
         L = input_ids.shape[1]
         
         hidden_states = self.model(
             prompt_emb=prompt_emb,
-            input_ids=input_ids,
+            input_ids=input_ids, # (B, L)
             position_ids=position_ids,
         ) # (B, T, C)
         

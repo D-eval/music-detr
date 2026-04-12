@@ -33,6 +33,50 @@ class ALUnion(nn.Module):
         
         self.loss_weights = cfg.union_loss_weights
         
+    def infer(self,
+              audio, # (T)
+              ):
+        assert audio.dim()==1
+        assert audio.shape[0]==1
+        audio = audio[None, :]
+        
+        detr_outputs = self.detr_forward(audio)[0] # Dict
+        detr_outputs = self.detr.infer(detr_outputs) # List[Dict]
+        
+        for i in range(len(detr_outputs)):
+            detr_output = detr_outputs[i]
+            prompt = detr_output['text_prompt'] # (Lp, C)
+            text_desc = self.lm_infer(prompt[None, :,:]) # str
+            detr_output['text_desc'] = text_desc
+        return detr_outputs
+
+        
+    def lm_infer(self,
+                 prompt_emb, # (1, Lp, C)
+                 max_length=30):
+        assert prompt_emb.dim()==3
+        assert prompt_emb.shape[0]==1
+        
+        seq_ids = self.lm_tokenizer.encode("<bos>").ids
+        seq_ids = torch.tensor(seq_ids, dtype=torch.long, device=prompt_emb.device)[None, :]
+        
+        self.lm.eval()
+        for i in range(max_length):
+            with torch.no_grad():
+                output = self.lm(prompt_emb,
+                                 seq_ids)
+                logits = output['logits'][0,-1,:] # (V)
+                next_idx = torch.argmax(logits).long()[None, :]
+                seq_ids = torch.cat([seq_ids, next_idx], dim=1)
+                if next_idx[0,0] == self.lm_tokenizer.encode("<eos>").ids[0]:
+                    break
+        
+        seq_ids = seq_ids[0,:].tolist()
+        seq_text = self.lm_tokenizer.decode(seq_ids)
+        
+        return seq_text
+
+        
     def get_loss(self,
                 audio, # (B, T)
                 targets, # List[Dict] B
@@ -87,7 +131,7 @@ class ALUnion(nn.Module):
         
         text_ids = sentences # (M, L)
         
-        position_ids = torch.arange(L-1, dtype=torch.long, device=prompts.device)[None, :].expand(B, -1) # (Lp,)
+        
         
         input_ids = text_ids[:,:-1]
         labels = text_ids[:,1:]
@@ -95,7 +139,6 @@ class ALUnion(nn.Module):
         output = self.lm(
             prompt_emb=prompts,
             input_ids=input_ids,
-            position_ids=position_ids,
             labels=labels,
         )
         

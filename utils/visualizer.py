@@ -251,3 +251,137 @@ def plot_roll(roll, name="roll"):
     
     plt.savefig(os.path.join(cfg.save_dir, name + ".png"))
     plt.close()
+    
+
+# def show_al_result(output, target, cqt, times, name="al_result", title=None):
+#     """
+#     output: List[
+#         Dict{
+#             'text_desc': str,
+#             'start': (num_events, ), sec 注意转换成float64，否则会数值溢出
+#             'sustain': (num_events, ), sec
+#             'pitch': (num_events, ), int 0 ~ P-2 是 pitch, P-1 是 模糊音高
+#         }
+#     ] * num_timbre
+#     target: Dict{
+#         "text_emb": (Nt, C_text),
+#         "start": (Ne,), sec
+#         "sustain": (Ne,), sec
+#         "pitch": (Ne,) # -1 ~ P-1, 需要首先把 -1 变成 P-1
+#         "text": List[str] Nt
+#         "text_idx": (Ne,) int 0 ~ Nt-1
+#     }
+#     cqt: (T, P)
+#     times: (T, ) long, sec * sr
+#     保存为 save_dir 的多个文件
+#     用2个子图 (T, P) 画出 每个 output Dict，并用 text_desc 作为 plt title
+#     target 也是
+#     每个png有2个子图，明明为 gt1.png, gt2.png, ..., pred1.png, pred2.png, ...
+#     """
+#     cfg = get_config()
+#     sr = cfg.sr
+    
+#     save_dir = cfg.save_dir
+#     save_dir = os.path.join(save_dir, name)
+#     os.makedirs(save_dir) # 设置成覆盖模式，如果存在就覆盖
+
+def show_al_result(output, target, cqt, times, name="al_result", title=None):
+    cfg = get_config()
+    sr = cfg.sr
+
+    save_dir = os.path.join(cfg.save_dir, name)
+    os.makedirs(save_dir, exist_ok=True)
+
+    T, P = cqt.shape
+
+    # ===== 工具函数：event → roll =====
+    def events_to_roll(starts, sustains, pitch, text=None):
+        roll = np.zeros((T, P))
+
+        # 转 numpy + float64（防溢出）
+        starts = starts.detach().cpu().numpy().astype(np.float64)
+        sustains = sustains.detach().cpu().numpy().astype(np.float64)
+        pitch = pitch.detach().cpu().numpy()
+
+        for i in range(len(starts)):
+            t0 = starts[i]
+            dur = sustains[i]
+            p = pitch[i]
+
+            # pitch -1 → 模糊音高
+            if p < 0:
+                p = P - 1
+
+            # 时间 → frame
+            start_idx = np.argmin(np.abs(times - t0 * sr))
+            end_time = (t0 + dur) * sr
+            end_idx = np.argmin(np.abs(times - end_time))
+
+            end_idx = max(start_idx + 1, end_idx)
+
+            # clip
+            start_idx = np.clip(start_idx, 0, T-1)
+            end_idx = np.clip(end_idx, 0, T)
+
+            roll[start_idx:end_idx, p] = 1.0
+
+        return roll
+
+    # =========================================================
+    # ====================== GT ================================
+    # =========================================================
+    gt_starts = target["start"]
+    gt_sustain = target["sustain"]
+    gt_pitch = target["pitch"].clone()
+
+    # -1 → P-1
+    gt_pitch[gt_pitch < 0] = P - 1
+
+    # 按 text_idx 分组
+    text_idx = target["text_idx"]
+    texts = target["text"]
+
+    for i in range(len(texts)):
+        mask = (text_idx == i)
+
+        if mask.sum() == 0:
+            continue
+
+        roll = events_to_roll(
+            gt_starts[mask],
+            gt_sustain[mask],
+            gt_pitch[mask]
+        )
+
+        plt.figure(figsize=(10, 4))
+        plt.imshow(roll.T, aspect='auto', origin='lower')
+        plt.title(f"GT: {texts[i]}")
+        plt.xlabel("Time")
+        plt.ylabel("Pitch")
+
+        plt.tight_layout()
+        plt.savefig(os.path.join(save_dir, f"gt_{i}.png"))
+        plt.close()
+
+    # =========================================================
+    # ====================== PRED ==============================
+    # =========================================================
+    for i, d in enumerate(output):
+        starts = d["start"]
+        sustain = d["sustain"]
+        pitch = d["pitch"]
+
+        roll = events_to_roll(starts, sustain, pitch)
+
+        plt.figure(figsize=(10, 4))
+        plt.imshow(roll.T, aspect='auto', origin='lower')
+
+        desc = d.get("text_desc", f"pred_{i}")
+        plt.title(f"PRED: {desc}")
+
+        plt.xlabel("Time")
+        plt.ylabel("Pitch")
+
+        plt.tight_layout()
+        plt.savefig(os.path.join(save_dir, f"pred_{i}.png"))
+        plt.close()
