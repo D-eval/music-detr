@@ -180,11 +180,11 @@ def get_config():
         "start": 1,
         "sustain": 1,
         "pitch": 1,
-        "exist": 1,
+        "exist": 0,
         "text": 1,
         "text_exist": 0, # 这个是0，否则会坍缩
         "te_text": 1,
-        "te_event": 0,
+        "te_event": 1,
     }
     
     cfg.sustain_ref = 0.1
