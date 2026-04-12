@@ -1042,7 +1042,11 @@ class PitchTransformer(nn.Module):
         cost_pitch = -log_prob[:, target['pitch']].T # (N, Q)
         
         exist_prob = torch.sigmoid(output['exist']) # (Q,)
-        exist_logprob = - torch.log(exist_prob)[None, :]
+        exist_logprob = - torch.log(exist_prob + 1e-6)[None, :]
+        # exist_logprob = - torch.nn.functional.logsigmoid(output['exist'])[None, :]
+
+        assert not torch.isinf(exist_logprob).any(), f"got {output['exist']}"
+
         
         cost = self.cost_weight['start'] * cost_start +\
                 self.cost_weight['sustain'] * cost_sustain +\
@@ -1119,7 +1123,7 @@ class PitchTransformer(nn.Module):
         assert pred.shape[1] == target.shape[1]
         
         exist_prob = torch.sigmoid(exist) # (Q,)
-        exist_logprob = - torch.log(exist_prob)[None, :]
+        exist_logprob = - torch.log(exist_prob + 1e-6)[None, :]
         
         cost_exist = exist_logprob
         cost_text = self.get_text_cost_matrix(pred, target)

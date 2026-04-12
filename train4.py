@@ -26,7 +26,7 @@ dataset = AudioDataset(root_dir=cfg.dataset_data_path,
 
 loader = DataLoader(
     dataset,
-    batch_size=1,
+    batch_size=4,
     shuffle=True,
     # num_workers=4,
     collate_fn=collate_fn,
@@ -54,7 +54,7 @@ model = ALUnion().to(device)
 
 teacher = Teacher()
 
-checkpoint_path = "/home/vipuser/wby/proj_params/params/al/ckpt_epoch_10.pt"
+checkpoint_path = "/home/vipuser/wby/proj_params/params/al/ckpt_epoch_40.pt"
 state_dict = torch.load(checkpoint_path)
 model.load_state_dict(state_dict=state_dict)
 
@@ -81,8 +81,6 @@ for epoch in range(start_epoch+1, num_epochs):
         embed_text(target, teacher)
         target = to_device(target, device)
         
-        loss = model.get_loss(audio, target)
-    
         # assert 0
         # ---------- forward + loss（AMP）----------
         with torch.amp.autocast("cuda"):
@@ -124,3 +122,12 @@ for epoch in range(start_epoch+1, num_epochs):
 #                 pitchmap.detach().cpu().numpy()[...,1],
 #                 pitchmap.detach().cpu().numpy()[...,1],
 #                 "wtf")
+
+
+
+loss = model.get_loss(audio, target)
+
+with torch.amp.autocast("cuda"):
+    loss = model.get_loss(audio, target)
+with torch.amp.autocast("cuda"):
+    loss = model.get_loss(audio, target)
