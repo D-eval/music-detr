@@ -733,8 +733,6 @@ class PitchTransformer(nn.Module):
         self.text_cost_dist = cfg.text_cost_dist
         self.text_loss_dist = cfg.text_loss_dist
         
-        self.infer_text_exist_threshold = cfg.infer_text_exist_threshold
-        self.infer_event_exist_threshold = cfg.infer_event_exist_threshold
         self.infer_threshold = cfg.infer_threshold
         self.infer_chord_threshold = cfg.infer_chord_threshold
         
@@ -821,16 +819,16 @@ class PitchTransformer(nn.Module):
         output_prompts = cells[:,:,N_rec+N_teacher:N_rec+N_teacher+N_prompt,:] # (B, N, prompt, C)
         output_events = cells[:,:,N_rec+N_teacher+N_prompt:N_rec+N_teacher+N_prompt+N_event,:] # (B, N, E, C)
 
-        output_distillation = self.distllation_head(output_distillation) # (B, N, 1, C_text)
-        output_prompts = self.prompt_head(output_prompts) # (B, N, prompt, C_prompts)
+        # output_distillation = self.distllation_head(output_distillation) # (B, N, 1, C_text)
+        # output_prompts = self.prompt_head(output_prompts) # (B, N, prompt, C_prompts)
         output_events = self.events_head(output_events) # (B, N, E, C_events)
 
-        assert output_distillation.shape[2]==1
-        output_distillation = output_distillation.squeeze(2) # (B, N, C)
+        # assert output_distillation.shape[2]==1
+        # output_distillation = output_distillation.squeeze(2) # (B, N, C)
 
         outputs = [{
-            "text_distillation": output_distillation[b,...], # (Qt, C)
-            "text_prompt": output_prompts[b,...], # (Qt, prompt, C)
+            "text_distillation": None, # output_distillation[b,...], # (Qt, C)
+            "text_prompt": None, # output_prompts[b,...], # (Qt, prompt, C)
             "event_out": output_events[b,...], # (Qt, Qe, C)
         } for b in range(B)] # chord 只关注 event_out[0] 就好了
 
@@ -841,13 +839,12 @@ class PitchTransformer(nn.Module):
             output: Dict
             target: Dict Ne
         """
-        
         output = output['event_out'][0, ...] # (Qe, Ce)
         gt_idxs, pred_idxs, loss_matrix = self.match_event(output, target)
         
         loss = 0
         for k, v in loss_matrix.items():
-            loss += self.loss_weight[k] * v[gt_idxs, pred_idxs]
+            loss += self.loss_weight[k] * v[gt_idxs, pred_idxs].sum()
         
         return loss
 
@@ -906,11 +903,11 @@ class PitchTransformer(nn.Module):
             output: (Qe, Ce)
             target: Dict
         """
-        Ne = len(target)
+        Ne = target['chord'].shape[0]
         
         start_gt = target['start'] # (N,)
         sustain_gt = target['sustain'] # (N,)
-        root_gt = target['pitch'] # (N,) int
+        root_gt = target['root'] # (N,) int
         tonic_gt = target['tonic'] # (N,) int
         chord_gt = target['chord'] # (N, 12) 0~1
 
@@ -942,6 +939,7 @@ class PitchTransformer(nn.Module):
         
         # 扩展维度对齐
         chord_logits_exp = chord_logits[None, :, :]  # (1, Q, 12)
+        chord_gt = chord_gt.float()
         chord_gt_exp = chord_gt[:, None, :]          # (N, 1, 12)
 
         # BCE cost

@@ -270,7 +270,7 @@ def get_config21():
     cfg.num_freqs = 128
     
     cfg.dataset_read_py_path = Path("../musicNotebook/web")
-    cfg.dataset_data_path = Path("../musicNotebook/preprocess11")
+    cfg.dataset_data_path = Path("../musicNotebook/preprocess0")
     
     cfg.batch_size = 1
     
@@ -370,41 +370,21 @@ def get_config21():
     cfg.detr_pos_weight_event = 1
     
     cfg.detr2_loss_weight = {
-        "sub": 1,
-        "exist_text": 1,
-        "text": 1,
         "start": 1,
-        "sustain": 1,
-        "pitch": 1,
-        "exist_event": 1
+        "sustain": 0.5,
+        "root": 1,
+        "tonic": 1,
+        "chord": 1,
+        "exist": 3,
     }
     
     cfg.detr2_cost_weight = {
         "start": 1,
         "sustain": 1,
-        "pitch": 1,
-        "exist": 1,
-    }
-    
-    cfg.detr3_loss_weight = {
-        "sub": 1,
-        "exist_text": 1,
-        "text": 1,
-        "start": 1,
-        "sustain": 1,
-        "pitch": 1,
-        "exist_event": 1
-    }
-    
-    cfg.detr3_cost_weight = {
-        "start": 1,
-        "sustain": 1,
-        "pitch": 1,
+        "root": 1,
+        "tonic": 1,
+        "chord": 1,
         "exist": 0,
-        "text": 1,
-        "text_exist": 0, # 这个是0，否则会坍缩
-        "te_text": 1,
-        "te_event": 1,
     }
     
     cfg.sustain_ref = 0.1

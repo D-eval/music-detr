@@ -49,7 +49,7 @@ def wav2cqt(wav, shift=0):
 
     wav_len = cfg.wav_len
     _, L = wav.shape
-    assert L==wav_len, f"长度不匹配，预期长度{wav_len}，实际获得{L}"
+    # assert L==wav_len, f"长度不匹配，预期长度{wav_len}，实际获得{L}"
     
     F = freqs.shape[0]
     device = wav.device

@@ -48,12 +48,12 @@ def get_spec_freqs():
     return freqs
 
 
-def wav2spec_2C(wav, shift=0):
+def wav2spec_2C(wav):
     """
         wav: (B, L, 2)
     """
-    spec1, pos, freqs = wav2spec(wav[:,:,0], shift)
-    spec2, pos, freqs = wav2spec(wav[:,:,1], shift)
+    spec1, pos, freqs = wav2spec(wav[:,:,0])
+    spec2, pos, freqs = wav2spec(wav[:,:,1])
     spec = torch.stack([spec1, spec2], dim=-1)
     return spec, pos, freqs
 
@@ -76,7 +76,7 @@ def wav2spec(wav):
 
     wav_len = cfg.wav_len
     _, L = wav.shape
-    assert L == wav_len
+    # assert L == wav_len
 
     device = wav.device
 

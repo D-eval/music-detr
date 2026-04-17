@@ -12,7 +12,7 @@ from utils.trainRecorder import TrainingRecorder
 from utils.visualizer import plot_pianoroll_event
 
 import os
-from configs.config import get_config
+from configs.config import get_config21 as get_config
 cfg = get_config()
 
 import sys
@@ -81,7 +81,10 @@ for epoch in range(start_epoch+1, num_epochs):
         cqt, cqt_pos, cqt_freqs = wav2cqt_2C(audio)
         spec, spec_pos, spec_freqs = wav2spec_2C(audio)
         with torch.amp.autocast("cuda"):
-            loss = model.get_loss(audio, target)
+            cqt, cqt_pos, cqt_freqs = wav2cqt_2C(audio)
+            spec, spec_pos, spec_freqs = wav2spec_2C(audio)
+            output = model(cqt,cqt_freqs,cqt_pos,spec,spec_freqs,spec_pos)
+            loss = model.get_loss(output, target)
         # ---------- backward ----------
         optimizer.zero_grad()
 

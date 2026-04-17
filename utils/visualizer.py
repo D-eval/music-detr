@@ -414,13 +414,13 @@ def plot_pianoroll_event(pred, target, title="event_pianoroll", name="chord_pred
         tonic = data["tonic"]
         start = data["start"]
         sustain = data["sustain"]
-        exist = data["exist"]
+        # exist = data["exist"]
 
         M = len(start)
 
         for i in range(M):
-            if exist[i] < 0.5:
-                continue
+            # if exist[i] < 0.5:
+            #     continue
 
             t0 = start[i]
             t1 = start[i] + sustain[i]
