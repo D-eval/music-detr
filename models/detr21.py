@@ -874,7 +874,7 @@ class PitchTransformer(nn.Module):
         chord_logits = pitch_pred[:, 12:24] # (Q,12)
         tonic_logits = pitch_pred[:, 24:36] # (Q,12)
 
-        choice = torch.sigmoid(start_pred) > threshold
+        choice = torch.sigmoid(exist_pred) > threshold
         before_pred = torch.sigmoid(before_pred) > before_threshold
         
         start_pred = start_pred[choice]
@@ -932,16 +932,18 @@ class PitchTransformer(nn.Module):
         chord_logits = pitch_pred[:, 12:24] # (Q,12)
         tonic_logits = pitch_pred[:, 24:36] # (Q,12)
 
-        prob_before = F.sigmoid(before_pred) # (Q,)
+        prob_before = before_pred # F.sigmoid(before_pred) # (Q,)
         cost_before = F.binary_cross_entropy_with_logits(prob_before[None,:].expand(Ne, Qe),
                                                          before_gt[:,None].expand(Ne, Qe),
                                                          reduction="none")
         
+        mask = (1 - before_gt[:, None]) * (1 - prob_before[None, :])
+        
         diff_start = start_gt[:,None] - start_pred[None,:] # (N, Q)
-        cost_start = diff_start**2 * (1 - before_gt[:, None]) # (N, Q)
+        cost_start = diff_start**2 * mask # (N, Q)
         
         diff_sustain = (torch.log(sustain_gt[:, None] + 1e-6)-math.log(self.sustain_ref)) - sustain_pred[None,:] # (N, Q)
-        cost_sustain = diff_sustain**2 * (1 - before_gt[:, None]) # (N, Q)
+        cost_sustain = diff_sustain**2 * mask # (N, Q)
         
         log_prob_root = F.log_softmax(root_logits, dim=-1) # (Q, 12)
         cost_root = -log_prob_root[:, root_gt].T # (N, Q)
@@ -961,8 +963,14 @@ class PitchTransformer(nn.Module):
             reduction='none'
         ).mean(dim=-1)  # (N, Q)
         
-        exist_prob = torch.sigmoid(exist_pred) # (Q,)
-        exist_logprob = - torch.log(exist_prob + 1e-6)[None, :].expand(Ne, Qe) # (N, Q)
+        # exist_prob = torch.sigmoid(exist_pred) # (Q,)
+        # exist_logprob = - torch.log(exist_prob + 1e-6)[None, :].expand(Ne, Qe) # (N, Q)
+
+        cost_exist = F.binary_cross_entropy_with_logits(
+            exist_pred[None, :].expand(Ne, Qe),
+            torch.ones((Ne, Qe), device=output.device),
+            reduction="none"
+        )
         
         return {
             "start": cost_start,
@@ -970,7 +978,7 @@ class PitchTransformer(nn.Module):
             "root": cost_root,
             "tonic": cost_tonic,
             "chord": cost_chord,
-            "exist": exist_logprob,
+            "exist": cost_exist,
             "before": cost_before
         }
 
@@ -980,13 +988,6 @@ class PitchTransformer(nn.Module):
             target: Dict
         """
         cost_matrix = self.get_cost_or_loss_matrix(output, target)
-
-        # cost = self.cost_weight['start'] * cost_matrix['start'] +\
-        #         self.cost_weight['sustain'] * cost_matrix['sustain'] +\
-        #         self.cost_weight['chord'] * cost_matrix['chord'] +\
-        #         self.cost_weight['root'] * cost_matrix['root'] +\
-        #         self.cost_weight['tonic'] * cost_matrix['tonic'] +\
-        #         self.cost_weight['exist'] * cost_matrix['exist']
 
         cost = 0
         for k, v in cost_matrix.items():
