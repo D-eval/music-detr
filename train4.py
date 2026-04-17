@@ -1,7 +1,7 @@
 """
 用来训练ALUnion
 
-nohup python3 train4.py > trainAL.log 2>&1 &
+nohup python3 -u train4.py > trainAL.log 2>&1 &
 """
 
 import torch
@@ -54,7 +54,7 @@ model = ALUnion().to(device)
 
 teacher = Teacher()
 
-checkpoint_path = "/home/vipuser/wby/proj_params/params/al/ckpt_epoch_90.pt"
+checkpoint_path = "/home/vipuser/wby/proj_params/params/al/ckpt_epoch_190.pt"
 state_dict = torch.load(checkpoint_path)
 model.load_state_dict(state_dict=state_dict)
 

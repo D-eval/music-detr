@@ -18,7 +18,7 @@ cfg = get_config()
 import sys
 sys.path.append(str(cfg.dataset_read_py_path))
 
-from read0 import AudioDataset, collate_fn
+from read0 import AudioDataset, collate_fn, to_device
 from torch.utils.data import DataLoader
 dataset = AudioDataset(root_dir=cfg.dataset_data_path)
 
@@ -35,7 +35,7 @@ loader = DataLoader(
 from models.detr21 import PitchTransformer
 from spec import wav2cqt_2C, wav2spec_2C
 from models.teacher import Teacher
-from utils.equipTarget import get_target_map, get_sustain_map, get_sustain_map_textwise, normalize_targets_pitch, render_pred_pitch_map, render_pred_group_pitch_map, to_device, embed_text
+from utils.equipTarget import get_target_map, get_sustain_map, get_sustain_map_textwise, normalize_targets_pitch, render_pred_pitch_map, render_pred_group_pitch_map, embed_text
 
 if cfg.map_type == "target_map":
     get_map = get_target_map
@@ -75,7 +75,8 @@ for epoch in range(start_epoch+1, num_epochs):
     total_loss = 0
     for step, batch in enumerate(loader):
         audio, target = batch
-        audio = audio.to(device)        
+        target = to_device(target, device)
+        audio = audio.to(device)
         # assert 0
         # ---------- forward + loss（AMP）----------
         cqt, cqt_pos, cqt_freqs = wav2cqt_2C(audio)
@@ -117,6 +118,8 @@ for epoch in range(start_epoch+1, num_epochs):
             #     "sustain": sustain_pred, # (M)
             #     "exist": exist_pred, # (M)
             # }
+            target = to_device(target, torch.device("cpu"))
+            infer_output = to_device(infer_output, torch.device("cpu"))
             plot_pianoroll_event(infer_output, target[0])
             assert 0
     print(f"==== Epoch {epoch} avg loss: {total_loss / (step+1):.4f} ====")
