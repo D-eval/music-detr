@@ -396,25 +396,15 @@ NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F',
 
 
 def plot_pianoroll_event(pred, target, title="event_pianoroll", name="chord_pred"):
-    """
-    pred / target: Dict{
-        "root": (M,)
-        "chord": (M, 12)
-        "tonic": (M,)
-        "start": (M,)
-        "sustain": (M,)
-        "exist": (M,)
-    }
-    """
-    cfg = get_config()
 
     def draw(ax, data, name):
-        root = data["root"]
-        chord = data["chord"]
-        tonic = data["tonic"]
-        start = data["start"]
-        sustain = data["sustain"]
-        # exist = data["exist"]
+        root = np.asarray(data["root"])
+        chord = np.asarray(data["chord"])
+        tonic = np.asarray(data["tonic"])
+        start = np.asarray(data["start"])
+        sustain = np.asarray(data["sustain"])
+        # exist = np.asarray(data["exist"])
+        before = np.asarray(data.get("before", np.zeros_like(start)))
 
         M = len(start)
 
@@ -422,10 +412,15 @@ def plot_pianoroll_event(pred, target, title="event_pianoroll", name="chord_pred
             # if exist[i] < 0.5:
             #     continue
 
-            t0 = start[i]
-            t1 = start[i] + sustain[i]
+            # ===== 处理 before =====
+            if before[i] > 0.5:
+                t0 = -1.0
+            else:
+                t0 = start[i]
 
-            # 🎹 chord notes
+            t1 = t0 + sustain[i]
+
+            # 🎹 chord
             for p in range(12):
                 if chord[i][p] > 0.5:
                     ax.add_patch(
@@ -438,7 +433,7 @@ def plot_pianoroll_event(pred, target, title="event_pianoroll", name="chord_pred
                         )
                     )
 
-            # 🔴 root（红色）
+            # 🔴 root
             ax.add_patch(
                 plt.Rectangle(
                     (t0, root[i] - 0.4),
@@ -449,7 +444,7 @@ def plot_pianoroll_event(pred, target, title="event_pianoroll", name="chord_pred
                 )
             )
 
-            # 🟢 tonic（绿色边框）
+            # 🟢 tonic（边框）
             ax.add_patch(
                 plt.Rectangle(
                     (t0, tonic[i] - 0.4),
@@ -461,19 +456,25 @@ def plot_pianoroll_event(pred, target, title="event_pianoroll", name="chord_pred
                 )
             )
 
-        # 🎯 设置轴
+        # ===== 坐标轴 =====
         ax.set_title(name)
         ax.set_ylim(-0.5, 11.5)
         ax.set_yticks(range(12))
         ax.set_yticklabels(NOTE_NAMES)
 
-        # 横向网格（12音）
+        # 🎯 网格
         ax.grid(True, axis='y', linestyle='--', alpha=0.5)
-
-        # 时间方向网格
         ax.grid(True, axis='x', linestyle=':', alpha=0.3)
 
-    # ====== plot ======
+        # ===== 标记 t=0 =====
+        ax.axvline(0, color='black', linestyle='--', alpha=0.7)
+
+        # ===== x范围（包含 before 区域）=====
+        min_t = -1.5
+        max_t = np.max(start + sustain) + 0.5 if len(start) > 0 else 1
+        ax.set_xlim(min_t, max_t)
+
+    # ===== 绘图 =====
     fig, axs = plt.subplots(2, 1, figsize=(12, 6), sharex=True)
 
     draw(axs[0], pred, "Prediction")
@@ -483,5 +484,7 @@ def plot_pianoroll_event(pred, target, title="event_pianoroll", name="chord_pred
 
     plt.suptitle(title)
     plt.tight_layout()
+
+    cfg = get_config()
     plt.savefig(os.path.join(cfg.save_dir, name + ".png"))
     plt.close()

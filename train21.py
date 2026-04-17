@@ -121,7 +121,7 @@ for epoch in range(start_epoch+1, num_epochs):
             target = to_device(target, torch.device("cpu"))
             infer_output = to_device(infer_output, torch.device("cpu"))
             plot_pianoroll_event(infer_output, target[0])
-            assert 0
+            # assert 0
     print(f"==== Epoch {epoch} avg loss: {total_loss / (step+1):.4f} ====")
     # ---------- 保存 ----------
     if epoch % cfg.save_epoch == 0:

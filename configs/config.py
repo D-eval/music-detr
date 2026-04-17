@@ -339,7 +339,7 @@ def get_config21():
     # assert cfg.num_querys % cfg.num_cls_querys == 0
     
     cfg.input_dim = 2
-    cfg.detr_output_dim_dict = {"event": 2, # [start, log sustain]
+    cfg.detr_output_dim_dict = {"event": 3, # [start, log sustain, before]
                                 "pitch": 36,
                                 "exist": 1}
     cfg.detr_num_decoder_layers = 12
@@ -350,21 +350,6 @@ def get_config21():
     cfg.ffn_dim_up = [1,1,2, 1,1,2, 1,1,2, 1,2,1]
     cfg.ffn_intermediate_up_list = [2,2,4, 2,2,4, 2,2,2, 2,2,2]
     
-    cfg.detr_cost_weight = {
-        "pitch": 1.0,
-        "start": 1.0,
-        "logSustain": 1.0,
-        "text": 1.0
-        # "IoU": 2.0,
-    }
-    
-    cfg.detr_loss_weight = {
-        "pitch": 1.0,
-        "start": 1.0,
-        "logSustain": 1.0,
-        "text": 1.0,
-        "exist": 1.0
-    }
     
     cfg.detr_pos_weight_text = 1
     cfg.detr_pos_weight_event = 1
@@ -376,6 +361,7 @@ def get_config21():
         "tonic": 1,
         "chord": 1,
         "exist": 3,
+        "before": 2,
     }
     
     cfg.detr2_cost_weight = {
@@ -385,6 +371,7 @@ def get_config21():
         "tonic": 1,
         "chord": 1,
         "exist": 0,
+        "before": 5,
     }
     
     cfg.sustain_ref = 0.1
@@ -394,6 +381,7 @@ def get_config21():
     
     cfg.infer_threshold = 0.5
     cfg.infer_chord_threshold = 0.5
+    cfg.infer_before_threshold = 0.5
     
     cfg.llm = argparse.Namespace()
     

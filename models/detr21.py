@@ -735,6 +735,7 @@ class PitchTransformer(nn.Module):
         
         self.infer_threshold = cfg.infer_threshold
         self.infer_chord_threshold = cfg.infer_chord_threshold
+        self.infer_before_threshold = cfg.infer_before_threshold
         
     def forward(self,
                 pitch_spec,
@@ -861,17 +862,20 @@ class PitchTransformer(nn.Module):
 
         threshold = self.infer_threshold
         chord_threshold = self.infer_chord_threshold
+        before_threshold = self.infer_before_threshold
 
         start_pred = output[:,0] # (Q)
         sustain_pred = output[:,1] # (Q,)
+        before_pred = output[:,2] # (Q,)
         exist_pred = output[:,-1] # (Q)
-
-        pitch_pred = output[:,2:2+self.output_dim_pitch]
+        
+        pitch_pred = output[:,3:3+self.output_dim_pitch]
         root_logits = pitch_pred[:,:12] # (Q,12)
         chord_logits = pitch_pred[:, 12:24] # (Q,12)
         tonic_logits = pitch_pred[:, 24:36] # (Q,12)
 
         choice = torch.sigmoid(start_pred) > threshold
+        before_pred = torch.sigmoid(before_pred) > before_threshold
         
         start_pred = start_pred[choice]
         sustain_pred = torch.exp(sustain_pred[choice]) * self.sustain_ref
@@ -887,6 +891,7 @@ class PitchTransformer(nn.Module):
             "start": start_pred, # (M)
             "sustain": sustain_pred, # (M)
             "exist": exist_pred, # (M)
+            "before": before_pred, # (M) 0~1
         }
 
         return result
@@ -907,29 +912,36 @@ class PitchTransformer(nn.Module):
         
         start_gt = target['start'] # (N,)
         sustain_gt = target['sustain'] # (N,)
+        before_gt = target['before'] # (N,)
         root_gt = target['root'] # (N,) int
         tonic_gt = target['tonic'] # (N,) int
         chord_gt = target['chord'] # (N, 12) 0~1
 
 
         Qe = output.shape[0]
-        assert output.shape[1]==2+36+1
+        assert output.shape[1]==3+36+1
         
         start_pred = output[:,0] # (Q)
         sustain_pred = output[:,1] # (Q,)
+        before_pred = output[:,2] # (Q,)
+        
         exist_pred = output[:,-1] # (Q)
 
-        pitch_pred = output[:,2:2+self.output_dim_pitch]
+        pitch_pred = output[:,3:3+self.output_dim_pitch]
         root_logits = pitch_pred[:,:12] # (Q,12)
         chord_logits = pitch_pred[:, 12:24] # (Q,12)
         tonic_logits = pitch_pred[:, 24:36] # (Q,12)
 
+        prob_before = F.sigmoid(before_pred) # (Q,)
+        cost_before = F.binary_cross_entropy_with_logits(prob_before[None,:].expand(Ne, Qe),
+                                                         before_gt[:,None].expand(Ne, Qe),
+                                                         reduction="none")
         
         diff_start = start_gt[:,None] - start_pred[None,:] # (N, Q)
-        cost_start = diff_start**2 # (N, Q)
+        cost_start = diff_start**2 * (1 - before_gt[:, None]) # (N, Q)
         
         diff_sustain = (torch.log(sustain_gt[:, None] + 1e-6)-math.log(self.sustain_ref)) - sustain_pred[None,:] # (N, Q)
-        cost_sustain = diff_sustain**2 # (N, Q)
+        cost_sustain = diff_sustain**2 * (1 - before_gt[:, None]) # (N, Q)
         
         log_prob_root = F.log_softmax(root_logits, dim=-1) # (Q, 12)
         cost_root = -log_prob_root[:, root_gt].T # (N, Q)
@@ -950,7 +962,7 @@ class PitchTransformer(nn.Module):
         ).mean(dim=-1)  # (N, Q)
         
         exist_prob = torch.sigmoid(exist_pred) # (Q,)
-        exist_logprob = - torch.log(exist_prob)[None, :].expand(Ne, Qe) # (N, Q)
+        exist_logprob = - torch.log(exist_prob + 1e-6)[None, :].expand(Ne, Qe) # (N, Q)
         
         return {
             "start": cost_start,
@@ -958,7 +970,8 @@ class PitchTransformer(nn.Module):
             "root": cost_root,
             "tonic": cost_tonic,
             "chord": cost_chord,
-            "exist": exist_logprob
+            "exist": exist_logprob,
+            "before": cost_before
         }
 
     def match_event(self, output, target):
