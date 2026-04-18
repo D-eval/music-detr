@@ -842,14 +842,14 @@ class PitchTransformer(nn.Module):
         """
         output = output['event_out'][0, ...] # (Qe, Ce)
         gt_idxs, pred_idxs, loss_matrix = self.match_event(output, target)
-        
+        M = gt_idxs.shape[0]
         loss = 0
         loss_dict = {}
         for k, v in loss_matrix.items():
             if k=="exist":
                 continue
-            loss += self.loss_weight[k] * v[gt_idxs, pred_idxs].sum()
-            loss_dict[k] = v[gt_idxs, pred_idxs].sum().item()
+            loss += self.loss_weight[k] * v[gt_idxs, pred_idxs].mean()
+            loss_dict[k] = v[gt_idxs, pred_idxs].mean().item()
             
         # 2) exist loss: 所有 query 都参与
         exist_pred = output[:, -1]  # (Qe,)
@@ -917,14 +917,15 @@ class PitchTransformer(nn.Module):
     def get_loss(self, outputs, targets):
         loss = 0
         loss_dict = {}
-        for b in range(len(outputs)):
+        B = len(outputs)
+        for b in range(B):
             temp_loss, temp_loss_dict = self.get_sample_loss(outputs[b], targets[b])
-            loss += temp_loss
+            loss += temp_loss / B
             for k in temp_loss_dict.keys():
                 if loss_dict.get(k):
-                    loss_dict[k] += temp_loss_dict[k]
+                    loss_dict[k] += temp_loss_dict[k] /B
                 else:
-                    loss_dict[k] = temp_loss_dict[k]
+                    loss_dict[k] = temp_loss_dict[k] /B
         return loss, loss_dict
  
     def get_cost_or_loss_matrix(self, output, target):

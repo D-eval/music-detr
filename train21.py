@@ -24,7 +24,7 @@ dataset = AudioDataset(root_dir=cfg.dataset_data_path)
 
 loader = DataLoader(
     dataset,
-    batch_size=4,
+    batch_size=8,
     shuffle=True,
     # num_workers=4,
     collate_fn=collate_fn,
@@ -52,7 +52,7 @@ model = PitchTransformer().to(device)
 
 # teacher = Teacher()
 
-checkpoint_path = "../params/detr21/ckpt_epoch_100.pt"
+checkpoint_path = "../params/detr21/ckpt_epoch.pt"
 state_dict = torch.load(checkpoint_path)
 model.load_state_dict(state_dict=state_dict)
 
@@ -67,7 +67,7 @@ scaler = torch.cuda.amp.GradScaler()
 model.train()
 
 
-num_epochs = 500
+num_epochs = 5000
 
 hist_len = recorder.history["loss"].__len__()
 start_epoch = cfg.save_epoch * (hist_len-1) if hist_len!=0 else 0
@@ -126,7 +126,7 @@ for epoch in range(start_epoch+1, num_epochs):
     print(f"==== Epoch {epoch} avg loss: {total_loss / (step+1):.4f} ====")
     # ---------- 保存 ----------
     if epoch % cfg.save_epoch == 0:
-        torch.save(model.state_dict(), os.path.join(cfg.large_save_dir, f"ckpt_epoch_{epoch}.pt"))
+        torch.save(model.state_dict(), os.path.join(cfg.large_save_dir, f"ckpt_epoch.pt"))
         recorder.update(total_loss / (step+1), cfg.lr)
         recorder.save()
 

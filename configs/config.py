@@ -355,21 +355,21 @@ def get_config21():
     cfg.detr_pos_weight_event = 1
     
     cfg.detr2_loss_weight = {
-        "start": 1,
+        "start": 3,
         "sustain": 0.5,
         "root": 1,
-        "tonic": 1,
+        "tonic": 0.3,
         "chord": 1,
-        "exist": 0.5,
+        "exist": 1,
         "before": 2,
     }
     
     cfg.detr2_cost_weight = {
-        "start": 1,
+        "start": 3,
         "sustain": 1,
-        "root": 1,
-        "tonic": 1,
-        "chord": 1,
+        "root": 0,
+        "tonic": 0,
+        "chord": 0,
         "exist": 1,
         "before": 1,
     }
