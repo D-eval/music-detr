@@ -305,7 +305,7 @@ def get_config21():
     cfg.abs_pos_encoding.sigma = 1
     
     cfg.save_dir = "./tiny_save"
-    cfg.large_save_dir = "../params/al"
+    cfg.large_save_dir = "../params/detr21"
     
         
     cfg.use_diff_input = True
@@ -360,7 +360,7 @@ def get_config21():
         "root": 1,
         "tonic": 1,
         "chord": 1,
-        "exist": 3,
+        "exist": 0.5,
         "before": 2,
     }
     
@@ -370,8 +370,8 @@ def get_config21():
         "root": 1,
         "tonic": 1,
         "chord": 1,
-        "exist": 0,
-        "before": 5,
+        "exist": 1,
+        "before": 1,
     }
     
     cfg.sustain_ref = 0.1

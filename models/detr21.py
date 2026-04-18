@@ -844,10 +844,27 @@ class PitchTransformer(nn.Module):
         gt_idxs, pred_idxs, loss_matrix = self.match_event(output, target)
         
         loss = 0
+        loss_dict = {}
         for k, v in loss_matrix.items():
+            if k=="exist":
+                continue
             loss += self.loss_weight[k] * v[gt_idxs, pred_idxs].sum()
-        
-        return loss
+            loss_dict[k] = v[gt_idxs, pred_idxs].sum().item()
+            
+        # 2) exist loss: 所有 query 都参与
+        exist_pred = output[:, -1]  # (Qe,)
+        exist_target = torch.zeros_like(exist_pred)  # (Qe,)
+        exist_target[pred_idxs] = 1.0
+
+        loss_exist = F.binary_cross_entropy_with_logits(
+            exist_pred,
+            exist_target,
+            reduction="mean"
+        )
+        loss_dict['exist'] = loss_exist.item()
+
+        loss = loss + self.loss_weight["exist"] * loss_exist
+        return loss, loss_dict
 
     def infer(self, output):
         """
@@ -899,9 +916,16 @@ class PitchTransformer(nn.Module):
 
     def get_loss(self, outputs, targets):
         loss = 0
+        loss_dict = {}
         for b in range(len(outputs)):
-            loss += self.get_sample_loss(outputs[b], targets[b])
-        return loss
+            temp_loss, temp_loss_dict = self.get_sample_loss(outputs[b], targets[b])
+            loss += temp_loss
+            for k in temp_loss_dict.keys():
+                if loss_dict.get(k):
+                    loss_dict[k] += temp_loss_dict[k]
+                else:
+                    loss_dict[k] = temp_loss_dict[k]
+        return loss, loss_dict
  
     def get_cost_or_loss_matrix(self, output, target):
         """
@@ -932,12 +956,13 @@ class PitchTransformer(nn.Module):
         chord_logits = pitch_pred[:, 12:24] # (Q,12)
         tonic_logits = pitch_pred[:, 24:36] # (Q,12)
 
-        prob_before = before_pred # F.sigmoid(before_pred) # (Q,)
-        cost_before = F.binary_cross_entropy_with_logits(prob_before[None,:].expand(Ne, Qe),
+        
+        cost_before = F.binary_cross_entropy_with_logits(before_pred[None,:].expand(Ne, Qe),
                                                          before_gt[:,None].expand(Ne, Qe),
                                                          reduction="none")
         
-        mask = (1 - before_gt[:, None]) * (1 - prob_before[None, :])
+        prob_before = F.sigmoid(before_pred) # (Q,)
+        mask = (1 - before_gt[:, None]) # * (1 - prob_before[None, :])
         
         diff_start = start_gt[:,None] - start_pred[None,:] # (N, Q)
         cost_start = diff_start**2 * mask # (N, Q)

@@ -24,7 +24,7 @@ dataset = AudioDataset(root_dir=cfg.dataset_data_path)
 
 loader = DataLoader(
     dataset,
-    batch_size=1,
+    batch_size=4,
     shuffle=True,
     # num_workers=4,
     collate_fn=collate_fn,
@@ -52,9 +52,9 @@ model = PitchTransformer().to(device)
 
 # teacher = Teacher()
 
-# checkpoint_path = "/home/vipuser/wby/proj_params/params/al/ckpt_epoch_90.pt"
-# state_dict = torch.load(checkpoint_path)
-# model.load_state_dict(state_dict=state_dict)
+checkpoint_path = "../params/detr21/ckpt_epoch_100.pt"
+state_dict = torch.load(checkpoint_path)
+model.load_state_dict(state_dict=state_dict)
 
 # -------- optimizer --------
 optimizer = optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=1e-4)
@@ -85,7 +85,7 @@ for epoch in range(start_epoch+1, num_epochs):
             cqt, cqt_pos, cqt_freqs = wav2cqt_2C(audio)
             spec, spec_pos, spec_freqs = wav2spec_2C(audio)
             output = model(cqt,cqt_freqs,cqt_pos,spec,spec_freqs,spec_pos)
-            loss = model.get_loss(output, target)
+            loss, loss_dict = model.get_loss(output, target)
         # ---------- backward ----------
         optimizer.zero_grad()
 
@@ -102,6 +102,7 @@ for epoch in range(start_epoch+1, num_epochs):
         # ---------- log ----------
         if step % 10 == 0:
             print(f"[Epoch {epoch}] step {step} loss: {loss.item():.4f}")
+            print(loss_dict)
             with torch.no_grad():
                 audio = audio[0,...][None,...]
                 model.eval()
