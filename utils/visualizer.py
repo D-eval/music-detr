@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import os
-from configs.config import get_config
+from configs.config import get_config, get_config22
 import torch
 import cv2
 import numpy as np
@@ -11,7 +11,7 @@ fonts = [f.name for f in fm.fontManager.ttflist if 'Hei' in f.name or 'Song' in 
 print(fonts)
 """
 
-plt.rcParams['font.sans-serif'] = ['WenQuanYi Micro Hei']  
+# plt.rcParams['font.sans-serif'] = ['WenQuanYi Micro Hei']  
 
 def show_attn_alpha(pos_encoding, num_time=1, num_freq=1):
     cfg = get_config()
@@ -486,5 +486,250 @@ def plot_pianoroll_event(pred, target, title="event_pianoroll", name="chord_pred
     plt.tight_layout()
 
     cfg = get_config()
+    plt.savefig(os.path.join(cfg.save_dir, name + ".png"))
+    plt.close()
+    
+
+
+def equip_cls(event, start, sustain, t):
+    """
+    event: (N) int cls_num
+    start: (N) float
+    sustain: (N) float
+    t: (T) float
+    """
+    result = 12 * torch.ones_like(t, device=t.device).long()
+    N = event.shape[0]
+    for n in range(N):
+        choice = (start[n] <= t) * (t <= sustain[n]) # (T,)
+        result[choice] = event[n]
+    return result
+
+def equip_chord(chord, start, sustain, t):
+    """
+    chord: (N, 12) 0~1
+    start: (N) float
+    sustain: (N) float
+    t: (T) float
+    """
+    C = chord.shape[-1]
+    result = 12 * torch.ones((t.shape[0], C), device=t.device).float()
+    N = chord.shape[0]
+    for n in range(N):
+        choice = (start[n] <= t) * (t <= sustain[n]) # (T,)
+        result[choice, :] = chord[n, :].float()
+    return result
+
+def plot_pianoroll_timewise(output, target, title="timewise_compare", name="timewise_pred", chord_threshold=0.5):
+    """
+    output: Dict{
+        "output": (B, T, 38)
+        "time": (T,)
+    }
+    target: Dict{
+        start: (N,)
+        sustain: (N,)
+        root: (N,)
+        tonic: (N,)
+        chord: (N, 12)
+        before: (N,) bool   # 可有可无
+    }
+
+    上图：forward 输出 -> 合并成 event 后画
+    下图：target 原始 event 直接画
+    """
+
+    cfg = get_config22()
+
+    x = output["output"]
+    t = output["time"]
+
+    if x.dim() != 3:
+        raise ValueError(f"output['output'] 应为 (B,T,38)，实际得到 {x.shape}")
+
+    x = x[0]  # 只画 batch 第一个, (T, 38)
+
+    root_logits = x[:, :13]       # (T, 13)
+    chord_logits = x[:, 13:25]    # (T, 12)
+    tonic_logits = x[:, 25:]      # (T, 13)
+
+    root_pred = torch.argmax(root_logits, dim=-1)                 # (T,)
+    tonic_pred = torch.argmax(tonic_logits, dim=-1)               # (T,)
+    chord_pred = (torch.sigmoid(chord_logits) > chord_threshold)  # (T,12)
+
+    t = t.detach().cpu()
+    root_pred = root_pred.detach().cpu()
+    tonic_pred = tonic_pred.detach().cpu()
+    chord_pred = chord_pred.detach().cpu().bool()
+
+    def timewise_to_event(root_seq, chord_seq, tonic_seq, t_axis):
+        """
+        把逐帧预测合并成 event，保持和原来的 plot_pianoroll_event 风格一致
+        None 类 = 12，不画
+        """
+        T = len(t_axis)
+        if T == 0:
+            return {
+                "root": torch.empty(0, dtype=torch.long),
+                "tonic": torch.empty(0, dtype=torch.long),
+                "chord": torch.empty(0, 12, dtype=torch.float32),
+                "start": torch.empty(0, dtype=torch.float32),
+                "sustain": torch.empty(0, dtype=torch.float32),
+            }
+
+        roots = []
+        tonics = []
+        chords = []
+        starts = []
+        sustains = []
+
+        def same_state(i, j):
+            return (
+                int(root_seq[i]) == int(root_seq[j])
+                and int(tonic_seq[i]) == int(tonic_seq[j])
+                and torch.equal(chord_seq[i], chord_seq[j])
+            )
+
+        seg_start = 0
+        for i in range(1, T):
+            if not same_state(i - 1, i):
+                r = int(root_seq[seg_start].item())
+                tn = int(tonic_seq[seg_start].item())
+                ch = chord_seq[seg_start].float()
+
+                if r < 12 or ch.any():
+                    t0 = float(t_axis[seg_start].item())
+                    t1 = float(t_axis[i].item())
+                    roots.append(r)
+                    tonics.append(tn)
+                    chords.append(ch)
+                    starts.append(t0)
+                    sustains.append(max(t1 - t0, 1e-6))
+
+                seg_start = i
+
+        # 最后一段
+        r = int(root_seq[seg_start].item())
+        tn = int(tonic_seq[seg_start].item())
+        ch = chord_seq[seg_start].float()
+        if r < 12 or ch.any():
+            t0 = float(t_axis[seg_start].item())
+            if T > 1:
+                dt = float((t_axis[-1] - t_axis[-2]).item())
+            else:
+                dt = 0.05
+            t1 = float(t_axis[-1].item() + dt)
+            roots.append(r)
+            tonics.append(tn)
+            chords.append(ch)
+            starts.append(t0)
+            sustains.append(max(t1 - t0, 1e-6))
+
+        if len(roots) == 0:
+            return {
+                "root": torch.empty(0, dtype=torch.long),
+                "tonic": torch.empty(0, dtype=torch.long),
+                "chord": torch.empty(0, 12, dtype=torch.float32),
+                "start": torch.empty(0, dtype=torch.float32),
+                "sustain": torch.empty(0, dtype=torch.float32),
+            }
+
+        return {
+            "root": torch.tensor(roots, dtype=torch.long),
+            "tonic": torch.tensor(tonics, dtype=torch.long),
+            "chord": torch.stack(chords, dim=0).float(),
+            "start": torch.tensor(starts, dtype=torch.float32),
+            "sustain": torch.tensor(sustains, dtype=torch.float32),
+        }
+
+    pred_event = timewise_to_event(root_pred, chord_pred, tonic_pred, t)
+
+    # target 直接用原始 event，不再 equip
+    gt_event = {
+        "root": target["root"].detach().cpu().long(),
+        "tonic": target["tonic"].detach().cpu().long(),
+        "chord": target["chord"].detach().cpu().float(),
+        "start": target["start"].detach().cpu().float(),
+        "sustain": target["sustain"].detach().cpu().float(),
+    }
+
+    def draw(ax, data, subtitle):
+        root = data["root"]
+        chord = data["chord"]
+        tonic = data["tonic"]
+        start = data["start"]
+        sustain = data["sustain"]
+
+        M = len(start)
+
+        for i in range(M):
+            t0 = float(start[i].item())
+            dur = float(sustain[i].item())
+
+            # chord: 蓝色块
+            for p in range(12):
+                if float(chord[i, p].item()) > 0.5:
+                    ax.add_patch(
+                        plt.Rectangle(
+                            (t0, p - 0.4),
+                            dur,
+                            0.8,
+                            color="skyblue",
+                            alpha=0.6
+                        )
+                    )
+
+            # root: 红色块；12 表示 None，不画
+            r = int(root[i].item())
+            if 0 <= r < 12:
+                ax.add_patch(
+                    plt.Rectangle(
+                        (t0, r - 0.4),
+                        dur,
+                        0.8,
+                        color="red",
+                        alpha=0.9
+                    )
+                )
+
+            # tonic: 绿色边框；12 表示 None，不画
+            tn = int(tonic[i].item())
+            if 0 <= tn < 12:
+                ax.add_patch(
+                    plt.Rectangle(
+                        (t0, tn - 0.4),
+                        dur,
+                        0.8,
+                        fill=False,
+                        edgecolor="green",
+                        linewidth=2
+                    )
+                )
+
+        ax.set_title(subtitle)
+        ax.set_ylim(-0.5, 11.5)
+        ax.set_yticks(range(12))
+        ax.set_yticklabels(NOTE_NAMES)
+        ax.grid(True, axis='y', linestyle='--', alpha=0.5)
+        ax.grid(True, axis='x', linestyle=':', alpha=0.3)
+
+    fig, axs = plt.subplots(2, 1, figsize=(12, 6), sharex=True)
+
+    draw(axs[0], pred_event, "Prediction")
+    draw(axs[1], gt_event, "Ground Truth")
+
+    # 统一 x 范围
+    all_starts = []
+    all_ends = []
+    for data in [pred_event, gt_event]:
+        if len(data["start"]) > 0:
+            all_starts.append(float(data["start"].min().item()))
+            all_ends.append(float((data["start"] + data["sustain"]).max().item()))
+    if len(all_starts) > 0:
+        axs[-1].set_xlim(min(all_starts), max(all_ends))
+
+    axs[-1].set_xlabel("Time")
+    plt.suptitle(title)
+    plt.tight_layout()
     plt.savefig(os.path.join(cfg.save_dir, name + ".png"))
     plt.close()

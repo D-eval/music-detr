@@ -1,5 +1,5 @@
 """
-用来训练ALUnion
+chord detr
 
 nohup python3 train4.py > trainAL.log 2>&1 &
 """

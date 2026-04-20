@@ -1,3 +1,7 @@
+"""
+输入音色text_embedding，查询谱
+"""
+
 import torch
 from configs.config import get_config
 from torch import nn

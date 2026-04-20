@@ -6,6 +6,7 @@ from utils.midi import midi2freq, freq2midi
 from configs.config import get_config
 import numpy as np
 import torch
+import torch.nn.functional as F
 import math
 
 def get_freqs(min_midi, max_midi):
@@ -144,3 +145,44 @@ def estimate_shift(wav, shift_range=(-50, 50), step=1):
     best_shift = shifts[best_idx]
 
     return best_shift, shifts, scores
+
+
+
+freq2numT = lambda freq: 20 * (math.log(freq) - math.log(50)) / math.log(16000/50) +\
+    1 * (math.log(16000) - math.log(freq)) / math.log(16000/50)
+
+def cqt1(audio, temp_freq = 440):
+    """
+    audio: (T,)
+    return: (T,)
+    """
+    cfg = get_config()
+    sr = cfg.sr
+    L = int(1/temp_freq * sr * freq2numT(temp_freq))
+    L = L+1 if L % 2 == 0 else L  # ✅ 保证奇数
+    window = torch.hann_window(L)
+
+    phase = torch.arange(0, L) / sr * 2*math.pi
+    cos = torch.cos(phase) * window
+    sin = torch.sin(phase) * window
+
+    cos = cos.view(1, 1, -1)
+    sin = sin.view(1, 1, -1)
+
+    # pad_left = L // 2
+    # pad_right = L // 2 - 1
+
+    # x_pad = F.pad(audio, (pad_left, pad_right))
+
+    # x = x_pad.unfold(dimension=0, size=L, step=1) # (T-L, L)
+
+    # cos_proj = x @ cos
+    # sin_proj = x @ sin
+    # freq_E = cos_proj **2 + sin_proj **2
+
+    audio = audio.view(1, 1, -1)
+
+    cos_proj = F.conv1d(audio, cos, padding=L//2)
+    sin_proj = F.conv1d(audio, sin, padding=L//2)
+    freq_E = cos_proj **2 + sin_proj **2
+    return freq_E[0,0,:]
