@@ -505,15 +505,16 @@ def get_config22():
     cfg.save_epoch = 10
     
     cfg.conv = argparse.Namespace()
-    cfg.conv.embedding_dim = 512
+    cfg.conv.embedding_dim = 1024
     cfg.conv.sound_union_time = 0.005
     cfg.conv.output_dim = 38
     cfg.conv.intermediate_size = 1024
-    
+    cfg.conv.num_layers = 18
     cfg.conv.N_weight = 0.2
     cfg.conv.loss_weight = {
         "root": 1,
         "tonic": 1,
         "chord": 1
     }
+    cfg.conv.use_causal = False
     return cfg

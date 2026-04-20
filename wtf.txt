@@ -4,4 +4,4 @@ python3.9 test_model.py
 
 https://homes.cs.washington.edu/~ranjay/visualgenome/api.html
 
-nohup python3 -u train21.py > train21.log 2>&1 &
+nohup python3 -u train22.py > train22.log 2>&1 &

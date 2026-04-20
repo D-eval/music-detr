@@ -1,0 +1,13 @@
+nohup: ignoring input
+device: cuda
+/home/vipuser/wby/proj_params/my/train22.py:56: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  scaler = torch.cuda.amp.GradScaler()
+[Epoch 1431] step 0 loss: 6.3650
+==== Epoch 1431 avg loss: 6.1859 ====
+[Epoch 1432] step 0 loss: 5.9799
+==== Epoch 1432 avg loss: 5.7097 ====
+[Epoch 1433] step 0 loss: 5.4129
+==== Epoch 1433 avg loss: 5.5754 ====
+[Epoch 1434] step 0 loss: 5.0883
+==== Epoch 1434 avg loss: 5.5677 ====
+[Epoch 1435] step 0 loss: 5.4235

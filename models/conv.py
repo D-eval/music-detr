@@ -42,7 +42,7 @@ def equip_cls(event, start, sustain, t):
     N = event.shape[0]
     for n in range(N):
         choice = (start[n] <= t) * (t <= sustain[n]) # (T,)
-        result[choice] = event[n]
+        result[choice] = event[n].long()
     return result
 
 def equip_chord(chord, start, sustain, t):
@@ -53,12 +53,72 @@ def equip_chord(chord, start, sustain, t):
     t: (T) float
     """
     C = chord.shape[-1]
-    result = 12 * torch.ones((t.shape[0], C), device=t.device).float()
+    result = torch.zeros((t.shape[0], C), device=t.device).float()
     N = chord.shape[0]
     for n in range(N):
         choice = (start[n] <= t) * (t <= sustain[n]) # (T,)
         result[choice, :] = chord[n, :].float()
     return result
+
+
+class Qwen2RMSNorm(nn.Module):
+    def __init__(self, d_model, eps: float = 1e-6) -> None:
+        super().__init__()
+        hidden_size = d_model
+        self.weight = nn.Parameter(torch.ones(hidden_size))
+        self.variance_epsilon = eps
+
+    def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
+        input_dtype = hidden_states.dtype
+        hidden_states = hidden_states.to(torch.float32)
+        variance = hidden_states.pow(2).mean(-1, keepdim=True)
+        # 平方根倒数 rsqrt
+        hidden_states = hidden_states * torch.rsqrt(variance + self.variance_epsilon)
+        return self.weight * hidden_states.to(input_dtype)
+
+
+class ResidualCausalBlock(nn.Module):
+    def __init__(self, dim, kernel_size=3, dilation=1, dropout=0.1, use_causal=True):
+        super().__init__()
+        self.kernel_size = kernel_size
+        self.dilation = dilation
+        self.use_causal = use_causal
+        self.norm = Qwen2RMSNorm(dim)
+        self.conv = nn.Conv1d(
+            dim,
+            dim,
+            kernel_size=kernel_size,
+            dilation=dilation,
+            padding=0  # ❗手动 pad
+        )
+
+        self.act = nn.GELU()
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x):
+        """
+        x: (B, C, T)
+        """
+        residual = x # (B, C, T)
+        
+        x = x.permute(0, 2, 1) # (B, T, C)
+        x = self.norm(x) # (B, T, C)
+        x = x.permute(0, 2, 1)   # (B, C, T)
+        
+        if self.use_causal:
+            pad = (self.kernel_size - 1) * self.dilation
+            x = F.pad(x, (pad, 0))  # causal pad
+        else:
+            pad = (self.kernel_size - 1) * self.dilation
+            pad_left = pad // 2
+            pad_right = pad - pad_left
+            x = F.pad(x, (pad_left, pad_right))  # 对称 padding
+            
+        x = self.conv(x)
+        x = self.act(x)
+        x = self.dropout(x)
+
+        return x + residual
 
 class BTF(nn.Module):
     def __init__(self):
@@ -67,7 +127,7 @@ class BTF(nn.Module):
         self.sr = cfg.sr
         self.num_pitch = cfg.pitch_vocab_size
         self.num_freq = cfg.num_freqs
-        
+        self.use_causal = cfg.conv.use_causal
         input_fea_size = 2 * (cfg.num_freqs + cfg.pitch_vocab_size)
         # 卷积，把 0.005 s 作为一个听感单元
         kernel_size = int(cfg.conv.sound_union_time * cfg.sr) # 220
@@ -76,7 +136,24 @@ class BTF(nn.Module):
                               cfg.conv.embedding_dim,
                               kernel_size=kernel_size,
                               padding=0)
-        self.head = Qwen2MLP(cfg.conv.intermediate_size, cfg.conv.embedding_dim, cfg.conv.output_dim)
+
+        layers = []
+        for i in range(cfg.conv.num_layers):
+            dilation = 3*(i + 1)
+            layers.append(
+                ResidualCausalBlock(
+                    cfg.conv.embedding_dim,
+                    kernel_size=10,
+                    dilation=dilation,
+                    dropout=0.1,
+                    use_causal=self.use_causal
+                )
+            )
+        self.layers = nn.ModuleList(layers)
+        self.post_layer_norm = Qwen2RMSNorm(cfg.conv.embedding_dim)
+        
+        # self.head = Qwen2MLP(cfg.conv.intermediate_size, cfg.conv.embedding_dim, cfg.conv.output_dim)
+        self.head = nn.Linear(cfg.conv.embedding_dim, cfg.conv.output_dim)
         self.N_weight = cfg.conv.N_weight
         self.loss_weight = cfg.conv.loss_weight
     def forward(self, audio):
@@ -101,10 +178,24 @@ class BTF(nn.Module):
         x = torch.concat([pitch, spec], dim=-1) # (B, T, C)
         x = x.permute(0, 2, 1) # (B, C, T)
                 
-        pad = self.kernel_size - 1
+        if self.use_causal:
+            pad = self.kernel_size - 1
+            x = F.pad(x, (pad, 0))  # 左边 pad
+            x = self.embedding(x) # (B, D, T)
+        else:
+            pad = self.kernel_size - 1
+            pad_left = pad//2
+            pad_right = pad - pad_left
+            x = F.pad(x, (pad_left, pad_right))  # 左边 pad
+            x = self.embedding(x) # (B, D, T)
+            
+        for layer in self.layers:
+            x = layer(x) # (B, D, T)
 
-        x = F.pad(x, (pad, 0))  # 左边 pad
-        x = self.embedding(x) # (B, D, T)
+        x = x.permute(0, 2, 1)
+        x = self.post_layer_norm(x)
+        x = x.permute(0, 2, 1)
+        
         assert x.shape[-1]==t.shape[-1], f"x:{x.shape[-1]}, t:{t.shape[-1]}"
         x = x.permute(0, 2, 1) # (B, T, D)
         output = self.head(x) # (B, T, 38)
