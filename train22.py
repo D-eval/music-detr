@@ -53,7 +53,7 @@ optimizer = optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=1e-4)
 recorder = TrainingRecorder()
 recorder.load()
 # -------- 混合精度（强烈建议）--------
-scaler = torch.cuda.amp.GradScaler()
+# scaler = torch.cuda.amp.GradScaler()
 
 # -------- 训练 --------
 # model.train()
@@ -74,13 +74,13 @@ for epoch in range(start_epoch+1, num_epochs):
         # ---------- backward ----------
         optimizer.zero_grad()
 
-        scaler.scale(loss).backward()
+        # scaler.scale(loss).backward()
 
         # 梯度裁剪（防炸）
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
 
-        scaler.step(optimizer)
-        scaler.update()
+        # scaler.step(optimizer)
+        # scaler.update()
 
         total_loss += loss.item()
         
@@ -88,7 +88,7 @@ for epoch in range(start_epoch+1, num_epochs):
         if step % 10 == 0:
             print(f"[Epoch {epoch}] step {step} loss: {loss.item():.4f}")
             plot_pianoroll_timewise(output, target[0])
-            assert 0
+
     print(f"==== Epoch {epoch} avg loss: {total_loss / (step+1):.4f} ====")
     # ---------- 保存 ----------
     if epoch % cfg.save_epoch == 0:

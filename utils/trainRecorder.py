@@ -1,6 +1,6 @@
 
 import torch
-from configs.config import get_config
+from configs.config import get_config22 as get_config
 import os
 
 class TrainingRecorder:
