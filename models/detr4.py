@@ -1,20 +1,5 @@
 """
-带有group query和训练策略
-event 39
-root + chord + tonic
-数据: read0.py
-
-1、预测 interval, offset
-2、预测不同尺度的偏移 int k1, k2, k3
-k1: 0~10,
-k2: 0~8,
-k3: 0~4
-start = offset + k1 * downbeat_interval + k2 * beat_interval + k3 * 16note_interval
-
-# omega: (num, 2), 单位圆num均分
-# vec: (2), 网络经过 norm
-k_logits = omega @ vec
-
+加入不同类型的cell
 """
 
 import torch
@@ -693,12 +678,14 @@ class PitchTransformer(nn.Module):
         assert self.num_distillation_tokens == 1, "wtf"
         self.num_prompt_tokens = cfg.cell.num_prompt_tokens
         self.num_event_tokens = cfg.cell.num_event_tokens
+        self.num_global_tokens = cfg.cell.num_global_tokens
         
         self.receptor_tokens = nn.Parameter(torch.randn((self.num_cell, self.num_receptor_tokens, self.d_model_list[0])))
         if cfg.cell.share_params:
             self.distillation_tokens = nn.Parameter(torch.randn((1, self.d_model_list[0])))
             self.prompt_tokens = nn.Parameter(torch.randn((self.num_prompt_tokens, self.d_model_list[0])))
             self.event_tokens = nn.Parameter(torch.randn((self.num_event_tokens, self.d_model_list[0])))
+            self.meta_tokens = nn.Parameter(torch.randn((self.num_global_tokens, self.d_model_list[0])))
         else:
             raise NotImplementedError("wtf")
                 
@@ -734,6 +721,7 @@ class PitchTransformer(nn.Module):
         # 第二次在 text 内部对 event 和 pitch 进行匹配
         
         self.events_head = nn.Linear(self.d_model_list[-1], output_Qe_dim)
+        self.meta_head = nn.Linear(self.d_model_list[-1], output_dim_dict["meta"])
         
         self.cost_weight = cfg.detr2_cost_weight
         self.loss_weight = cfg.detr2_loss_weight
@@ -797,15 +785,17 @@ class PitchTransformer(nn.Module):
         N_teacher = self.num_distillation_tokens
         N_prompt = self.num_prompt_tokens
         N_event = self.num_event_tokens
+        N_global = self.num_global_tokens
         
         # 组装 cell (B, N_cell, L_cell, C)
         receptors = self.receptor_tokens[None,:,:,:].expand(B, -1, -1, -1)
         teachers = self.distillation_tokens[None,None,:,:].expand(B, N_cell, -1, -1)
         prompts = self.prompt_tokens[None,None,:,:].expand(B, N_cell, -1, -1)
         events = self.event_tokens[None,None,:,:].expand(B, N_cell, -1, -1)
+        meta = self.meta_tokens[None,None,:,:].expand(B, N_cell, -1, -1)
         
         # (B, N_cell, L_cell(n), C(n,l))
-        cells = torch.concat([receptors, teachers, prompts, events], dim=2)
+        cells = torch.concat([receptors, teachers, prompts, events, meta], dim=2)
         
         modal_dict = {
             "text": query_emb, # (B, Q, C)
@@ -831,11 +821,12 @@ class PitchTransformer(nn.Module):
         output_distillation = cells[:,:,N_rec:N_rec+N_teacher,:] # (B, N, 1, C)
         output_prompts = cells[:,:,N_rec+N_teacher:N_rec+N_teacher+N_prompt,:] # (B, N, prompt, C)
         output_events = cells[:,:,N_rec+N_teacher+N_prompt:N_rec+N_teacher+N_prompt+N_event,:] # (B, N, E, C)
-
+        output_meta = cells[:,:,N_rec+N_teacher+N_prompt+N_event:N_rec+N_teacher+N_prompt+N_event+N_global,:] # (B, N, G, C)
+        
         # output_distillation = self.distllation_head(output_distillation) # (B, N, 1, C_text)
         # output_prompts = self.prompt_head(output_prompts) # (B, N, prompt, C_prompts)
         output_events = self.events_head(output_events) # (B, N, E, C_events)
-
+        output_meta = self.meta_head(output_meta) # (B, N, G, C_meta), bpm, offset
         # assert output_distillation.shape[2]==1
         # output_distillation = output_distillation.squeeze(2) # (B, N, C)
 
@@ -843,6 +834,7 @@ class PitchTransformer(nn.Module):
             "text_distillation": None, # output_distillation[b,...], # (Qt, C)
             "text_prompt": None, # output_prompts[b,...], # (Qt, prompt, C)
             "event_out": output_events[b,...], # (Qt, Qe, C)
+            "bpm_out": output_meta[b, ...], # (1, 1, 2)
         } for b in range(B)] # chord 只关注 event_out[0] 就好了
 
         return outputs
@@ -876,6 +868,17 @@ class PitchTransformer(nn.Module):
         loss_dict['exist'] = loss_exist.item()
 
         loss = loss + self.loss_weight["exist"] * loss_exist
+        
+        # bpm 预测
+        bpm_pred = output['bpm_out'][0, 0, 0]
+        offset_pred = output['bpm_out'][0, 0, 1]
+        bpm_target = target['bpm']
+        offset_target = target['offset']
+        loss_bpm = F.l1_loss(bpm_pred, bpm_target)
+        loss_offset = F.l1_loss(offset_pred, offset_target)
+        
+        loss = loss + self.loss_weight["bpm"] * loss_bpm + self.loss_weight["bpm_offset"] * loss_offset
+        
         return loss, loss_dict
 
     def infer(self, output):
@@ -885,6 +888,7 @@ class PitchTransformer(nn.Module):
             "text_distillation": output_distillation[b,...], # (Qt, C)
             "text_prompt": output_prompts[b,...], # (Qt, prompt, C)
             "event_out": output_events[b,...], # (Qt, Qe, C)
+            "bpm_out": (1,1,2)
         }
         """
         output = output['event_out'][0, ...] # (Qe, Ce)
@@ -913,6 +917,9 @@ class PitchTransformer(nn.Module):
         chord_pred = torch.sigmoid(chord_logits[choice]) > chord_threshold
         tonic_pred = torch.argmax(tonic_logits[choice], dim=1)
         
+        bpm_pred = output['bpm_out'][0, 0, 0]
+        offset_pred = output['bpm_out'][0, 0, 1]
+        
         result = {
             "root": root_pred, # (M) 0~11
             "chord": chord_pred, # (M, 12)
@@ -921,6 +928,9 @@ class PitchTransformer(nn.Module):
             "sustain": sustain_pred, # (M)
             "exist": exist_pred, # (M)
             "before": before_pred, # (M) 0~1
+            
+            "bpm": bpm_pred,
+            "offset": offset_pred,
         }
 
         return result

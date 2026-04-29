@@ -477,8 +477,8 @@ def plot_pianoroll_event(pred, target, title="event_pianoroll", name="chord_pred
     # ===== 绘图 =====
     fig, axs = plt.subplots(2, 1, figsize=(12, 6), sharex=True)
 
-    draw(axs[0], pred, "Prediction")
-    draw(axs[1], target, "Ground Truth")
+    draw(axs[0], pred, f"Prediction, bpm: {pred['bpm']}")
+    draw(axs[1], target, f"Ground Truth, bpm: {target['bpm']}")
 
     axs[-1].set_xlabel("Time")
 

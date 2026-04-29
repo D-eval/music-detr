@@ -326,12 +326,14 @@ def get_config21():
     cfg.time_mask_len = 5 # None
     
     # detr
-    cfg.num_cell = 1
+    cfg.num_cell = 2
+    cfg.cell_name = ["bpm", "chord"]
     cfg.cell = argparse.Namespace()
     cfg.cell.num_receptor_tokens = 5 # 细胞膜受体，和外部信息做注意力
     cfg.cell.num_distillation_tokens = 1 # 蒸馏token，用于接近 text_emb
     cfg.cell.num_prompt_tokens = 16 # 用于输入 llm，预测 文本描述
     cfg.cell.num_event_tokens = 20 # 用于预测事件
+    cfg.cell.num_global_tokens = 1 # 预测 bpm 和 offset
     cfg.cell.share_params = True # 共享细胞内的参数，只有细胞膜不同
     
     cfg.num_prompt_querys = 9
@@ -341,7 +343,9 @@ def get_config21():
     cfg.input_dim = 2
     cfg.detr_output_dim_dict = {"event": 3, # [start, log sustain, before]
                                 "pitch": 36,
-                                "exist": 1}
+                                "exist": 1,
+                                "meta": 2} # bpm, offset
+
     cfg.detr_num_decoder_layers = 12
     cfg.detr_d_model_list = [64] * 3 + [128] * 3 + [256] * 3 + [512] * 2 + [1024]
     cfg.pool_stride = [None, None, 4, None, None, 3, None, None, 2, None, None, 5]
@@ -362,6 +366,9 @@ def get_config21():
         "chord": 1,
         "exist": 1,
         "before": 2,
+        
+        "bpm": 0.3,
+        "bpm_offset": 0.5,
     }
     
     cfg.detr2_cost_weight = {
