@@ -44,9 +44,9 @@ model = BTF().to(device)
 
 # teacher = Teacher()
 
-# checkpoint_path = "/home/vipuser/wby/proj_params/params/al/ckpt_epoch.pt"
-# state_dict = torch.load(checkpoint_path)
-# model.load_state_dict(state_dict=state_dict)
+checkpoint_path = "/home/vipuser/wby/proj_params/params/conv/ckpt_epoch.pt"
+state_dict = torch.load(checkpoint_path)
+model.load_state_dict(state_dict=state_dict)
 
 # -------- optimizer --------
 optimizer = optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=1e-4)
@@ -59,7 +59,7 @@ scaler = torch.cuda.amp.GradScaler()
 # model.train()
 
 
-num_epochs = 5000
+num_epochs = 50000
 
 hist_len = recorder.history["loss"].__len__()
 start_epoch = cfg.save_epoch * (hist_len-1) if hist_len!=0 else 0

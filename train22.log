@@ -2,12 +2,3375 @@ nohup: ignoring input
 device: cuda
 /home/vipuser/wby/proj_params/my/train22.py:56: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
   scaler = torch.cuda.amp.GradScaler()
-[Epoch 1431] step 0 loss: 6.3650
-==== Epoch 1431 avg loss: 6.1859 ====
-[Epoch 1432] step 0 loss: 5.9799
-==== Epoch 1432 avg loss: 5.7097 ====
-[Epoch 1433] step 0 loss: 5.4129
-==== Epoch 1433 avg loss: 5.5754 ====
-[Epoch 1434] step 0 loss: 5.0883
-==== Epoch 1434 avg loss: 5.5677 ====
-[Epoch 1435] step 0 loss: 5.4235
+[Epoch 1481] step 0 loss: 4.1167
+==== Epoch 1481 avg loss: 4.0752 ====
+[Epoch 1482] step 0 loss: 4.2280
+==== Epoch 1482 avg loss: 4.0541 ====
+[Epoch 1483] step 0 loss: 3.8875
+==== Epoch 1483 avg loss: 4.0567 ====
+[Epoch 1484] step 0 loss: 4.0876
+==== Epoch 1484 avg loss: 4.0587 ====
+[Epoch 1485] step 0 loss: 4.6743
+==== Epoch 1485 avg loss: 3.9603 ====
+[Epoch 1486] step 0 loss: 4.2810
+==== Epoch 1486 avg loss: 4.0149 ====
+[Epoch 1487] step 0 loss: 4.5696
+==== Epoch 1487 avg loss: 4.0970 ====
+[Epoch 1488] step 0 loss: 3.9864
+==== Epoch 1488 avg loss: 3.9298 ====
+[Epoch 1489] step 0 loss: 4.5304
+==== Epoch 1489 avg loss: 4.0079 ====
+[Epoch 1490] step 0 loss: 3.5086
+==== Epoch 1490 avg loss: 3.7886 ====
+[Epoch 1491] step 0 loss: 3.7120
+==== Epoch 1491 avg loss: 3.9285 ====
+[Epoch 1492] step 0 loss: 4.4547
+==== Epoch 1492 avg loss: 4.0194 ====
+[Epoch 1493] step 0 loss: 3.1481
+==== Epoch 1493 avg loss: 3.8861 ====
+[Epoch 1494] step 0 loss: 3.9068
+==== Epoch 1494 avg loss: 3.8511 ====
+[Epoch 1495] step 0 loss: 2.9208
+==== Epoch 1495 avg loss: 3.7929 ====
+[Epoch 1496] step 0 loss: 3.9225
+==== Epoch 1496 avg loss: 3.8283 ====
+[Epoch 1497] step 0 loss: 4.8788
+==== Epoch 1497 avg loss: 3.7748 ====
+[Epoch 1498] step 0 loss: 4.2075
+==== Epoch 1498 avg loss: 3.6089 ====
+[Epoch 1499] step 0 loss: 3.5518
+==== Epoch 1499 avg loss: 3.8114 ====
+[Epoch 1500] step 0 loss: 3.9476
+==== Epoch 1500 avg loss: 3.7454 ====
+[Epoch 1501] step 0 loss: 3.4660
+==== Epoch 1501 avg loss: 3.6713 ====
+[Epoch 1502] step 0 loss: 3.8038
+==== Epoch 1502 avg loss: 3.7248 ====
+[Epoch 1503] step 0 loss: 3.2128
+==== Epoch 1503 avg loss: 3.8195 ====
+[Epoch 1504] step 0 loss: 3.9521
+==== Epoch 1504 avg loss: 3.7226 ====
+[Epoch 1505] step 0 loss: 2.8771
+==== Epoch 1505 avg loss: 3.8978 ====
+[Epoch 1506] step 0 loss: 3.6194
+==== Epoch 1506 avg loss: 3.5678 ====
+[Epoch 1507] step 0 loss: 3.9769
+==== Epoch 1507 avg loss: 3.6757 ====
+[Epoch 1508] step 0 loss: 3.6895
+==== Epoch 1508 avg loss: 3.5727 ====
+[Epoch 1509] step 0 loss: 3.9780
+==== Epoch 1509 avg loss: 3.7078 ====
+[Epoch 1510] step 0 loss: 3.2399
+==== Epoch 1510 avg loss: 3.4692 ====
+[Epoch 1511] step 0 loss: 2.9111
+==== Epoch 1511 avg loss: 3.6011 ====
+[Epoch 1512] step 0 loss: 2.8477
+==== Epoch 1512 avg loss: 3.5154 ====
+[Epoch 1513] step 0 loss: 3.4876
+==== Epoch 1513 avg loss: 3.4826 ====
+[Epoch 1514] step 0 loss: 3.0087
+==== Epoch 1514 avg loss: 3.5034 ====
+[Epoch 1515] step 0 loss: 3.7010
+==== Epoch 1515 avg loss: 3.4506 ====
+[Epoch 1516] step 0 loss: 3.9776
+==== Epoch 1516 avg loss: 3.4200 ====
+[Epoch 1517] step 0 loss: 3.4970
+==== Epoch 1517 avg loss: 3.5340 ====
+[Epoch 1518] step 0 loss: 3.4773
+==== Epoch 1518 avg loss: 3.3686 ====
+[Epoch 1519] step 0 loss: 2.3338
+==== Epoch 1519 avg loss: 3.5135 ====
+[Epoch 1520] step 0 loss: 3.3313
+==== Epoch 1520 avg loss: 3.3801 ====
+[Epoch 1521] step 0 loss: 2.7643
+==== Epoch 1521 avg loss: 3.4265 ====
+[Epoch 1522] step 0 loss: 2.9146
+==== Epoch 1522 avg loss: 3.3935 ====
+[Epoch 1523] step 0 loss: 3.7248
+==== Epoch 1523 avg loss: 3.4787 ====
+[Epoch 1524] step 0 loss: 3.6998
+==== Epoch 1524 avg loss: 3.6245 ====
+[Epoch 1525] step 0 loss: 2.7174
+==== Epoch 1525 avg loss: 3.3331 ====
+[Epoch 1526] step 0 loss: 2.3396
+==== Epoch 1526 avg loss: 3.1445 ====
+[Epoch 1527] step 0 loss: 3.1386
+==== Epoch 1527 avg loss: 3.1927 ====
+[Epoch 1528] step 0 loss: 2.8711
+==== Epoch 1528 avg loss: 3.3386 ====
+[Epoch 1529] step 0 loss: 3.0555
+==== Epoch 1529 avg loss: 3.4085 ====
+[Epoch 1530] step 0 loss: 3.2450
+==== Epoch 1530 avg loss: 3.3520 ====
+[Epoch 1531] step 0 loss: 2.1352
+==== Epoch 1531 avg loss: 3.1954 ====
+[Epoch 1532] step 0 loss: 4.2062
+==== Epoch 1532 avg loss: 3.3147 ====
+[Epoch 1533] step 0 loss: 3.6290
+==== Epoch 1533 avg loss: 3.2511 ====
+[Epoch 1534] step 0 loss: 2.7367
+==== Epoch 1534 avg loss: 3.1342 ====
+[Epoch 1535] step 0 loss: 3.4068
+==== Epoch 1535 avg loss: 3.2283 ====
+[Epoch 1536] step 0 loss: 3.7815
+==== Epoch 1536 avg loss: 3.3217 ====
+[Epoch 1537] step 0 loss: 3.2466
+==== Epoch 1537 avg loss: 3.3871 ====
+[Epoch 1538] step 0 loss: 3.7342
+==== Epoch 1538 avg loss: 3.2390 ====
+[Epoch 1539] step 0 loss: 3.4514
+==== Epoch 1539 avg loss: 3.2421 ====
+[Epoch 1540] step 0 loss: 3.4327
+==== Epoch 1540 avg loss: 3.0891 ====
+[Epoch 1541] step 0 loss: 3.1695
+==== Epoch 1541 avg loss: 3.6206 ====
+[Epoch 1542] step 0 loss: 3.8074
+==== Epoch 1542 avg loss: 3.1702 ====
+[Epoch 1543] step 0 loss: 3.0356
+==== Epoch 1543 avg loss: 3.2576 ====
+[Epoch 1544] step 0 loss: 2.6689
+==== Epoch 1544 avg loss: 3.0669 ====
+[Epoch 1545] step 0 loss: 3.5523
+==== Epoch 1545 avg loss: 3.2288 ====
+[Epoch 1546] step 0 loss: 2.8329
+==== Epoch 1546 avg loss: 3.3105 ====
+[Epoch 1547] step 0 loss: 3.0348
+==== Epoch 1547 avg loss: 3.2382 ====
+[Epoch 1548] step 0 loss: 2.5333
+==== Epoch 1548 avg loss: 3.0614 ====
+[Epoch 1549] step 0 loss: 2.9944
+==== Epoch 1549 avg loss: 2.9436 ====
+[Epoch 1550] step 0 loss: 2.3952
+==== Epoch 1550 avg loss: 2.9418 ====
+[Epoch 1551] step 0 loss: 3.2400
+==== Epoch 1551 avg loss: 3.1310 ====
+[Epoch 1552] step 0 loss: 2.9332
+==== Epoch 1552 avg loss: 3.0477 ====
+[Epoch 1553] step 0 loss: 3.3115
+==== Epoch 1553 avg loss: 3.0500 ====
+[Epoch 1554] step 0 loss: 3.0313
+==== Epoch 1554 avg loss: 2.9511 ====
+[Epoch 1555] step 0 loss: 3.2152
+==== Epoch 1555 avg loss: 3.0774 ====
+[Epoch 1556] step 0 loss: 3.1204
+==== Epoch 1556 avg loss: 3.1481 ====
+[Epoch 1557] step 0 loss: 3.3984
+==== Epoch 1557 avg loss: 2.9918 ====
+[Epoch 1558] step 0 loss: 3.6564
+==== Epoch 1558 avg loss: 2.9862 ====
+[Epoch 1559] step 0 loss: 3.0618
+==== Epoch 1559 avg loss: 2.9401 ====
+[Epoch 1560] step 0 loss: 3.3454
+==== Epoch 1560 avg loss: 2.8984 ====
+[Epoch 1561] step 0 loss: 2.6302
+==== Epoch 1561 avg loss: 2.9748 ====
+[Epoch 1562] step 0 loss: 3.0732
+==== Epoch 1562 avg loss: 2.9007 ====
+[Epoch 1563] step 0 loss: 2.8494
+==== Epoch 1563 avg loss: 2.9106 ====
+[Epoch 1564] step 0 loss: 2.7489
+==== Epoch 1564 avg loss: 3.0023 ====
+[Epoch 1565] step 0 loss: 2.2536
+==== Epoch 1565 avg loss: 2.8241 ====
+[Epoch 1566] step 0 loss: 3.7832
+==== Epoch 1566 avg loss: 2.7144 ====
+[Epoch 1567] step 0 loss: 2.3345
+==== Epoch 1567 avg loss: 3.2640 ====
+[Epoch 1568] step 0 loss: 2.2261
+==== Epoch 1568 avg loss: 3.0105 ====
+[Epoch 1569] step 0 loss: 2.9793
+==== Epoch 1569 avg loss: 2.8623 ====
+[Epoch 1570] step 0 loss: 3.4436
+==== Epoch 1570 avg loss: 2.8372 ====
+[Epoch 1571] step 0 loss: 2.8733
+==== Epoch 1571 avg loss: 2.8543 ====
+[Epoch 1572] step 0 loss: 2.8163
+==== Epoch 1572 avg loss: 2.7092 ====
+[Epoch 1573] step 0 loss: 2.7919
+==== Epoch 1573 avg loss: 2.9670 ====
+[Epoch 1574] step 0 loss: 2.6002
+==== Epoch 1574 avg loss: 2.9558 ====
+[Epoch 1575] step 0 loss: 2.5830
+==== Epoch 1575 avg loss: 2.8399 ====
+[Epoch 1576] step 0 loss: 3.6466
+==== Epoch 1576 avg loss: 3.1893 ====
+[Epoch 1577] step 0 loss: 2.7721
+==== Epoch 1577 avg loss: 2.9428 ====
+[Epoch 1578] step 0 loss: 2.5469
+==== Epoch 1578 avg loss: 2.8887 ====
+[Epoch 1579] step 0 loss: 2.6650
+==== Epoch 1579 avg loss: 2.8751 ====
+[Epoch 1580] step 0 loss: 3.0642
+==== Epoch 1580 avg loss: 2.6727 ====
+[Epoch 1581] step 0 loss: 2.8576
+==== Epoch 1581 avg loss: 2.8382 ====
+[Epoch 1582] step 0 loss: 2.9222
+==== Epoch 1582 avg loss: 2.8669 ====
+[Epoch 1583] step 0 loss: 2.4252
+==== Epoch 1583 avg loss: 2.7314 ====
+[Epoch 1584] step 0 loss: 3.6615
+==== Epoch 1584 avg loss: 2.7504 ====
+[Epoch 1585] step 0 loss: 2.3459
+==== Epoch 1585 avg loss: 2.9057 ====
+[Epoch 1586] step 0 loss: 2.6970
+==== Epoch 1586 avg loss: 2.7425 ====
+[Epoch 1587] step 0 loss: 2.9397
+==== Epoch 1587 avg loss: 2.9504 ====
+[Epoch 1588] step 0 loss: 2.1248
+==== Epoch 1588 avg loss: 2.6216 ====
+[Epoch 1589] step 0 loss: 2.6861
+==== Epoch 1589 avg loss: 2.9860 ====
+[Epoch 1590] step 0 loss: 2.2305
+==== Epoch 1590 avg loss: 2.7204 ====
+[Epoch 1591] step 0 loss: 3.0454
+==== Epoch 1591 avg loss: 2.9516 ====
+[Epoch 1592] step 0 loss: 3.0282
+==== Epoch 1592 avg loss: 2.6198 ====
+[Epoch 1593] step 0 loss: 3.2113
+==== Epoch 1593 avg loss: 2.7599 ====
+[Epoch 1594] step 0 loss: 2.1509
+==== Epoch 1594 avg loss: 2.6794 ====
+[Epoch 1595] step 0 loss: 2.7131
+==== Epoch 1595 avg loss: 2.8259 ====
+[Epoch 1596] step 0 loss: 2.8572
+==== Epoch 1596 avg loss: 2.7619 ====
+[Epoch 1597] step 0 loss: 2.2990
+==== Epoch 1597 avg loss: 2.6099 ====
+[Epoch 1598] step 0 loss: 1.8587
+==== Epoch 1598 avg loss: 2.7286 ====
+[Epoch 1599] step 0 loss: 3.2231
+==== Epoch 1599 avg loss: 2.7119 ====
+[Epoch 1600] step 0 loss: 3.6784
+==== Epoch 1600 avg loss: 2.4798 ====
+[Epoch 1601] step 0 loss: 3.4639
+==== Epoch 1601 avg loss: 2.4859 ====
+[Epoch 1602] step 0 loss: 2.9095
+==== Epoch 1602 avg loss: 2.6098 ====
+[Epoch 1603] step 0 loss: 2.9880
+==== Epoch 1603 avg loss: 2.6432 ====
+[Epoch 1604] step 0 loss: 3.6757
+==== Epoch 1604 avg loss: 2.5193 ====
+[Epoch 1605] step 0 loss: 2.3129
+==== Epoch 1605 avg loss: 2.5835 ====
+[Epoch 1606] step 0 loss: 2.6829
+==== Epoch 1606 avg loss: 2.5139 ====
+[Epoch 1607] step 0 loss: 2.9288
+==== Epoch 1607 avg loss: 2.8087 ====
+[Epoch 1608] step 0 loss: 2.6922
+==== Epoch 1608 avg loss: 2.7002 ====
+[Epoch 1609] step 0 loss: 2.1447
+==== Epoch 1609 avg loss: 2.5901 ====
+[Epoch 1610] step 0 loss: 2.4362
+==== Epoch 1610 avg loss: 2.7902 ====
+[Epoch 1611] step 0 loss: 1.6015
+==== Epoch 1611 avg loss: 2.7340 ====
+[Epoch 1612] step 0 loss: 2.7802
+==== Epoch 1612 avg loss: 2.6611 ====
+[Epoch 1613] step 0 loss: 2.8014
+==== Epoch 1613 avg loss: 2.5774 ====
+[Epoch 1614] step 0 loss: 1.7177
+==== Epoch 1614 avg loss: 2.5316 ====
+[Epoch 1615] step 0 loss: 2.8735
+==== Epoch 1615 avg loss: 2.6341 ====
+[Epoch 1616] step 0 loss: 2.5418
+==== Epoch 1616 avg loss: 2.7143 ====
+[Epoch 1617] step 0 loss: 2.9133
+==== Epoch 1617 avg loss: 2.3832 ====
+[Epoch 1618] step 0 loss: 2.5011
+==== Epoch 1618 avg loss: 2.5885 ====
+[Epoch 1619] step 0 loss: 2.7083
+==== Epoch 1619 avg loss: 2.4807 ====
+[Epoch 1620] step 0 loss: 2.7792
+==== Epoch 1620 avg loss: 2.6731 ====
+[Epoch 1621] step 0 loss: 2.4842
+==== Epoch 1621 avg loss: 2.7410 ====
+[Epoch 1622] step 0 loss: 2.7904
+==== Epoch 1622 avg loss: 2.5987 ====
+[Epoch 1623] step 0 loss: 2.7045
+==== Epoch 1623 avg loss: 2.7083 ====
+[Epoch 1624] step 0 loss: 2.5375
+==== Epoch 1624 avg loss: 2.6084 ====
+[Epoch 1625] step 0 loss: 3.2704
+==== Epoch 1625 avg loss: 2.5042 ====
+[Epoch 1626] step 0 loss: 2.6260
+==== Epoch 1626 avg loss: 2.5307 ====
+[Epoch 1627] step 0 loss: 2.1867
+==== Epoch 1627 avg loss: 2.4240 ====
+[Epoch 1628] step 0 loss: 1.9534
+==== Epoch 1628 avg loss: 2.4970 ====
+[Epoch 1629] step 0 loss: 2.2100
+==== Epoch 1629 avg loss: 2.6025 ====
+[Epoch 1630] step 0 loss: 2.5455
+==== Epoch 1630 avg loss: 2.4342 ====
+[Epoch 1631] step 0 loss: 2.2050
+==== Epoch 1631 avg loss: 2.4466 ====
+[Epoch 1632] step 0 loss: 2.0884
+==== Epoch 1632 avg loss: 2.5016 ====
+[Epoch 1633] step 0 loss: 2.9817
+==== Epoch 1633 avg loss: 2.2946 ====
+[Epoch 1634] step 0 loss: 2.3817
+==== Epoch 1634 avg loss: 2.6420 ====
+[Epoch 1635] step 0 loss: 2.5107
+==== Epoch 1635 avg loss: 2.3609 ====
+[Epoch 1636] step 0 loss: 3.3919
+==== Epoch 1636 avg loss: 2.5611 ====
+[Epoch 1637] step 0 loss: 3.1389
+==== Epoch 1637 avg loss: 2.3780 ====
+[Epoch 1638] step 0 loss: 1.6047
+==== Epoch 1638 avg loss: 2.3444 ====
+[Epoch 1639] step 0 loss: 1.9327
+==== Epoch 1639 avg loss: 2.4930 ====
+[Epoch 1640] step 0 loss: 2.0465
+==== Epoch 1640 avg loss: 2.5032 ====
+[Epoch 1641] step 0 loss: 1.8363
+==== Epoch 1641 avg loss: 2.3710 ====
+[Epoch 1642] step 0 loss: 2.7254
+==== Epoch 1642 avg loss: 2.4515 ====
+[Epoch 1643] step 0 loss: 2.6499
+==== Epoch 1643 avg loss: 2.5700 ====
+[Epoch 1644] step 0 loss: 2.2535
+==== Epoch 1644 avg loss: 2.2631 ====
+[Epoch 1645] step 0 loss: 3.3489
+==== Epoch 1645 avg loss: 2.3508 ====
+[Epoch 1646] step 0 loss: 3.0358
+==== Epoch 1646 avg loss: 2.4041 ====
+[Epoch 1647] step 0 loss: 3.1045
+==== Epoch 1647 avg loss: 2.5639 ====
+[Epoch 1648] step 0 loss: 2.6882
+==== Epoch 1648 avg loss: 2.3670 ====
+[Epoch 1649] step 0 loss: 2.6660
+==== Epoch 1649 avg loss: 2.5650 ====
+[Epoch 1650] step 0 loss: 3.9236
+==== Epoch 1650 avg loss: 2.5849 ====
+[Epoch 1651] step 0 loss: 2.0805
+==== Epoch 1651 avg loss: 2.4352 ====
+[Epoch 1652] step 0 loss: 2.7784
+==== Epoch 1652 avg loss: 2.1068 ====
+[Epoch 1653] step 0 loss: 2.8233
+==== Epoch 1653 avg loss: 2.3255 ====
+[Epoch 1654] step 0 loss: 2.2598
+==== Epoch 1654 avg loss: 2.2736 ====
+[Epoch 1655] step 0 loss: 2.8198
+==== Epoch 1655 avg loss: 2.2286 ====
+[Epoch 1656] step 0 loss: 2.0665
+==== Epoch 1656 avg loss: 2.4384 ====
+[Epoch 1657] step 0 loss: 1.8933
+==== Epoch 1657 avg loss: 2.3823 ====
+[Epoch 1658] step 0 loss: 1.9908
+==== Epoch 1658 avg loss: 2.2724 ====
+[Epoch 1659] step 0 loss: 2.0294
+==== Epoch 1659 avg loss: 2.3199 ====
+[Epoch 1660] step 0 loss: 1.9899
+==== Epoch 1660 avg loss: 2.3826 ====
+[Epoch 1661] step 0 loss: 2.0604
+==== Epoch 1661 avg loss: 2.2840 ====
+[Epoch 1662] step 0 loss: 2.2125
+==== Epoch 1662 avg loss: 2.3210 ====
+[Epoch 1663] step 0 loss: 2.6191
+==== Epoch 1663 avg loss: 2.4330 ====
+[Epoch 1664] step 0 loss: 2.8197
+==== Epoch 1664 avg loss: 2.4541 ====
+[Epoch 1665] step 0 loss: 1.5684
+==== Epoch 1665 avg loss: 2.2401 ====
+[Epoch 1666] step 0 loss: 2.9174
+==== Epoch 1666 avg loss: 2.2806 ====
+[Epoch 1667] step 0 loss: 1.8876
+==== Epoch 1667 avg loss: 2.1970 ====
+[Epoch 1668] step 0 loss: 2.5747
+==== Epoch 1668 avg loss: 2.2972 ====
+[Epoch 1669] step 0 loss: 1.9290
+==== Epoch 1669 avg loss: 2.0798 ====
+[Epoch 1670] step 0 loss: 2.4300
+==== Epoch 1670 avg loss: 2.3220 ====
+[Epoch 1671] step 0 loss: 2.3160
+==== Epoch 1671 avg loss: 2.1788 ====
+[Epoch 1672] step 0 loss: 2.7808
+==== Epoch 1672 avg loss: 2.2599 ====
+[Epoch 1673] step 0 loss: 1.8320
+==== Epoch 1673 avg loss: 2.3631 ====
+[Epoch 1674] step 0 loss: 2.0443
+==== Epoch 1674 avg loss: 2.1404 ====
+[Epoch 1675] step 0 loss: 2.2298
+==== Epoch 1675 avg loss: 2.4709 ====
+[Epoch 1676] step 0 loss: 2.0629
+==== Epoch 1676 avg loss: 2.1244 ====
+[Epoch 1677] step 0 loss: 2.1310
+==== Epoch 1677 avg loss: 2.2962 ====
+[Epoch 1678] step 0 loss: 2.0667
+==== Epoch 1678 avg loss: 2.2133 ====
+[Epoch 1679] step 0 loss: 2.5045
+==== Epoch 1679 avg loss: 2.1658 ====
+[Epoch 1680] step 0 loss: 2.2005
+==== Epoch 1680 avg loss: 2.2926 ====
+[Epoch 1681] step 0 loss: 1.9144
+==== Epoch 1681 avg loss: 2.1343 ====
+[Epoch 1682] step 0 loss: 3.3326
+==== Epoch 1682 avg loss: 2.1651 ====
+[Epoch 1683] step 0 loss: 3.3555
+==== Epoch 1683 avg loss: 2.5462 ====
+[Epoch 1684] step 0 loss: 2.2713
+==== Epoch 1684 avg loss: 2.1556 ====
+[Epoch 1685] step 0 loss: 2.4724
+==== Epoch 1685 avg loss: 2.1857 ====
+[Epoch 1686] step 0 loss: 2.2610
+==== Epoch 1686 avg loss: 2.4277 ====
+[Epoch 1687] step 0 loss: 2.1688
+==== Epoch 1687 avg loss: 2.3193 ====
+[Epoch 1688] step 0 loss: 2.5102
+==== Epoch 1688 avg loss: 2.3611 ====
+[Epoch 1689] step 0 loss: 2.3844
+==== Epoch 1689 avg loss: 2.3659 ====
+[Epoch 1690] step 0 loss: 2.7442
+==== Epoch 1690 avg loss: 2.4123 ====
+[Epoch 1691] step 0 loss: 2.0991
+==== Epoch 1691 avg loss: 2.0898 ====
+[Epoch 1692] step 0 loss: 2.4335
+==== Epoch 1692 avg loss: 2.1647 ====
+[Epoch 1693] step 0 loss: 2.7647
+==== Epoch 1693 avg loss: 2.1712 ====
+[Epoch 1694] step 0 loss: 2.1821
+==== Epoch 1694 avg loss: 2.1896 ====
+[Epoch 1695] step 0 loss: 2.4932
+==== Epoch 1695 avg loss: 2.0830 ====
+[Epoch 1696] step 0 loss: 2.7087
+==== Epoch 1696 avg loss: 2.1587 ====
+[Epoch 1697] step 0 loss: 2.8072
+==== Epoch 1697 avg loss: 2.1220 ====
+[Epoch 1698] step 0 loss: 2.3961
+==== Epoch 1698 avg loss: 2.2948 ====
+[Epoch 1699] step 0 loss: 1.8959
+==== Epoch 1699 avg loss: 2.1094 ====
+[Epoch 1700] step 0 loss: 2.3648
+==== Epoch 1700 avg loss: 2.0755 ====
+[Epoch 1701] step 0 loss: 3.0723
+==== Epoch 1701 avg loss: 2.2289 ====
+[Epoch 1702] step 0 loss: 2.3381
+==== Epoch 1702 avg loss: 2.1981 ====
+[Epoch 1703] step 0 loss: 2.1163
+==== Epoch 1703 avg loss: 2.1649 ====
+[Epoch 1704] step 0 loss: 2.6795
+==== Epoch 1704 avg loss: 2.2813 ====
+[Epoch 1705] step 0 loss: 2.2297
+==== Epoch 1705 avg loss: 1.9986 ====
+[Epoch 1706] step 0 loss: 2.1231
+==== Epoch 1706 avg loss: 2.1616 ====
+[Epoch 1707] step 0 loss: 3.0508
+==== Epoch 1707 avg loss: 2.1606 ====
+[Epoch 1708] step 0 loss: 2.7953
+==== Epoch 1708 avg loss: 2.1007 ====
+[Epoch 1709] step 0 loss: 2.1288
+==== Epoch 1709 avg loss: 2.1605 ====
+[Epoch 1710] step 0 loss: 2.4906
+==== Epoch 1710 avg loss: 2.0206 ====
+[Epoch 1711] step 0 loss: 2.0284
+==== Epoch 1711 avg loss: 2.2189 ====
+[Epoch 1712] step 0 loss: 2.7903
+==== Epoch 1712 avg loss: 2.2113 ====
+[Epoch 1713] step 0 loss: 1.5942
+==== Epoch 1713 avg loss: 2.0722 ====
+[Epoch 1714] step 0 loss: 2.8702
+==== Epoch 1714 avg loss: 2.1071 ====
+[Epoch 1715] step 0 loss: 1.8946
+==== Epoch 1715 avg loss: 2.0214 ====
+[Epoch 1716] step 0 loss: 1.5915
+==== Epoch 1716 avg loss: 2.2602 ====
+[Epoch 1717] step 0 loss: 3.1915
+==== Epoch 1717 avg loss: 1.9829 ====
+[Epoch 1718] step 0 loss: 1.9598
+==== Epoch 1718 avg loss: 2.1289 ====
+[Epoch 1719] step 0 loss: 2.3830
+==== Epoch 1719 avg loss: 2.3736 ====
+[Epoch 1720] step 0 loss: 1.2434
+==== Epoch 1720 avg loss: 2.0529 ====
+[Epoch 1721] step 0 loss: 1.8935
+==== Epoch 1721 avg loss: 2.1983 ====
+[Epoch 1722] step 0 loss: 1.9776
+==== Epoch 1722 avg loss: 2.0850 ====
+[Epoch 1723] step 0 loss: 1.7758
+==== Epoch 1723 avg loss: 2.0933 ====
+[Epoch 1724] step 0 loss: 1.7335
+==== Epoch 1724 avg loss: 2.1045 ====
+[Epoch 1725] step 0 loss: 1.4513
+==== Epoch 1725 avg loss: 2.1532 ====
+[Epoch 1726] step 0 loss: 1.6768
+==== Epoch 1726 avg loss: 2.0252 ====
+[Epoch 1727] step 0 loss: 1.9080
+==== Epoch 1727 avg loss: 2.0178 ====
+[Epoch 1728] step 0 loss: 2.2715
+==== Epoch 1728 avg loss: 2.1300 ====
+[Epoch 1729] step 0 loss: 1.8942
+==== Epoch 1729 avg loss: 1.9577 ====
+[Epoch 1730] step 0 loss: 1.6266
+==== Epoch 1730 avg loss: 2.0825 ====
+[Epoch 1731] step 0 loss: 1.5250
+==== Epoch 1731 avg loss: 1.9961 ====
+[Epoch 1732] step 0 loss: 2.4610
+==== Epoch 1732 avg loss: 2.0074 ====
+[Epoch 1733] step 0 loss: 2.1312
+==== Epoch 1733 avg loss: 2.0904 ====
+[Epoch 1734] step 0 loss: 2.0412
+==== Epoch 1734 avg loss: 2.0972 ====
+[Epoch 1735] step 0 loss: 2.3593
+==== Epoch 1735 avg loss: 1.9883 ====
+[Epoch 1736] step 0 loss: 2.2616
+==== Epoch 1736 avg loss: 2.0013 ====
+[Epoch 1737] step 0 loss: 2.1136
+==== Epoch 1737 avg loss: 2.1116 ====
+[Epoch 1738] step 0 loss: 2.5871
+==== Epoch 1738 avg loss: 1.9945 ====
+[Epoch 1739] step 0 loss: 1.8478
+==== Epoch 1739 avg loss: 2.0843 ====
+[Epoch 1740] step 0 loss: 2.0357
+==== Epoch 1740 avg loss: 1.8791 ====
+[Epoch 1741] step 0 loss: 2.3897
+==== Epoch 1741 avg loss: 1.9665 ====
+[Epoch 1742] step 0 loss: 1.9976
+==== Epoch 1742 avg loss: 2.1475 ====
+[Epoch 1743] step 0 loss: 1.1978
+==== Epoch 1743 avg loss: 1.8408 ====
+[Epoch 1744] step 0 loss: 2.1191
+==== Epoch 1744 avg loss: 2.0801 ====
+[Epoch 1745] step 0 loss: 1.6380
+==== Epoch 1745 avg loss: 1.9279 ====
+[Epoch 1746] step 0 loss: 2.5197
+==== Epoch 1746 avg loss: 2.1001 ====
+[Epoch 1747] step 0 loss: 1.9208
+==== Epoch 1747 avg loss: 2.0170 ====
+[Epoch 1748] step 0 loss: 1.5536
+==== Epoch 1748 avg loss: 1.9080 ====
+[Epoch 1749] step 0 loss: 2.2302
+==== Epoch 1749 avg loss: 1.9795 ====
+[Epoch 1750] step 0 loss: 1.6503
+==== Epoch 1750 avg loss: 1.8242 ====
+[Epoch 1751] step 0 loss: 2.0259
+==== Epoch 1751 avg loss: 2.0519 ====
+[Epoch 1752] step 0 loss: 1.5140
+==== Epoch 1752 avg loss: 2.2009 ====
+[Epoch 1753] step 0 loss: 1.9359
+==== Epoch 1753 avg loss: 2.0336 ====
+[Epoch 1754] step 0 loss: 1.4684
+==== Epoch 1754 avg loss: 2.1569 ====
+[Epoch 1755] step 0 loss: 2.2394
+==== Epoch 1755 avg loss: 1.9293 ====
+[Epoch 1756] step 0 loss: 1.9535
+==== Epoch 1756 avg loss: 2.0056 ====
+[Epoch 1757] step 0 loss: 1.9237
+==== Epoch 1757 avg loss: 1.8163 ====
+[Epoch 1758] step 0 loss: 1.3129
+==== Epoch 1758 avg loss: 1.8585 ====
+[Epoch 1759] step 0 loss: 1.2786
+==== Epoch 1759 avg loss: 1.9637 ====
+[Epoch 1760] step 0 loss: 2.2356
+==== Epoch 1760 avg loss: 2.0265 ====
+[Epoch 1761] step 0 loss: 2.3954
+==== Epoch 1761 avg loss: 1.9202 ====
+[Epoch 1762] step 0 loss: 2.1551
+==== Epoch 1762 avg loss: 2.0333 ====
+[Epoch 1763] step 0 loss: 1.5958
+==== Epoch 1763 avg loss: 1.9704 ====
+[Epoch 1764] step 0 loss: 1.8700
+==== Epoch 1764 avg loss: 1.9823 ====
+[Epoch 1765] step 0 loss: 1.9257
+==== Epoch 1765 avg loss: 1.9324 ====
+[Epoch 1766] step 0 loss: 1.5050
+==== Epoch 1766 avg loss: 2.1268 ====
+[Epoch 1767] step 0 loss: 2.4149
+==== Epoch 1767 avg loss: 1.9045 ====
+[Epoch 1768] step 0 loss: 2.0372
+==== Epoch 1768 avg loss: 2.0992 ====
+[Epoch 1769] step 0 loss: 2.4901
+==== Epoch 1769 avg loss: 1.9292 ====
+[Epoch 1770] step 0 loss: 2.3689
+==== Epoch 1770 avg loss: 1.8102 ====
+[Epoch 1771] step 0 loss: 1.9760
+==== Epoch 1771 avg loss: 1.8116 ====
+[Epoch 1772] step 0 loss: 2.9692
+==== Epoch 1772 avg loss: 2.0914 ====
+[Epoch 1773] step 0 loss: 1.2628
+==== Epoch 1773 avg loss: 1.8154 ====
+[Epoch 1774] step 0 loss: 2.2345
+==== Epoch 1774 avg loss: 1.9409 ====
+[Epoch 1775] step 0 loss: 2.4712
+==== Epoch 1775 avg loss: 2.0141 ====
+[Epoch 1776] step 0 loss: 2.2074
+==== Epoch 1776 avg loss: 2.1022 ====
+[Epoch 1777] step 0 loss: 1.9454
+==== Epoch 1777 avg loss: 1.9882 ====
+[Epoch 1778] step 0 loss: 2.1241
+==== Epoch 1778 avg loss: 1.9260 ====
+[Epoch 1779] step 0 loss: 2.2929
+==== Epoch 1779 avg loss: 2.0434 ====
+[Epoch 1780] step 0 loss: 2.4202
+==== Epoch 1780 avg loss: 2.0601 ====
+[Epoch 1781] step 0 loss: 1.9376
+==== Epoch 1781 avg loss: 1.8399 ====
+[Epoch 1782] step 0 loss: 1.8161
+==== Epoch 1782 avg loss: 1.8908 ====
+[Epoch 1783] step 0 loss: 1.9767
+==== Epoch 1783 avg loss: 1.8892 ====
+[Epoch 1784] step 0 loss: 2.8638
+==== Epoch 1784 avg loss: 1.9223 ====
+[Epoch 1785] step 0 loss: 1.6091
+==== Epoch 1785 avg loss: 2.0875 ====
+[Epoch 1786] step 0 loss: 2.0597
+==== Epoch 1786 avg loss: 2.0297 ====
+[Epoch 1787] step 0 loss: 1.4478
+==== Epoch 1787 avg loss: 2.0030 ====
+[Epoch 1788] step 0 loss: 1.8745
+==== Epoch 1788 avg loss: 1.7821 ====
+[Epoch 1789] step 0 loss: 1.7478
+==== Epoch 1789 avg loss: 1.9439 ====
+[Epoch 1790] step 0 loss: 1.6054
+==== Epoch 1790 avg loss: 2.0203 ====
+[Epoch 1791] step 0 loss: 2.0595
+==== Epoch 1791 avg loss: 2.0359 ====
+[Epoch 1792] step 0 loss: 1.7004
+==== Epoch 1792 avg loss: 1.9154 ====
+[Epoch 1793] step 0 loss: 1.9179
+==== Epoch 1793 avg loss: 1.9549 ====
+[Epoch 1794] step 0 loss: 1.5931
+==== Epoch 1794 avg loss: 1.8380 ====
+[Epoch 1795] step 0 loss: 1.8084
+==== Epoch 1795 avg loss: 1.9711 ====
+[Epoch 1796] step 0 loss: 1.3721
+==== Epoch 1796 avg loss: 1.6735 ====
+[Epoch 1797] step 0 loss: 2.2166
+==== Epoch 1797 avg loss: 1.9279 ====
+[Epoch 1798] step 0 loss: 2.4728
+==== Epoch 1798 avg loss: 1.9757 ====
+[Epoch 1799] step 0 loss: 1.6062
+==== Epoch 1799 avg loss: 1.7918 ====
+[Epoch 1800] step 0 loss: 2.2844
+==== Epoch 1800 avg loss: 1.8308 ====
+[Epoch 1801] step 0 loss: 2.3954
+==== Epoch 1801 avg loss: 1.9145 ====
+[Epoch 1802] step 0 loss: 1.8652
+==== Epoch 1802 avg loss: 1.9121 ====
+[Epoch 1803] step 0 loss: 2.1500
+==== Epoch 1803 avg loss: 1.8531 ====
+[Epoch 1804] step 0 loss: 1.5118
+==== Epoch 1804 avg loss: 1.7968 ====
+[Epoch 1805] step 0 loss: 1.7457
+==== Epoch 1805 avg loss: 1.9083 ====
+[Epoch 1806] step 0 loss: 2.4528
+==== Epoch 1806 avg loss: 1.6945 ====
+[Epoch 1807] step 0 loss: 1.3467
+==== Epoch 1807 avg loss: 1.9611 ====
+[Epoch 1808] step 0 loss: 2.1173
+==== Epoch 1808 avg loss: 1.8065 ====
+[Epoch 1809] step 0 loss: 1.6375
+==== Epoch 1809 avg loss: 1.7671 ====
+[Epoch 1810] step 0 loss: 2.5587
+==== Epoch 1810 avg loss: 1.7679 ====
+[Epoch 1811] step 0 loss: 1.6329
+==== Epoch 1811 avg loss: 1.8244 ====
+[Epoch 1812] step 0 loss: 1.8634
+==== Epoch 1812 avg loss: 2.0874 ====
+[Epoch 1813] step 0 loss: 1.6909
+==== Epoch 1813 avg loss: 1.7946 ====
+[Epoch 1814] step 0 loss: 1.3886
+==== Epoch 1814 avg loss: 1.9388 ====
+[Epoch 1815] step 0 loss: 2.0931
+==== Epoch 1815 avg loss: 1.8290 ====
+[Epoch 1816] step 0 loss: 1.9360
+==== Epoch 1816 avg loss: 2.0850 ====
+[Epoch 1817] step 0 loss: 2.0664
+==== Epoch 1817 avg loss: 1.9084 ====
+[Epoch 1818] step 0 loss: 1.3851
+==== Epoch 1818 avg loss: 1.8477 ====
+[Epoch 1819] step 0 loss: 1.9882
+==== Epoch 1819 avg loss: 2.0792 ====
+[Epoch 1820] step 0 loss: 1.7030
+==== Epoch 1820 avg loss: 1.8561 ====
+[Epoch 1821] step 0 loss: 2.2650
+==== Epoch 1821 avg loss: 1.6584 ====
+[Epoch 1822] step 0 loss: 1.8479
+==== Epoch 1822 avg loss: 1.7313 ====
+[Epoch 1823] step 0 loss: 1.3499
+==== Epoch 1823 avg loss: 1.7581 ====
+[Epoch 1824] step 0 loss: 1.4505
+==== Epoch 1824 avg loss: 1.5692 ====
+[Epoch 1825] step 0 loss: 1.8950
+==== Epoch 1825 avg loss: 1.6363 ====
+[Epoch 1826] step 0 loss: 1.7016
+==== Epoch 1826 avg loss: 1.6130 ====
+[Epoch 1827] step 0 loss: 1.7611
+==== Epoch 1827 avg loss: 1.7363 ====
+[Epoch 1828] step 0 loss: 2.1562
+==== Epoch 1828 avg loss: 1.6809 ====
+[Epoch 1829] step 0 loss: 2.4204
+==== Epoch 1829 avg loss: 1.9931 ====
+[Epoch 1830] step 0 loss: 1.6156
+==== Epoch 1830 avg loss: 1.5791 ====
+[Epoch 1831] step 0 loss: 1.4134
+==== Epoch 1831 avg loss: 1.8990 ====
+[Epoch 1832] step 0 loss: 1.6999
+==== Epoch 1832 avg loss: 1.6524 ====
+[Epoch 1833] step 0 loss: 1.8198
+==== Epoch 1833 avg loss: 1.7253 ====
+[Epoch 1834] step 0 loss: 1.9974
+==== Epoch 1834 avg loss: 1.5793 ====
+[Epoch 1835] step 0 loss: 1.2564
+==== Epoch 1835 avg loss: 1.5843 ====
+[Epoch 1836] step 0 loss: 1.1357
+==== Epoch 1836 avg loss: 1.9693 ====
+[Epoch 1837] step 0 loss: 1.7428
+==== Epoch 1837 avg loss: 1.5436 ====
+[Epoch 1838] step 0 loss: 1.9723
+==== Epoch 1838 avg loss: 1.7215 ====
+[Epoch 1839] step 0 loss: 1.5973
+==== Epoch 1839 avg loss: 1.9198 ====
+[Epoch 1840] step 0 loss: 1.3058
+==== Epoch 1840 avg loss: 1.7572 ====
+[Epoch 1841] step 0 loss: 1.4498
+==== Epoch 1841 avg loss: 1.7076 ====
+[Epoch 1842] step 0 loss: 2.1010
+==== Epoch 1842 avg loss: 1.7609 ====
+[Epoch 1843] step 0 loss: 1.6621
+==== Epoch 1843 avg loss: 1.6492 ====
+[Epoch 1844] step 0 loss: 2.2776
+==== Epoch 1844 avg loss: 1.7951 ====
+[Epoch 1845] step 0 loss: 1.8620
+==== Epoch 1845 avg loss: 1.7324 ====
+[Epoch 1846] step 0 loss: 1.4621
+==== Epoch 1846 avg loss: 1.6953 ====
+[Epoch 1847] step 0 loss: 1.4271
+==== Epoch 1847 avg loss: 1.5818 ====
+[Epoch 1848] step 0 loss: 1.3898
+==== Epoch 1848 avg loss: 1.7752 ====
+[Epoch 1849] step 0 loss: 1.3527
+==== Epoch 1849 avg loss: 1.7476 ====
+[Epoch 1850] step 0 loss: 1.9205
+==== Epoch 1850 avg loss: 1.6996 ====
+[Epoch 1851] step 0 loss: 1.3323
+==== Epoch 1851 avg loss: 1.7296 ====
+[Epoch 1852] step 0 loss: 1.8907
+==== Epoch 1852 avg loss: 1.5722 ====
+[Epoch 1853] step 0 loss: 1.5022
+==== Epoch 1853 avg loss: 1.7021 ====
+[Epoch 1854] step 0 loss: 1.4359
+==== Epoch 1854 avg loss: 1.6878 ====
+[Epoch 1855] step 0 loss: 1.6744
+==== Epoch 1855 avg loss: 1.8175 ====
+[Epoch 1856] step 0 loss: 1.9977
+==== Epoch 1856 avg loss: 1.6276 ====
+[Epoch 1857] step 0 loss: 1.7552
+==== Epoch 1857 avg loss: 1.6982 ====
+[Epoch 1858] step 0 loss: 1.3229
+==== Epoch 1858 avg loss: 1.6928 ====
+[Epoch 1859] step 0 loss: 1.5250
+==== Epoch 1859 avg loss: 1.6802 ====
+[Epoch 1860] step 0 loss: 1.3734
+==== Epoch 1860 avg loss: 1.5455 ====
+[Epoch 1861] step 0 loss: 1.6024
+==== Epoch 1861 avg loss: 1.7224 ====
+[Epoch 1862] step 0 loss: 1.6680
+==== Epoch 1862 avg loss: 1.7431 ====
+[Epoch 1863] step 0 loss: 1.6282
+==== Epoch 1863 avg loss: 1.5873 ====
+[Epoch 1864] step 0 loss: 1.9080
+==== Epoch 1864 avg loss: 1.5596 ====
+[Epoch 1865] step 0 loss: 1.5292
+==== Epoch 1865 avg loss: 1.7137 ====
+[Epoch 1866] step 0 loss: 1.5617
+==== Epoch 1866 avg loss: 1.6198 ====
+[Epoch 1867] step 0 loss: 1.7881
+==== Epoch 1867 avg loss: 1.6623 ====
+[Epoch 1868] step 0 loss: 1.8502
+==== Epoch 1868 avg loss: 1.5699 ====
+[Epoch 1869] step 0 loss: 1.4124
+==== Epoch 1869 avg loss: 1.6577 ====
+[Epoch 1870] step 0 loss: 1.9413
+==== Epoch 1870 avg loss: 1.6153 ====
+[Epoch 1871] step 0 loss: 2.1167
+==== Epoch 1871 avg loss: 1.6199 ====
+[Epoch 1872] step 0 loss: 1.6502
+==== Epoch 1872 avg loss: 1.6041 ====
+[Epoch 1873] step 0 loss: 1.6714
+==== Epoch 1873 avg loss: 1.6622 ====
+[Epoch 1874] step 0 loss: 1.2625
+==== Epoch 1874 avg loss: 1.4088 ====
+[Epoch 1875] step 0 loss: 1.5689
+==== Epoch 1875 avg loss: 1.6449 ====
+[Epoch 1876] step 0 loss: 1.3168
+==== Epoch 1876 avg loss: 1.6575 ====
+[Epoch 1877] step 0 loss: 1.3566
+==== Epoch 1877 avg loss: 1.6513 ====
+[Epoch 1878] step 0 loss: 1.8486
+==== Epoch 1878 avg loss: 1.6795 ====
+[Epoch 1879] step 0 loss: 1.4774
+==== Epoch 1879 avg loss: 1.7889 ====
+[Epoch 1880] step 0 loss: 1.7552
+==== Epoch 1880 avg loss: 1.5892 ====
+[Epoch 1881] step 0 loss: 1.4213
+==== Epoch 1881 avg loss: 1.5095 ====
+[Epoch 1882] step 0 loss: 2.0169
+==== Epoch 1882 avg loss: 1.5139 ====
+[Epoch 1883] step 0 loss: 1.6946
+==== Epoch 1883 avg loss: 1.5399 ====
+[Epoch 1884] step 0 loss: 1.6600
+==== Epoch 1884 avg loss: 1.5384 ====
+[Epoch 1885] step 0 loss: 1.8775
+==== Epoch 1885 avg loss: 1.6135 ====
+[Epoch 1886] step 0 loss: 0.9330
+==== Epoch 1886 avg loss: 1.5967 ====
+[Epoch 1887] step 0 loss: 1.0921
+==== Epoch 1887 avg loss: 1.3976 ====
+[Epoch 1888] step 0 loss: 2.4090
+==== Epoch 1888 avg loss: 1.5785 ====
+[Epoch 1889] step 0 loss: 1.3800
+==== Epoch 1889 avg loss: 1.5178 ====
+[Epoch 1890] step 0 loss: 2.2449
+==== Epoch 1890 avg loss: 1.6359 ====
+[Epoch 1891] step 0 loss: 1.5397
+==== Epoch 1891 avg loss: 1.5766 ====
+[Epoch 1892] step 0 loss: 1.6773
+==== Epoch 1892 avg loss: 1.6587 ====
+[Epoch 1893] step 0 loss: 1.3174
+==== Epoch 1893 avg loss: 1.5638 ====
+[Epoch 1894] step 0 loss: 1.1179
+==== Epoch 1894 avg loss: 1.5451 ====
+[Epoch 1895] step 0 loss: 0.9648
+==== Epoch 1895 avg loss: 1.5956 ====
+[Epoch 1896] step 0 loss: 1.4241
+==== Epoch 1896 avg loss: 1.6091 ====
+[Epoch 1897] step 0 loss: 1.8227
+==== Epoch 1897 avg loss: 1.6724 ====
+[Epoch 1898] step 0 loss: 1.7279
+==== Epoch 1898 avg loss: 1.5758 ====
+[Epoch 1899] step 0 loss: 1.6109
+==== Epoch 1899 avg loss: 1.6124 ====
+[Epoch 1900] step 0 loss: 1.8410
+==== Epoch 1900 avg loss: 1.6067 ====
+[Epoch 1901] step 0 loss: 2.1583
+==== Epoch 1901 avg loss: 1.5889 ====
+[Epoch 1902] step 0 loss: 1.3315
+==== Epoch 1902 avg loss: 1.4886 ====
+[Epoch 1903] step 0 loss: 1.4180
+==== Epoch 1903 avg loss: 1.5957 ====
+[Epoch 1904] step 0 loss: 2.0812
+==== Epoch 1904 avg loss: 1.5894 ====
+[Epoch 1905] step 0 loss: 1.1419
+==== Epoch 1905 avg loss: 1.4367 ====
+[Epoch 1906] step 0 loss: 1.3331
+==== Epoch 1906 avg loss: 1.5801 ====
+[Epoch 1907] step 0 loss: 1.8435
+==== Epoch 1907 avg loss: 1.5045 ====
+[Epoch 1908] step 0 loss: 1.6286
+==== Epoch 1908 avg loss: 1.6478 ====
+[Epoch 1909] step 0 loss: 1.4527
+==== Epoch 1909 avg loss: 1.5753 ====
+[Epoch 1910] step 0 loss: 2.3426
+==== Epoch 1910 avg loss: 1.7192 ====
+[Epoch 1911] step 0 loss: 1.7614
+==== Epoch 1911 avg loss: 1.5145 ====
+[Epoch 1912] step 0 loss: 1.1670
+==== Epoch 1912 avg loss: 1.5315 ====
+[Epoch 1913] step 0 loss: 1.6094
+==== Epoch 1913 avg loss: 1.4913 ====
+[Epoch 1914] step 0 loss: 1.9724
+==== Epoch 1914 avg loss: 1.5576 ====
+[Epoch 1915] step 0 loss: 1.2248
+==== Epoch 1915 avg loss: 1.5618 ====
+[Epoch 1916] step 0 loss: 1.6787
+==== Epoch 1916 avg loss: 1.5058 ====
+[Epoch 1917] step 0 loss: 1.3410
+==== Epoch 1917 avg loss: 1.6071 ====
+[Epoch 1918] step 0 loss: 2.1187
+==== Epoch 1918 avg loss: 1.8039 ====
+[Epoch 1919] step 0 loss: 1.0865
+==== Epoch 1919 avg loss: 1.6032 ====
+[Epoch 1920] step 0 loss: 1.5324
+==== Epoch 1920 avg loss: 1.5853 ====
+[Epoch 1921] step 0 loss: 2.3319
+==== Epoch 1921 avg loss: 1.7866 ====
+[Epoch 1922] step 0 loss: 1.7237
+==== Epoch 1922 avg loss: 1.5915 ====
+[Epoch 1923] step 0 loss: 1.9120
+==== Epoch 1923 avg loss: 1.5098 ====
+[Epoch 1924] step 0 loss: 1.3905
+==== Epoch 1924 avg loss: 1.6128 ====
+[Epoch 1925] step 0 loss: 1.9641
+==== Epoch 1925 avg loss: 1.4880 ====
+[Epoch 1926] step 0 loss: 1.5982
+==== Epoch 1926 avg loss: 1.6372 ====
+[Epoch 1927] step 0 loss: 1.5765
+==== Epoch 1927 avg loss: 1.5275 ====
+[Epoch 1928] step 0 loss: 1.6826
+==== Epoch 1928 avg loss: 1.5345 ====
+[Epoch 1929] step 0 loss: 2.1574
+==== Epoch 1929 avg loss: 1.5894 ====
+[Epoch 1930] step 0 loss: 1.4970
+==== Epoch 1930 avg loss: 1.5328 ====
+[Epoch 1931] step 0 loss: 0.9912
+==== Epoch 1931 avg loss: 1.5349 ====
+[Epoch 1932] step 0 loss: 1.5762
+==== Epoch 1932 avg loss: 1.6692 ====
+[Epoch 1933] step 0 loss: 1.9775
+==== Epoch 1933 avg loss: 1.4928 ====
+[Epoch 1934] step 0 loss: 1.3355
+==== Epoch 1934 avg loss: 1.5224 ====
+[Epoch 1935] step 0 loss: 1.5367
+==== Epoch 1935 avg loss: 1.5144 ====
+[Epoch 1936] step 0 loss: 1.3870
+==== Epoch 1936 avg loss: 1.4973 ====
+[Epoch 1937] step 0 loss: 1.7607
+==== Epoch 1937 avg loss: 1.6585 ====
+[Epoch 1938] step 0 loss: 1.2649
+==== Epoch 1938 avg loss: 1.3296 ====
+[Epoch 1939] step 0 loss: 1.4986
+==== Epoch 1939 avg loss: 1.4799 ====
+[Epoch 1940] step 0 loss: 1.5489
+==== Epoch 1940 avg loss: 1.6622 ====
+[Epoch 1941] step 0 loss: 0.9906
+==== Epoch 1941 avg loss: 1.5413 ====
+[Epoch 1942] step 0 loss: 1.7643
+==== Epoch 1942 avg loss: 1.6060 ====
+[Epoch 1943] step 0 loss: 1.7823
+==== Epoch 1943 avg loss: 1.7032 ====
+[Epoch 1944] step 0 loss: 1.2899
+==== Epoch 1944 avg loss: 1.7264 ====
+[Epoch 1945] step 0 loss: 1.2513
+==== Epoch 1945 avg loss: 1.5106 ====
+[Epoch 1946] step 0 loss: 1.7016
+==== Epoch 1946 avg loss: 1.8351 ====
+[Epoch 1947] step 0 loss: 1.6128
+==== Epoch 1947 avg loss: 1.6051 ====
+[Epoch 1948] step 0 loss: 1.7524
+==== Epoch 1948 avg loss: 1.6844 ====
+[Epoch 1949] step 0 loss: 1.4999
+==== Epoch 1949 avg loss: 1.6292 ====
+[Epoch 1950] step 0 loss: 1.5264
+==== Epoch 1950 avg loss: 1.7623 ====
+[Epoch 1951] step 0 loss: 1.3183
+==== Epoch 1951 avg loss: 1.5877 ====
+[Epoch 1952] step 0 loss: 1.5086
+==== Epoch 1952 avg loss: 1.4870 ====
+[Epoch 1953] step 0 loss: 1.6520
+==== Epoch 1953 avg loss: 1.7909 ====
+[Epoch 1954] step 0 loss: 2.5073
+==== Epoch 1954 avg loss: 1.7420 ====
+[Epoch 1955] step 0 loss: 1.3762
+==== Epoch 1955 avg loss: 1.5541 ====
+[Epoch 1956] step 0 loss: 1.4291
+==== Epoch 1956 avg loss: 1.7693 ====
+[Epoch 1957] step 0 loss: 1.2580
+==== Epoch 1957 avg loss: 1.6095 ====
+[Epoch 1958] step 0 loss: 2.1040
+==== Epoch 1958 avg loss: 1.7106 ====
+[Epoch 1959] step 0 loss: 1.8606
+==== Epoch 1959 avg loss: 1.6834 ====
+[Epoch 1960] step 0 loss: 1.8117
+==== Epoch 1960 avg loss: 1.5402 ====
+[Epoch 1961] step 0 loss: 1.3956
+==== Epoch 1961 avg loss: 1.7355 ====
+[Epoch 1962] step 0 loss: 1.4169
+==== Epoch 1962 avg loss: 1.6334 ====
+[Epoch 1963] step 0 loss: 1.9714
+==== Epoch 1963 avg loss: 1.7411 ====
+[Epoch 1964] step 0 loss: 1.2083
+==== Epoch 1964 avg loss: 1.7518 ====
+[Epoch 1965] step 0 loss: 2.0241
+==== Epoch 1965 avg loss: 1.7439 ====
+[Epoch 1966] step 0 loss: 1.2713
+==== Epoch 1966 avg loss: 1.5776 ====
+[Epoch 1967] step 0 loss: 1.1304
+==== Epoch 1967 avg loss: 1.5078 ====
+[Epoch 1968] step 0 loss: 0.8710
+==== Epoch 1968 avg loss: 1.7419 ====
+[Epoch 1969] step 0 loss: 2.3784
+==== Epoch 1969 avg loss: 1.8380 ====
+[Epoch 1970] step 0 loss: 1.9781
+==== Epoch 1970 avg loss: 1.6991 ====
+[Epoch 1971] step 0 loss: 1.4314
+==== Epoch 1971 avg loss: 1.5353 ====
+[Epoch 1972] step 0 loss: 2.3278
+==== Epoch 1972 avg loss: 1.6986 ====
+[Epoch 1973] step 0 loss: 1.7181
+==== Epoch 1973 avg loss: 1.5294 ====
+[Epoch 1974] step 0 loss: 1.1818
+==== Epoch 1974 avg loss: 1.6076 ====
+[Epoch 1975] step 0 loss: 1.8498
+==== Epoch 1975 avg loss: 1.6369 ====
+[Epoch 1976] step 0 loss: 2.8474
+==== Epoch 1976 avg loss: 1.8779 ====
+[Epoch 1977] step 0 loss: 1.3201
+==== Epoch 1977 avg loss: 1.7068 ====
+[Epoch 1978] step 0 loss: 1.7331
+==== Epoch 1978 avg loss: 1.6686 ====
+[Epoch 1979] step 0 loss: 1.5923
+==== Epoch 1979 avg loss: 1.6887 ====
+[Epoch 1980] step 0 loss: 1.7363
+==== Epoch 1980 avg loss: 1.7136 ====
+[Epoch 1981] step 0 loss: 1.5884
+==== Epoch 1981 avg loss: 1.5544 ====
+[Epoch 1982] step 0 loss: 1.5365
+==== Epoch 1982 avg loss: 1.6269 ====
+[Epoch 1983] step 0 loss: 1.5831
+==== Epoch 1983 avg loss: 1.6773 ====
+[Epoch 1984] step 0 loss: 1.6649
+==== Epoch 1984 avg loss: 1.7203 ====
+[Epoch 1985] step 0 loss: 2.1272
+==== Epoch 1985 avg loss: 1.7368 ====
+[Epoch 1986] step 0 loss: 2.0055
+==== Epoch 1986 avg loss: 1.7190 ====
+[Epoch 1987] step 0 loss: 1.4787
+==== Epoch 1987 avg loss: 1.6922 ====
+[Epoch 1988] step 0 loss: 1.3184
+==== Epoch 1988 avg loss: 1.6323 ====
+[Epoch 1989] step 0 loss: 1.1911
+==== Epoch 1989 avg loss: 1.6014 ====
+[Epoch 1990] step 0 loss: 1.7127
+==== Epoch 1990 avg loss: 1.5928 ====
+[Epoch 1991] step 0 loss: 1.9196
+==== Epoch 1991 avg loss: 1.6501 ====
+[Epoch 1992] step 0 loss: 1.2723
+==== Epoch 1992 avg loss: 1.5331 ====
+[Epoch 1993] step 0 loss: 1.8620
+==== Epoch 1993 avg loss: 1.6255 ====
+[Epoch 1994] step 0 loss: 1.5307
+==== Epoch 1994 avg loss: 1.6302 ====
+[Epoch 1995] step 0 loss: 2.0142
+==== Epoch 1995 avg loss: 1.6806 ====
+[Epoch 1996] step 0 loss: 1.2572
+==== Epoch 1996 avg loss: 1.5049 ====
+[Epoch 1997] step 0 loss: 2.1248
+==== Epoch 1997 avg loss: 1.7144 ====
+[Epoch 1998] step 0 loss: 1.5599
+==== Epoch 1998 avg loss: 1.7692 ====
+[Epoch 1999] step 0 loss: 1.9094
+==== Epoch 1999 avg loss: 1.7078 ====
+[Epoch 2000] step 0 loss: 1.1118
+==== Epoch 2000 avg loss: 1.4252 ====
+[Epoch 2001] step 0 loss: 1.3745
+==== Epoch 2001 avg loss: 1.6688 ====
+[Epoch 2002] step 0 loss: 1.6121
+==== Epoch 2002 avg loss: 1.8035 ====
+[Epoch 2003] step 0 loss: 0.8029
+==== Epoch 2003 avg loss: 1.5051 ====
+[Epoch 2004] step 0 loss: 1.5664
+==== Epoch 2004 avg loss: 1.4613 ====
+[Epoch 2005] step 0 loss: 1.1557
+==== Epoch 2005 avg loss: 1.5129 ====
+[Epoch 2006] step 0 loss: 1.1733
+==== Epoch 2006 avg loss: 1.6082 ====
+[Epoch 2007] step 0 loss: 1.3728
+==== Epoch 2007 avg loss: 1.5885 ====
+[Epoch 2008] step 0 loss: 2.5701
+==== Epoch 2008 avg loss: 1.6807 ====
+[Epoch 2009] step 0 loss: 2.0953
+==== Epoch 2009 avg loss: 1.6366 ====
+[Epoch 2010] step 0 loss: 1.4784
+==== Epoch 2010 avg loss: 1.6268 ====
+[Epoch 2011] step 0 loss: 1.8060
+==== Epoch 2011 avg loss: 1.6133 ====
+[Epoch 2012] step 0 loss: 1.8069
+==== Epoch 2012 avg loss: 1.7046 ====
+[Epoch 2013] step 0 loss: 1.7777
+==== Epoch 2013 avg loss: 1.6549 ====
+[Epoch 2014] step 0 loss: 1.7107
+==== Epoch 2014 avg loss: 1.6667 ====
+[Epoch 2015] step 0 loss: 1.7238
+==== Epoch 2015 avg loss: 1.6398 ====
+[Epoch 2016] step 0 loss: 2.0504
+==== Epoch 2016 avg loss: 1.6398 ====
+[Epoch 2017] step 0 loss: 1.1682
+==== Epoch 2017 avg loss: 1.7003 ====
+[Epoch 2018] step 0 loss: 1.0364
+==== Epoch 2018 avg loss: 1.4503 ====
+[Epoch 2019] step 0 loss: 1.4518
+==== Epoch 2019 avg loss: 1.5203 ====
+[Epoch 2020] step 0 loss: 1.9591
+==== Epoch 2020 avg loss: 1.6497 ====
+[Epoch 2021] step 0 loss: 1.5421
+==== Epoch 2021 avg loss: 1.5584 ====
+[Epoch 2022] step 0 loss: 1.5966
+==== Epoch 2022 avg loss: 1.5353 ====
+[Epoch 2023] step 0 loss: 1.4138
+==== Epoch 2023 avg loss: 1.7827 ====
+[Epoch 2024] step 0 loss: 1.4803
+==== Epoch 2024 avg loss: 1.5604 ====
+[Epoch 2025] step 0 loss: 1.9649
+==== Epoch 2025 avg loss: 1.4181 ====
+[Epoch 2026] step 0 loss: 1.5901
+==== Epoch 2026 avg loss: 1.5646 ====
+[Epoch 2027] step 0 loss: 1.7254
+==== Epoch 2027 avg loss: 1.5488 ====
+[Epoch 2028] step 0 loss: 1.9622
+==== Epoch 2028 avg loss: 1.6137 ====
+[Epoch 2029] step 0 loss: 1.6020
+==== Epoch 2029 avg loss: 1.8010 ====
+[Epoch 2030] step 0 loss: 1.6563
+==== Epoch 2030 avg loss: 1.8368 ====
+[Epoch 2031] step 0 loss: 1.6912
+==== Epoch 2031 avg loss: 1.5878 ====
+[Epoch 2032] step 0 loss: 1.4759
+==== Epoch 2032 avg loss: 1.6234 ====
+[Epoch 2033] step 0 loss: 2.6811
+==== Epoch 2033 avg loss: 1.8095 ====
+[Epoch 2034] step 0 loss: 1.5609
+==== Epoch 2034 avg loss: 1.4951 ====
+[Epoch 2035] step 0 loss: 1.7650
+==== Epoch 2035 avg loss: 1.5294 ====
+[Epoch 2036] step 0 loss: 1.6807
+==== Epoch 2036 avg loss: 1.4734 ====
+[Epoch 2037] step 0 loss: 1.1978
+==== Epoch 2037 avg loss: 1.6788 ====
+[Epoch 2038] step 0 loss: 1.7492
+==== Epoch 2038 avg loss: 1.5051 ====
+[Epoch 2039] step 0 loss: 1.9548
+==== Epoch 2039 avg loss: 1.5869 ====
+[Epoch 2040] step 0 loss: 1.5450
+==== Epoch 2040 avg loss: 1.6492 ====
+[Epoch 2041] step 0 loss: 1.8722
+==== Epoch 2041 avg loss: 1.5870 ====
+[Epoch 2042] step 0 loss: 1.0518
+==== Epoch 2042 avg loss: 1.2937 ====
+[Epoch 2043] step 0 loss: 1.5915
+==== Epoch 2043 avg loss: 1.6686 ====
+[Epoch 2044] step 0 loss: 1.2740
+==== Epoch 2044 avg loss: 1.6124 ====
+[Epoch 2045] step 0 loss: 1.8268
+==== Epoch 2045 avg loss: 1.5376 ====
+[Epoch 2046] step 0 loss: 1.5060
+==== Epoch 2046 avg loss: 1.5578 ====
+[Epoch 2047] step 0 loss: 1.2058
+==== Epoch 2047 avg loss: 1.7433 ====
+[Epoch 2048] step 0 loss: 1.4600
+==== Epoch 2048 avg loss: 1.5088 ====
+[Epoch 2049] step 0 loss: 1.2217
+==== Epoch 2049 avg loss: 1.5783 ====
+[Epoch 2050] step 0 loss: 1.8534
+==== Epoch 2050 avg loss: 1.5524 ====
+[Epoch 2051] step 0 loss: 1.6649
+==== Epoch 2051 avg loss: 1.4841 ====
+[Epoch 2052] step 0 loss: 1.3982
+==== Epoch 2052 avg loss: 1.5750 ====
+[Epoch 2053] step 0 loss: 1.3566
+==== Epoch 2053 avg loss: 1.3416 ====
+[Epoch 2054] step 0 loss: 2.1220
+==== Epoch 2054 avg loss: 1.4594 ====
+[Epoch 2055] step 0 loss: 1.7389
+==== Epoch 2055 avg loss: 1.6438 ====
+[Epoch 2056] step 0 loss: 1.8593
+==== Epoch 2056 avg loss: 1.6375 ====
+[Epoch 2057] step 0 loss: 1.8287
+==== Epoch 2057 avg loss: 1.4948 ====
+[Epoch 2058] step 0 loss: 1.4253
+==== Epoch 2058 avg loss: 1.5304 ====
+[Epoch 2059] step 0 loss: 1.5015
+==== Epoch 2059 avg loss: 1.4653 ====
+[Epoch 2060] step 0 loss: 2.2568
+==== Epoch 2060 avg loss: 1.5287 ====
+[Epoch 2061] step 0 loss: 1.1149
+==== Epoch 2061 avg loss: 1.5849 ====
+[Epoch 2062] step 0 loss: 1.3332
+==== Epoch 2062 avg loss: 1.5811 ====
+[Epoch 2063] step 0 loss: 1.4542
+==== Epoch 2063 avg loss: 1.5631 ====
+[Epoch 2064] step 0 loss: 1.4297
+==== Epoch 2064 avg loss: 1.5378 ====
+[Epoch 2065] step 0 loss: 1.1542
+==== Epoch 2065 avg loss: 1.4343 ====
+[Epoch 2066] step 0 loss: 1.6842
+==== Epoch 2066 avg loss: 1.4476 ====
+[Epoch 2067] step 0 loss: 1.6616
+==== Epoch 2067 avg loss: 1.4553 ====
+[Epoch 2068] step 0 loss: 1.5932
+==== Epoch 2068 avg loss: 1.4624 ====
+[Epoch 2069] step 0 loss: 1.4197
+==== Epoch 2069 avg loss: 1.5049 ====
+[Epoch 2070] step 0 loss: 1.5929
+==== Epoch 2070 avg loss: 1.4568 ====
+[Epoch 2071] step 0 loss: 1.3090
+==== Epoch 2071 avg loss: 1.5123 ====
+[Epoch 2072] step 0 loss: 1.5755
+==== Epoch 2072 avg loss: 1.4886 ====
+[Epoch 2073] step 0 loss: 1.2095
+==== Epoch 2073 avg loss: 1.7269 ====
+[Epoch 2074] step 0 loss: 1.8530
+==== Epoch 2074 avg loss: 1.5652 ====
+[Epoch 2075] step 0 loss: 1.4270
+==== Epoch 2075 avg loss: 1.6072 ====
+[Epoch 2076] step 0 loss: 1.3680
+==== Epoch 2076 avg loss: 1.4854 ====
+[Epoch 2077] step 0 loss: 1.4679
+==== Epoch 2077 avg loss: 1.5003 ====
+[Epoch 2078] step 0 loss: 1.9498
+==== Epoch 2078 avg loss: 1.5266 ====
+[Epoch 2079] step 0 loss: 1.9559
+==== Epoch 2079 avg loss: 1.6787 ====
+[Epoch 2080] step 0 loss: 1.8284
+==== Epoch 2080 avg loss: 1.5680 ====
+[Epoch 2081] step 0 loss: 1.6920
+==== Epoch 2081 avg loss: 1.6989 ====
+[Epoch 2082] step 0 loss: 2.0825
+==== Epoch 2082 avg loss: 1.4125 ====
+[Epoch 2083] step 0 loss: 1.2734
+==== Epoch 2083 avg loss: 1.4930 ====
+[Epoch 2084] step 0 loss: 1.3137
+==== Epoch 2084 avg loss: 1.4868 ====
+[Epoch 2085] step 0 loss: 1.5574
+==== Epoch 2085 avg loss: 1.6110 ====
+[Epoch 2086] step 0 loss: 1.6398
+==== Epoch 2086 avg loss: 1.5416 ====
+[Epoch 2087] step 0 loss: 1.7378
+==== Epoch 2087 avg loss: 1.3411 ====
+[Epoch 2088] step 0 loss: 1.9066
+==== Epoch 2088 avg loss: 1.5147 ====
+[Epoch 2089] step 0 loss: 0.9269
+==== Epoch 2089 avg loss: 1.5041 ====
+[Epoch 2090] step 0 loss: 1.4189
+==== Epoch 2090 avg loss: 1.3663 ====
+[Epoch 2091] step 0 loss: 1.5830
+==== Epoch 2091 avg loss: 1.5168 ====
+[Epoch 2092] step 0 loss: 1.1424
+==== Epoch 2092 avg loss: 1.5305 ====
+[Epoch 2093] step 0 loss: 1.9510
+==== Epoch 2093 avg loss: 1.4063 ====
+[Epoch 2094] step 0 loss: 1.8264
+==== Epoch 2094 avg loss: 1.4685 ====
+[Epoch 2095] step 0 loss: 1.5120
+==== Epoch 2095 avg loss: 1.4791 ====
+[Epoch 2096] step 0 loss: 1.3943
+==== Epoch 2096 avg loss: 1.4323 ====
+[Epoch 2097] step 0 loss: 2.0205
+==== Epoch 2097 avg loss: 1.4836 ====
+[Epoch 2098] step 0 loss: 1.6333
+==== Epoch 2098 avg loss: 1.5258 ====
+[Epoch 2099] step 0 loss: 1.2442
+==== Epoch 2099 avg loss: 1.4689 ====
+[Epoch 2100] step 0 loss: 1.0750
+==== Epoch 2100 avg loss: 1.6491 ====
+[Epoch 2101] step 0 loss: 1.4871
+==== Epoch 2101 avg loss: 1.5464 ====
+[Epoch 2102] step 0 loss: 1.3085
+==== Epoch 2102 avg loss: 1.3665 ====
+[Epoch 2103] step 0 loss: 1.0792
+==== Epoch 2103 avg loss: 1.4590 ====
+[Epoch 2104] step 0 loss: 1.4338
+==== Epoch 2104 avg loss: 1.4177 ====
+[Epoch 2105] step 0 loss: 1.3922
+==== Epoch 2105 avg loss: 1.4786 ====
+[Epoch 2106] step 0 loss: 1.3544
+==== Epoch 2106 avg loss: 1.3787 ====
+[Epoch 2107] step 0 loss: 1.8748
+==== Epoch 2107 avg loss: 1.4810 ====
+[Epoch 2108] step 0 loss: 1.3994
+==== Epoch 2108 avg loss: 1.3532 ====
+[Epoch 2109] step 0 loss: 1.1474
+==== Epoch 2109 avg loss: 1.3827 ====
+[Epoch 2110] step 0 loss: 1.3477
+==== Epoch 2110 avg loss: 1.4462 ====
+[Epoch 2111] step 0 loss: 1.4136
+==== Epoch 2111 avg loss: 1.6281 ====
+[Epoch 2112] step 0 loss: 1.4997
+==== Epoch 2112 avg loss: 1.5130 ====
+[Epoch 2113] step 0 loss: 1.2197
+==== Epoch 2113 avg loss: 1.4646 ====
+[Epoch 2114] step 0 loss: 1.3972
+==== Epoch 2114 avg loss: 1.5757 ====
+[Epoch 2115] step 0 loss: 1.8874
+==== Epoch 2115 avg loss: 1.4676 ====
+[Epoch 2116] step 0 loss: 1.5410
+==== Epoch 2116 avg loss: 1.3221 ====
+[Epoch 2117] step 0 loss: 1.2946
+==== Epoch 2117 avg loss: 1.4385 ====
+[Epoch 2118] step 0 loss: 1.1476
+==== Epoch 2118 avg loss: 1.4533 ====
+[Epoch 2119] step 0 loss: 1.0755
+==== Epoch 2119 avg loss: 1.4236 ====
+[Epoch 2120] step 0 loss: 1.2564
+==== Epoch 2120 avg loss: 1.5622 ====
+[Epoch 2121] step 0 loss: 0.8291
+==== Epoch 2121 avg loss: 1.4187 ====
+[Epoch 2122] step 0 loss: 1.5932
+==== Epoch 2122 avg loss: 1.4415 ====
+[Epoch 2123] step 0 loss: 1.4314
+==== Epoch 2123 avg loss: 1.3646 ====
+[Epoch 2124] step 0 loss: 0.8942
+==== Epoch 2124 avg loss: 1.3896 ====
+[Epoch 2125] step 0 loss: 1.2736
+==== Epoch 2125 avg loss: 1.5346 ====
+[Epoch 2126] step 0 loss: 1.2333
+==== Epoch 2126 avg loss: 1.5292 ====
+[Epoch 2127] step 0 loss: 0.8910
+==== Epoch 2127 avg loss: 1.3530 ====
+[Epoch 2128] step 0 loss: 1.8853
+==== Epoch 2128 avg loss: 1.6997 ====
+[Epoch 2129] step 0 loss: 1.2281
+==== Epoch 2129 avg loss: 1.4150 ====
+[Epoch 2130] step 0 loss: 1.4096
+==== Epoch 2130 avg loss: 1.3650 ====
+[Epoch 2131] step 0 loss: 1.8361
+==== Epoch 2131 avg loss: 1.5817 ====
+[Epoch 2132] step 0 loss: 0.9700
+==== Epoch 2132 avg loss: 1.4334 ====
+[Epoch 2133] step 0 loss: 1.7253
+==== Epoch 2133 avg loss: 1.6249 ====
+[Epoch 2134] step 0 loss: 1.0689
+==== Epoch 2134 avg loss: 1.4106 ====
+[Epoch 2135] step 0 loss: 2.0732
+==== Epoch 2135 avg loss: 1.5204 ====
+[Epoch 2136] step 0 loss: 1.3103
+==== Epoch 2136 avg loss: 1.5056 ====
+[Epoch 2137] step 0 loss: 1.7431
+==== Epoch 2137 avg loss: 1.5225 ====
+[Epoch 2138] step 0 loss: 1.6650
+==== Epoch 2138 avg loss: 1.5446 ====
+[Epoch 2139] step 0 loss: 1.3197
+==== Epoch 2139 avg loss: 1.5221 ====
+[Epoch 2140] step 0 loss: 1.0853
+==== Epoch 2140 avg loss: 1.4378 ====
+[Epoch 2141] step 0 loss: 0.9865
+==== Epoch 2141 avg loss: 1.4316 ====
+[Epoch 2142] step 0 loss: 1.5961
+==== Epoch 2142 avg loss: 1.4971 ====
+[Epoch 2143] step 0 loss: 1.3039
+==== Epoch 2143 avg loss: 1.3154 ====
+[Epoch 2144] step 0 loss: 0.9842
+==== Epoch 2144 avg loss: 1.4742 ====
+[Epoch 2145] step 0 loss: 1.8056
+==== Epoch 2145 avg loss: 1.4981 ====
+[Epoch 2146] step 0 loss: 1.5387
+==== Epoch 2146 avg loss: 1.3880 ====
+[Epoch 2147] step 0 loss: 1.9154
+==== Epoch 2147 avg loss: 1.5924 ====
+[Epoch 2148] step 0 loss: 1.7468
+==== Epoch 2148 avg loss: 1.4791 ====
+[Epoch 2149] step 0 loss: 1.6083
+==== Epoch 2149 avg loss: 1.3237 ====
+[Epoch 2150] step 0 loss: 1.5064
+==== Epoch 2150 avg loss: 1.4168 ====
+[Epoch 2151] step 0 loss: 2.0509
+==== Epoch 2151 avg loss: 1.5987 ====
+[Epoch 2152] step 0 loss: 1.4786
+==== Epoch 2152 avg loss: 1.4294 ====
+[Epoch 2153] step 0 loss: 1.1904
+==== Epoch 2153 avg loss: 1.4103 ====
+[Epoch 2154] step 0 loss: 1.3974
+==== Epoch 2154 avg loss: 1.3216 ====
+[Epoch 2155] step 0 loss: 1.0802
+==== Epoch 2155 avg loss: 1.2621 ====
+[Epoch 2156] step 0 loss: 1.9065
+==== Epoch 2156 avg loss: 1.4802 ====
+[Epoch 2157] step 0 loss: 1.6916
+==== Epoch 2157 avg loss: 1.6885 ====
+[Epoch 2158] step 0 loss: 1.4223
+==== Epoch 2158 avg loss: 1.4169 ====
+[Epoch 2159] step 0 loss: 2.0834
+==== Epoch 2159 avg loss: 1.4216 ====
+[Epoch 2160] step 0 loss: 2.0428
+==== Epoch 2160 avg loss: 1.3722 ====
+[Epoch 2161] step 0 loss: 1.3297
+==== Epoch 2161 avg loss: 1.2536 ====
+[Epoch 2162] step 0 loss: 1.6524
+==== Epoch 2162 avg loss: 1.4597 ====
+[Epoch 2163] step 0 loss: 1.1575
+==== Epoch 2163 avg loss: 1.5067 ====
+[Epoch 2164] step 0 loss: 1.8778
+==== Epoch 2164 avg loss: 1.4808 ====
+[Epoch 2165] step 0 loss: 1.7571
+==== Epoch 2165 avg loss: 1.4215 ====
+[Epoch 2166] step 0 loss: 1.8565
+==== Epoch 2166 avg loss: 1.6078 ====
+[Epoch 2167] step 0 loss: 1.1513
+==== Epoch 2167 avg loss: 1.4448 ====
+[Epoch 2168] step 0 loss: 1.1761
+==== Epoch 2168 avg loss: 1.4908 ====
+[Epoch 2169] step 0 loss: 1.9455
+==== Epoch 2169 avg loss: 1.5321 ====
+[Epoch 2170] step 0 loss: 1.5916
+==== Epoch 2170 avg loss: 1.5246 ====
+[Epoch 2171] step 0 loss: 1.4093
+==== Epoch 2171 avg loss: 1.3784 ====
+[Epoch 2172] step 0 loss: 1.3609
+==== Epoch 2172 avg loss: 1.5412 ====
+[Epoch 2173] step 0 loss: 1.3913
+==== Epoch 2173 avg loss: 1.5023 ====
+[Epoch 2174] step 0 loss: 2.0090
+==== Epoch 2174 avg loss: 1.4067 ====
+[Epoch 2175] step 0 loss: 1.1632
+==== Epoch 2175 avg loss: 1.3347 ====
+[Epoch 2176] step 0 loss: 1.1328
+==== Epoch 2176 avg loss: 1.4181 ====
+[Epoch 2177] step 0 loss: 2.0117
+==== Epoch 2177 avg loss: 1.3744 ====
+[Epoch 2178] step 0 loss: 1.0498
+==== Epoch 2178 avg loss: 1.3084 ====
+[Epoch 2179] step 0 loss: 1.0648
+==== Epoch 2179 avg loss: 1.3615 ====
+[Epoch 2180] step 0 loss: 1.1821
+==== Epoch 2180 avg loss: 1.4973 ====
+[Epoch 2181] step 0 loss: 1.0233
+==== Epoch 2181 avg loss: 1.3822 ====
+[Epoch 2182] step 0 loss: 1.3655
+==== Epoch 2182 avg loss: 1.2845 ====
+[Epoch 2183] step 0 loss: 1.0543
+==== Epoch 2183 avg loss: 1.4964 ====
+[Epoch 2184] step 0 loss: 1.7105
+==== Epoch 2184 avg loss: 1.3800 ====
+[Epoch 2185] step 0 loss: 1.3453
+==== Epoch 2185 avg loss: 1.4607 ====
+[Epoch 2186] step 0 loss: 1.2882
+==== Epoch 2186 avg loss: 1.3471 ====
+[Epoch 2187] step 0 loss: 1.9517
+==== Epoch 2187 avg loss: 1.5698 ====
+[Epoch 2188] step 0 loss: 1.7916
+==== Epoch 2188 avg loss: 1.4976 ====
+[Epoch 2189] step 0 loss: 1.5599
+==== Epoch 2189 avg loss: 1.3651 ====
+[Epoch 2190] step 0 loss: 1.4726
+==== Epoch 2190 avg loss: 1.4179 ====
+[Epoch 2191] step 0 loss: 0.7719
+==== Epoch 2191 avg loss: 1.2556 ====
+[Epoch 2192] step 0 loss: 1.7771
+==== Epoch 2192 avg loss: 1.5030 ====
+[Epoch 2193] step 0 loss: 1.2250
+==== Epoch 2193 avg loss: 1.2828 ====
+[Epoch 2194] step 0 loss: 1.0815
+==== Epoch 2194 avg loss: 1.3504 ====
+[Epoch 2195] step 0 loss: 1.4230
+==== Epoch 2195 avg loss: 1.4363 ====
+[Epoch 2196] step 0 loss: 1.5641
+==== Epoch 2196 avg loss: 1.2253 ====
+[Epoch 2197] step 0 loss: 1.6840
+==== Epoch 2197 avg loss: 1.5555 ====
+[Epoch 2198] step 0 loss: 1.6821
+==== Epoch 2198 avg loss: 1.4232 ====
+[Epoch 2199] step 0 loss: 1.1840
+==== Epoch 2199 avg loss: 1.4916 ====
+[Epoch 2200] step 0 loss: 2.0062
+==== Epoch 2200 avg loss: 1.4935 ====
+[Epoch 2201] step 0 loss: 1.1914
+==== Epoch 2201 avg loss: 1.2864 ====
+[Epoch 2202] step 0 loss: 1.2029
+==== Epoch 2202 avg loss: 1.4593 ====
+[Epoch 2203] step 0 loss: 2.0462
+==== Epoch 2203 avg loss: 1.3807 ====
+[Epoch 2204] step 0 loss: 1.5969
+==== Epoch 2204 avg loss: 1.2497 ====
+[Epoch 2205] step 0 loss: 0.9607
+==== Epoch 2205 avg loss: 1.3828 ====
+[Epoch 2206] step 0 loss: 1.6501
+==== Epoch 2206 avg loss: 1.5213 ====
+[Epoch 2207] step 0 loss: 1.2872
+==== Epoch 2207 avg loss: 1.4417 ====
+[Epoch 2208] step 0 loss: 1.4086
+==== Epoch 2208 avg loss: 1.4108 ====
+[Epoch 2209] step 0 loss: 1.4132
+==== Epoch 2209 avg loss: 1.3813 ====
+[Epoch 2210] step 0 loss: 1.1440
+==== Epoch 2210 avg loss: 1.4423 ====
+[Epoch 2211] step 0 loss: 1.3287
+==== Epoch 2211 avg loss: 1.4118 ====
+[Epoch 2212] step 0 loss: 1.3561
+==== Epoch 2212 avg loss: 1.5670 ====
+[Epoch 2213] step 0 loss: 1.8823
+==== Epoch 2213 avg loss: 1.3722 ====
+[Epoch 2214] step 0 loss: 2.5757
+==== Epoch 2214 avg loss: 1.5545 ====
+[Epoch 2215] step 0 loss: 1.3881
+==== Epoch 2215 avg loss: 1.3688 ====
+[Epoch 2216] step 0 loss: 1.3897
+==== Epoch 2216 avg loss: 1.4595 ====
+[Epoch 2217] step 0 loss: 1.1736
+==== Epoch 2217 avg loss: 1.2999 ====
+[Epoch 2218] step 0 loss: 0.8727
+==== Epoch 2218 avg loss: 1.3904 ====
+[Epoch 2219] step 0 loss: 0.7899
+==== Epoch 2219 avg loss: 1.3332 ====
+[Epoch 2220] step 0 loss: 1.7116
+==== Epoch 2220 avg loss: 1.2960 ====
+[Epoch 2221] step 0 loss: 1.4304
+==== Epoch 2221 avg loss: 1.6460 ====
+[Epoch 2222] step 0 loss: 1.5336
+==== Epoch 2222 avg loss: 1.3817 ====
+[Epoch 2223] step 0 loss: 1.7303
+==== Epoch 2223 avg loss: 1.3382 ====
+[Epoch 2224] step 0 loss: 1.2118
+==== Epoch 2224 avg loss: 1.4248 ====
+[Epoch 2225] step 0 loss: 1.6570
+==== Epoch 2225 avg loss: 1.3466 ====
+[Epoch 2226] step 0 loss: 1.4310
+==== Epoch 2226 avg loss: 1.3663 ====
+[Epoch 2227] step 0 loss: 1.7330
+==== Epoch 2227 avg loss: 1.4722 ====
+[Epoch 2228] step 0 loss: 1.4519
+==== Epoch 2228 avg loss: 1.3572 ====
+[Epoch 2229] step 0 loss: 1.1003
+==== Epoch 2229 avg loss: 1.3527 ====
+[Epoch 2230] step 0 loss: 1.5537
+==== Epoch 2230 avg loss: 1.2471 ====
+[Epoch 2231] step 0 loss: 1.0527
+==== Epoch 2231 avg loss: 1.3720 ====
+[Epoch 2232] step 0 loss: 1.2532
+==== Epoch 2232 avg loss: 1.3424 ====
+[Epoch 2233] step 0 loss: 1.9058
+==== Epoch 2233 avg loss: 1.4741 ====
+[Epoch 2234] step 0 loss: 2.3652
+==== Epoch 2234 avg loss: 1.6622 ====
+[Epoch 2235] step 0 loss: 1.0045
+==== Epoch 2235 avg loss: 1.2866 ====
+[Epoch 2236] step 0 loss: 1.5471
+==== Epoch 2236 avg loss: 1.4632 ====
+[Epoch 2237] step 0 loss: 0.7576
+==== Epoch 2237 avg loss: 1.2498 ====
+[Epoch 2238] step 0 loss: 0.9845
+==== Epoch 2238 avg loss: 1.2982 ====
+[Epoch 2239] step 0 loss: 1.4548
+==== Epoch 2239 avg loss: 1.3948 ====
+[Epoch 2240] step 0 loss: 1.0515
+==== Epoch 2240 avg loss: 1.4701 ====
+[Epoch 2241] step 0 loss: 1.1317
+==== Epoch 2241 avg loss: 1.1896 ====
+[Epoch 2242] step 0 loss: 1.4093
+==== Epoch 2242 avg loss: 1.2887 ====
+[Epoch 2243] step 0 loss: 1.1387
+==== Epoch 2243 avg loss: 1.3488 ====
+[Epoch 2244] step 0 loss: 1.8607
+==== Epoch 2244 avg loss: 1.4262 ====
+[Epoch 2245] step 0 loss: 1.2708
+==== Epoch 2245 avg loss: 1.5622 ====
+[Epoch 2246] step 0 loss: 1.3684
+==== Epoch 2246 avg loss: 1.2944 ====
+[Epoch 2247] step 0 loss: 1.4963
+==== Epoch 2247 avg loss: 1.3622 ====
+[Epoch 2248] step 0 loss: 1.5741
+==== Epoch 2248 avg loss: 1.5340 ====
+[Epoch 2249] step 0 loss: 1.3018
+==== Epoch 2249 avg loss: 1.2686 ====
+[Epoch 2250] step 0 loss: 0.9901
+==== Epoch 2250 avg loss: 1.1972 ====
+[Epoch 2251] step 0 loss: 1.1343
+==== Epoch 2251 avg loss: 1.2946 ====
+[Epoch 2252] step 0 loss: 2.1348
+==== Epoch 2252 avg loss: 1.3980 ====
+[Epoch 2253] step 0 loss: 1.2818
+==== Epoch 2253 avg loss: 1.3650 ====
+[Epoch 2254] step 0 loss: 1.4525
+==== Epoch 2254 avg loss: 1.3274 ====
+[Epoch 2255] step 0 loss: 1.1137
+==== Epoch 2255 avg loss: 1.3435 ====
+[Epoch 2256] step 0 loss: 1.5053
+==== Epoch 2256 avg loss: 1.3990 ====
+[Epoch 2257] step 0 loss: 1.6014
+==== Epoch 2257 avg loss: 1.5108 ====
+[Epoch 2258] step 0 loss: 1.0624
+==== Epoch 2258 avg loss: 1.4566 ====
+[Epoch 2259] step 0 loss: 1.5035
+==== Epoch 2259 avg loss: 1.3897 ====
+[Epoch 2260] step 0 loss: 1.0478
+==== Epoch 2260 avg loss: 1.2248 ====
+[Epoch 2261] step 0 loss: 1.3118
+==== Epoch 2261 avg loss: 1.3554 ====
+[Epoch 2262] step 0 loss: 1.7177
+==== Epoch 2262 avg loss: 1.3599 ====
+[Epoch 2263] step 0 loss: 1.7923
+==== Epoch 2263 avg loss: 1.3347 ====
+[Epoch 2264] step 0 loss: 0.7533
+==== Epoch 2264 avg loss: 1.2900 ====
+[Epoch 2265] step 0 loss: 1.2081
+==== Epoch 2265 avg loss: 1.4079 ====
+[Epoch 2266] step 0 loss: 1.7729
+==== Epoch 2266 avg loss: 1.3002 ====
+[Epoch 2267] step 0 loss: 1.7487
+==== Epoch 2267 avg loss: 1.4068 ====
+[Epoch 2268] step 0 loss: 1.2017
+==== Epoch 2268 avg loss: 1.4346 ====
+[Epoch 2269] step 0 loss: 1.6854
+==== Epoch 2269 avg loss: 1.3319 ====
+[Epoch 2270] step 0 loss: 1.7585
+==== Epoch 2270 avg loss: 1.2865 ====
+[Epoch 2271] step 0 loss: 1.1040
+==== Epoch 2271 avg loss: 1.2856 ====
+[Epoch 2272] step 0 loss: 0.6012
+==== Epoch 2272 avg loss: 1.4623 ====
+[Epoch 2273] step 0 loss: 1.1847
+==== Epoch 2273 avg loss: 1.3395 ====
+[Epoch 2274] step 0 loss: 1.1243
+==== Epoch 2274 avg loss: 1.4252 ====
+[Epoch 2275] step 0 loss: 1.6301
+==== Epoch 2275 avg loss: 1.3735 ====
+[Epoch 2276] step 0 loss: 1.6316
+==== Epoch 2276 avg loss: 1.4322 ====
+[Epoch 2277] step 0 loss: 1.4491
+==== Epoch 2277 avg loss: 1.2849 ====
+[Epoch 2278] step 0 loss: 1.5214
+==== Epoch 2278 avg loss: 1.2361 ====
+[Epoch 2279] step 0 loss: 1.3847
+==== Epoch 2279 avg loss: 1.2046 ====
+[Epoch 2280] step 0 loss: 0.8817
+==== Epoch 2280 avg loss: 1.2339 ====
+[Epoch 2281] step 0 loss: 1.0470
+==== Epoch 2281 avg loss: 1.1114 ====
+[Epoch 2282] step 0 loss: 1.4361
+==== Epoch 2282 avg loss: 1.1651 ====
+[Epoch 2283] step 0 loss: 1.4529
+==== Epoch 2283 avg loss: 1.1529 ====
+[Epoch 2284] step 0 loss: 1.1419
+==== Epoch 2284 avg loss: 1.3527 ====
+[Epoch 2285] step 0 loss: 0.9977
+==== Epoch 2285 avg loss: 1.1635 ====
+[Epoch 2286] step 0 loss: 1.0627
+==== Epoch 2286 avg loss: 1.4075 ====
+[Epoch 2287] step 0 loss: 0.9077
+==== Epoch 2287 avg loss: 1.2525 ====
+[Epoch 2288] step 0 loss: 1.3867
+==== Epoch 2288 avg loss: 1.2766 ====
+[Epoch 2289] step 0 loss: 1.0729
+==== Epoch 2289 avg loss: 1.3489 ====
+[Epoch 2290] step 0 loss: 1.2555
+==== Epoch 2290 avg loss: 1.0708 ====
+[Epoch 2291] step 0 loss: 1.3974
+==== Epoch 2291 avg loss: 1.1593 ====
+[Epoch 2292] step 0 loss: 0.9820
+==== Epoch 2292 avg loss: 1.0519 ====
+[Epoch 2293] step 0 loss: 0.9801
+==== Epoch 2293 avg loss: 1.0778 ====
+[Epoch 2294] step 0 loss: 1.1479
+==== Epoch 2294 avg loss: 1.2551 ====
+[Epoch 2295] step 0 loss: 1.1120
+==== Epoch 2295 avg loss: 1.1477 ====
+[Epoch 2296] step 0 loss: 1.6597
+==== Epoch 2296 avg loss: 1.2468 ====
+[Epoch 2297] step 0 loss: 1.2001
+==== Epoch 2297 avg loss: 1.1009 ====
+[Epoch 2298] step 0 loss: 0.9109
+==== Epoch 2298 avg loss: 1.3072 ====
+[Epoch 2299] step 0 loss: 0.7374
+==== Epoch 2299 avg loss: 1.1834 ====
+[Epoch 2300] step 0 loss: 1.3792
+==== Epoch 2300 avg loss: 1.0583 ====
+[Epoch 2301] step 0 loss: 1.4677
+==== Epoch 2301 avg loss: 1.2587 ====
+[Epoch 2302] step 0 loss: 2.0882
+==== Epoch 2302 avg loss: 1.2678 ====
+[Epoch 2303] step 0 loss: 0.9772
+==== Epoch 2303 avg loss: 1.1801 ====
+[Epoch 2304] step 0 loss: 1.2023
+==== Epoch 2304 avg loss: 1.2148 ====
+[Epoch 2305] step 0 loss: 1.5457
+==== Epoch 2305 avg loss: 1.1417 ====
+[Epoch 2306] step 0 loss: 1.3657
+==== Epoch 2306 avg loss: 1.1540 ====
+[Epoch 2307] step 0 loss: 0.9048
+==== Epoch 2307 avg loss: 1.1529 ====
+[Epoch 2308] step 0 loss: 1.2158
+==== Epoch 2308 avg loss: 1.2169 ====
+[Epoch 2309] step 0 loss: 1.3499
+==== Epoch 2309 avg loss: 1.1046 ====
+[Epoch 2310] step 0 loss: 1.2197
+==== Epoch 2310 avg loss: 1.1733 ====
+[Epoch 2311] step 0 loss: 1.4810
+==== Epoch 2311 avg loss: 1.1431 ====
+[Epoch 2312] step 0 loss: 1.3916
+==== Epoch 2312 avg loss: 1.2285 ====
+[Epoch 2313] step 0 loss: 0.7513
+==== Epoch 2313 avg loss: 0.9984 ====
+[Epoch 2314] step 0 loss: 1.4974
+==== Epoch 2314 avg loss: 1.3117 ====
+[Epoch 2315] step 0 loss: 1.0303
+==== Epoch 2315 avg loss: 0.9864 ====
+[Epoch 2316] step 0 loss: 1.7049
+==== Epoch 2316 avg loss: 1.4204 ====
+[Epoch 2317] step 0 loss: 1.1306
+==== Epoch 2317 avg loss: 1.1598 ====
+[Epoch 2318] step 0 loss: 1.1021
+==== Epoch 2318 avg loss: 1.2374 ====
+[Epoch 2319] step 0 loss: 1.0968
+==== Epoch 2319 avg loss: 1.0233 ====
+[Epoch 2320] step 0 loss: 1.1659
+==== Epoch 2320 avg loss: 1.1390 ====
+[Epoch 2321] step 0 loss: 0.8678
+==== Epoch 2321 avg loss: 1.1126 ====
+[Epoch 2322] step 0 loss: 1.1167
+==== Epoch 2322 avg loss: 1.3597 ====
+[Epoch 2323] step 0 loss: 0.9276
+==== Epoch 2323 avg loss: 1.2274 ====
+[Epoch 2324] step 0 loss: 0.9539
+==== Epoch 2324 avg loss: 1.2335 ====
+[Epoch 2325] step 0 loss: 0.8885
+==== Epoch 2325 avg loss: 1.0970 ====
+[Epoch 2326] step 0 loss: 1.4446
+==== Epoch 2326 avg loss: 1.0767 ====
+[Epoch 2327] step 0 loss: 1.2730
+==== Epoch 2327 avg loss: 1.1168 ====
+[Epoch 2328] step 0 loss: 1.2793
+==== Epoch 2328 avg loss: 1.1375 ====
+[Epoch 2329] step 0 loss: 0.6832
+==== Epoch 2329 avg loss: 1.0535 ====
+[Epoch 2330] step 0 loss: 0.9639
+==== Epoch 2330 avg loss: 1.1224 ====
+[Epoch 2331] step 0 loss: 0.8807
+==== Epoch 2331 avg loss: 1.2208 ====
+[Epoch 2332] step 0 loss: 0.7125
+==== Epoch 2332 avg loss: 1.2480 ====
+[Epoch 2333] step 0 loss: 0.9236
+==== Epoch 2333 avg loss: 1.0443 ====
+[Epoch 2334] step 0 loss: 0.7832
+==== Epoch 2334 avg loss: 1.0371 ====
+[Epoch 2335] step 0 loss: 1.1189
+==== Epoch 2335 avg loss: 1.1177 ====
+[Epoch 2336] step 0 loss: 1.4569
+==== Epoch 2336 avg loss: 1.1161 ====
+[Epoch 2337] step 0 loss: 1.8534
+==== Epoch 2337 avg loss: 1.0645 ====
+[Epoch 2338] step 0 loss: 1.2112
+==== Epoch 2338 avg loss: 1.0063 ====
+[Epoch 2339] step 0 loss: 1.9854
+==== Epoch 2339 avg loss: 1.1575 ====
+[Epoch 2340] step 0 loss: 1.3456
+==== Epoch 2340 avg loss: 1.1625 ====
+[Epoch 2341] step 0 loss: 1.1146
+==== Epoch 2341 avg loss: 1.3079 ====
+[Epoch 2342] step 0 loss: 1.2731
+==== Epoch 2342 avg loss: 1.2298 ====
+[Epoch 2343] step 0 loss: 0.7239
+==== Epoch 2343 avg loss: 1.0171 ====
+[Epoch 2344] step 0 loss: 1.1573
+==== Epoch 2344 avg loss: 1.1115 ====
+[Epoch 2345] step 0 loss: 0.8475
+==== Epoch 2345 avg loss: 1.0430 ====
+[Epoch 2346] step 0 loss: 1.1417
+==== Epoch 2346 avg loss: 1.2135 ====
+[Epoch 2347] step 0 loss: 1.1584
+==== Epoch 2347 avg loss: 1.1261 ====
+[Epoch 2348] step 0 loss: 0.9078
+==== Epoch 2348 avg loss: 1.0251 ====
+[Epoch 2349] step 0 loss: 1.3405
+==== Epoch 2349 avg loss: 1.1160 ====
+[Epoch 2350] step 0 loss: 1.3825
+==== Epoch 2350 avg loss: 1.1393 ====
+[Epoch 2351] step 0 loss: 0.8412
+==== Epoch 2351 avg loss: 1.1298 ====
+[Epoch 2352] step 0 loss: 0.6622
+==== Epoch 2352 avg loss: 1.1277 ====
+[Epoch 2353] step 0 loss: 1.1134
+==== Epoch 2353 avg loss: 1.2309 ====
+[Epoch 2354] step 0 loss: 1.1779
+==== Epoch 2354 avg loss: 1.2313 ====
+[Epoch 2355] step 0 loss: 0.8934
+==== Epoch 2355 avg loss: 1.1313 ====
+[Epoch 2356] step 0 loss: 1.3749
+==== Epoch 2356 avg loss: 1.0946 ====
+[Epoch 2357] step 0 loss: 1.3493
+==== Epoch 2357 avg loss: 1.1285 ====
+[Epoch 2358] step 0 loss: 1.1694
+==== Epoch 2358 avg loss: 1.1133 ====
+[Epoch 2359] step 0 loss: 1.2989
+==== Epoch 2359 avg loss: 1.1539 ====
+[Epoch 2360] step 0 loss: 1.2532
+==== Epoch 2360 avg loss: 1.1354 ====
+[Epoch 2361] step 0 loss: 1.2566
+==== Epoch 2361 avg loss: 1.1918 ====
+[Epoch 2362] step 0 loss: 1.1046
+==== Epoch 2362 avg loss: 1.1690 ====
+[Epoch 2363] step 0 loss: 1.4547
+==== Epoch 2363 avg loss: 1.1183 ====
+[Epoch 2364] step 0 loss: 1.1123
+==== Epoch 2364 avg loss: 1.1750 ====
+[Epoch 2365] step 0 loss: 0.9825
+==== Epoch 2365 avg loss: 1.0933 ====
+[Epoch 2366] step 0 loss: 1.6652
+==== Epoch 2366 avg loss: 1.1591 ====
+[Epoch 2367] step 0 loss: 0.9409
+==== Epoch 2367 avg loss: 1.2335 ====
+[Epoch 2368] step 0 loss: 1.0829
+==== Epoch 2368 avg loss: 1.1175 ====
+[Epoch 2369] step 0 loss: 1.5712
+==== Epoch 2369 avg loss: 1.2874 ====
+[Epoch 2370] step 0 loss: 1.3502
+==== Epoch 2370 avg loss: 1.1897 ====
+[Epoch 2371] step 0 loss: 0.7392
+==== Epoch 2371 avg loss: 1.0570 ====
+[Epoch 2372] step 0 loss: 1.3925
+==== Epoch 2372 avg loss: 1.2344 ====
+[Epoch 2373] step 0 loss: 1.1632
+==== Epoch 2373 avg loss: 1.0749 ====
+[Epoch 2374] step 0 loss: 1.6868
+==== Epoch 2374 avg loss: 1.2076 ====
+[Epoch 2375] step 0 loss: 0.7002
+==== Epoch 2375 avg loss: 1.2744 ====
+[Epoch 2376] step 0 loss: 0.8011
+==== Epoch 2376 avg loss: 1.0734 ====
+[Epoch 2377] step 0 loss: 1.0432
+==== Epoch 2377 avg loss: 1.0660 ====
+[Epoch 2378] step 0 loss: 0.7905
+==== Epoch 2378 avg loss: 1.1151 ====
+[Epoch 2379] step 0 loss: 1.6918
+==== Epoch 2379 avg loss: 1.1504 ====
+[Epoch 2380] step 0 loss: 1.0891
+==== Epoch 2380 avg loss: 1.0992 ====
+[Epoch 2381] step 0 loss: 0.9490
+==== Epoch 2381 avg loss: 0.9770 ====
+[Epoch 2382] step 0 loss: 1.2620
+==== Epoch 2382 avg loss: 1.0559 ====
+[Epoch 2383] step 0 loss: 0.8020
+==== Epoch 2383 avg loss: 1.0776 ====
+[Epoch 2384] step 0 loss: 0.9516
+==== Epoch 2384 avg loss: 1.1225 ====
+[Epoch 2385] step 0 loss: 1.4120
+==== Epoch 2385 avg loss: 1.2214 ====
+[Epoch 2386] step 0 loss: 0.9807
+==== Epoch 2386 avg loss: 1.0714 ====
+[Epoch 2387] step 0 loss: 0.9399
+==== Epoch 2387 avg loss: 1.1500 ====
+[Epoch 2388] step 0 loss: 1.0227
+==== Epoch 2388 avg loss: 1.1355 ====
+[Epoch 2389] step 0 loss: 1.5527
+==== Epoch 2389 avg loss: 1.2227 ====
+[Epoch 2390] step 0 loss: 1.1662
+==== Epoch 2390 avg loss: 1.0276 ====
+[Epoch 2391] step 0 loss: 1.2689
+==== Epoch 2391 avg loss: 1.1978 ====
+[Epoch 2392] step 0 loss: 0.9481
+==== Epoch 2392 avg loss: 1.3202 ====
+[Epoch 2393] step 0 loss: 1.2355
+==== Epoch 2393 avg loss: 1.1423 ====
+[Epoch 2394] step 0 loss: 1.2841
+==== Epoch 2394 avg loss: 1.3029 ====
+[Epoch 2395] step 0 loss: 1.7054
+==== Epoch 2395 avg loss: 1.3926 ====
+[Epoch 2396] step 0 loss: 1.3021
+==== Epoch 2396 avg loss: 1.2744 ====
+[Epoch 2397] step 0 loss: 1.3665
+==== Epoch 2397 avg loss: 1.4125 ====
+[Epoch 2398] step 0 loss: 1.1447
+==== Epoch 2398 avg loss: 1.2117 ====
+[Epoch 2399] step 0 loss: 1.7910
+==== Epoch 2399 avg loss: 1.1794 ====
+[Epoch 2400] step 0 loss: 1.1411
+==== Epoch 2400 avg loss: 1.1204 ====
+[Epoch 2401] step 0 loss: 1.5782
+==== Epoch 2401 avg loss: 1.2929 ====
+[Epoch 2402] step 0 loss: 1.7952
+==== Epoch 2402 avg loss: 1.2662 ====
+[Epoch 2403] step 0 loss: 1.1619
+==== Epoch 2403 avg loss: 1.2413 ====
+[Epoch 2404] step 0 loss: 0.7692
+==== Epoch 2404 avg loss: 1.3695 ====
+[Epoch 2405] step 0 loss: 0.9645
+==== Epoch 2405 avg loss: 1.1084 ====
+[Epoch 2406] step 0 loss: 0.9271
+==== Epoch 2406 avg loss: 1.1153 ====
+[Epoch 2407] step 0 loss: 1.0822
+==== Epoch 2407 avg loss: 1.2619 ====
+[Epoch 2408] step 0 loss: 1.1951
+==== Epoch 2408 avg loss: 1.2759 ====
+[Epoch 2409] step 0 loss: 1.3397
+==== Epoch 2409 avg loss: 1.2324 ====
+[Epoch 2410] step 0 loss: 1.7359
+==== Epoch 2410 avg loss: 1.4651 ====
+[Epoch 2411] step 0 loss: 1.4457
+==== Epoch 2411 avg loss: 1.2864 ====
+[Epoch 2412] step 0 loss: 1.1814
+==== Epoch 2412 avg loss: 1.2167 ====
+[Epoch 2413] step 0 loss: 1.5963
+==== Epoch 2413 avg loss: 1.1785 ====
+[Epoch 2414] step 0 loss: 1.3000
+==== Epoch 2414 avg loss: 1.1754 ====
+[Epoch 2415] step 0 loss: 1.0540
+==== Epoch 2415 avg loss: 1.3500 ====
+[Epoch 2416] step 0 loss: 1.9439
+==== Epoch 2416 avg loss: 1.2244 ====
+[Epoch 2417] step 0 loss: 1.3669
+==== Epoch 2417 avg loss: 1.1616 ====
+[Epoch 2418] step 0 loss: 1.2099
+==== Epoch 2418 avg loss: 1.1352 ====
+[Epoch 2419] step 0 loss: 1.0243
+==== Epoch 2419 avg loss: 1.4083 ====
+[Epoch 2420] step 0 loss: 1.7480
+==== Epoch 2420 avg loss: 1.4440 ====
+[Epoch 2421] step 0 loss: 1.1707
+==== Epoch 2421 avg loss: 1.3132 ====
+[Epoch 2422] step 0 loss: 1.0657
+==== Epoch 2422 avg loss: 1.1718 ====
+[Epoch 2423] step 0 loss: 1.4633
+==== Epoch 2423 avg loss: 1.3035 ====
+[Epoch 2424] step 0 loss: 1.2631
+==== Epoch 2424 avg loss: 1.2431 ====
+[Epoch 2425] step 0 loss: 1.2891
+==== Epoch 2425 avg loss: 1.2391 ====
+[Epoch 2426] step 0 loss: 1.5827
+==== Epoch 2426 avg loss: 1.3673 ====
+[Epoch 2427] step 0 loss: 1.3920
+==== Epoch 2427 avg loss: 1.2223 ====
+[Epoch 2428] step 0 loss: 0.8621
+==== Epoch 2428 avg loss: 1.2050 ====
+[Epoch 2429] step 0 loss: 0.9493
+==== Epoch 2429 avg loss: 1.2396 ====
+[Epoch 2430] step 0 loss: 1.8077
+==== Epoch 2430 avg loss: 1.4448 ====
+[Epoch 2431] step 0 loss: 1.0416
+==== Epoch 2431 avg loss: 1.2636 ====
+[Epoch 2432] step 0 loss: 1.8216
+==== Epoch 2432 avg loss: 1.3717 ====
+[Epoch 2433] step 0 loss: 1.2526
+==== Epoch 2433 avg loss: 1.3136 ====
+[Epoch 2434] step 0 loss: 0.8949
+==== Epoch 2434 avg loss: 1.0589 ====
+[Epoch 2435] step 0 loss: 0.8564
+==== Epoch 2435 avg loss: 1.2087 ====
+[Epoch 2436] step 0 loss: 1.2052
+==== Epoch 2436 avg loss: 1.1168 ====
+[Epoch 2437] step 0 loss: 0.7530
+==== Epoch 2437 avg loss: 1.2207 ====
+[Epoch 2438] step 0 loss: 1.1773
+==== Epoch 2438 avg loss: 1.0384 ====
+[Epoch 2439] step 0 loss: 1.6073
+==== Epoch 2439 avg loss: 1.2329 ====
+[Epoch 2440] step 0 loss: 1.4405
+==== Epoch 2440 avg loss: 1.3369 ====
+[Epoch 2441] step 0 loss: 1.0452
+==== Epoch 2441 avg loss: 1.2640 ====
+[Epoch 2442] step 0 loss: 1.0306
+==== Epoch 2442 avg loss: 1.2637 ====
+[Epoch 2443] step 0 loss: 1.1649
+==== Epoch 2443 avg loss: 1.3296 ====
+[Epoch 2444] step 0 loss: 1.3272
+==== Epoch 2444 avg loss: 1.3522 ====
+[Epoch 2445] step 0 loss: 0.6462
+==== Epoch 2445 avg loss: 1.3356 ====
+[Epoch 2446] step 0 loss: 1.2097
+==== Epoch 2446 avg loss: 1.3092 ====
+[Epoch 2447] step 0 loss: 0.8133
+==== Epoch 2447 avg loss: 1.1502 ====
+[Epoch 2448] step 0 loss: 0.7307
+==== Epoch 2448 avg loss: 1.2530 ====
+[Epoch 2449] step 0 loss: 1.2301
+==== Epoch 2449 avg loss: 1.3318 ====
+[Epoch 2450] step 0 loss: 1.0509
+==== Epoch 2450 avg loss: 1.1166 ====
+[Epoch 2451] step 0 loss: 1.5817
+==== Epoch 2451 avg loss: 1.2248 ====
+[Epoch 2452] step 0 loss: 1.2224
+==== Epoch 2452 avg loss: 1.3391 ====
+[Epoch 2453] step 0 loss: 0.9161
+==== Epoch 2453 avg loss: 1.2071 ====
+[Epoch 2454] step 0 loss: 1.0443
+==== Epoch 2454 avg loss: 1.2547 ====
+[Epoch 2455] step 0 loss: 1.4142
+==== Epoch 2455 avg loss: 1.2631 ====
+[Epoch 2456] step 0 loss: 1.1049
+==== Epoch 2456 avg loss: 1.2473 ====
+[Epoch 2457] step 0 loss: 1.3493
+==== Epoch 2457 avg loss: 1.3985 ====
+[Epoch 2458] step 0 loss: 0.9782
+==== Epoch 2458 avg loss: 1.1500 ====
+[Epoch 2459] step 0 loss: 1.1334
+==== Epoch 2459 avg loss: 1.2179 ====
+[Epoch 2460] step 0 loss: 1.3779
+==== Epoch 2460 avg loss: 1.1539 ====
+[Epoch 2461] step 0 loss: 1.6669
+==== Epoch 2461 avg loss: 1.3268 ====
+[Epoch 2462] step 0 loss: 1.0444
+==== Epoch 2462 avg loss: 1.1712 ====
+[Epoch 2463] step 0 loss: 1.1091
+==== Epoch 2463 avg loss: 1.3002 ====
+[Epoch 2464] step 0 loss: 1.1368
+==== Epoch 2464 avg loss: 1.1757 ====
+[Epoch 2465] step 0 loss: 1.4181
+==== Epoch 2465 avg loss: 1.1316 ====
+[Epoch 2466] step 0 loss: 1.1737
+==== Epoch 2466 avg loss: 1.0925 ====
+[Epoch 2467] step 0 loss: 1.1866
+==== Epoch 2467 avg loss: 1.2155 ====
+[Epoch 2468] step 0 loss: 1.7357
+==== Epoch 2468 avg loss: 1.2110 ====
+[Epoch 2469] step 0 loss: 0.8618
+==== Epoch 2469 avg loss: 1.2546 ====
+[Epoch 2470] step 0 loss: 1.2774
+==== Epoch 2470 avg loss: 1.1773 ====
+[Epoch 2471] step 0 loss: 1.5088
+==== Epoch 2471 avg loss: 1.3131 ====
+[Epoch 2472] step 0 loss: 0.9555
+==== Epoch 2472 avg loss: 1.2523 ====
+[Epoch 2473] step 0 loss: 1.8598
+==== Epoch 2473 avg loss: 1.1158 ====
+[Epoch 2474] step 0 loss: 1.2538
+==== Epoch 2474 avg loss: 1.4155 ====
+[Epoch 2475] step 0 loss: 1.4655
+==== Epoch 2475 avg loss: 1.1621 ====
+[Epoch 2476] step 0 loss: 1.6466
+==== Epoch 2476 avg loss: 1.2157 ====
+[Epoch 2477] step 0 loss: 1.0472
+==== Epoch 2477 avg loss: 1.1785 ====
+[Epoch 2478] step 0 loss: 1.1336
+==== Epoch 2478 avg loss: 1.2114 ====
+[Epoch 2479] step 0 loss: 1.3737
+==== Epoch 2479 avg loss: 1.2424 ====
+[Epoch 2480] step 0 loss: 1.7748
+==== Epoch 2480 avg loss: 1.3930 ====
+[Epoch 2481] step 0 loss: 1.1102
+==== Epoch 2481 avg loss: 1.2934 ====
+[Epoch 2482] step 0 loss: 0.9848
+==== Epoch 2482 avg loss: 1.3030 ====
+[Epoch 2483] step 0 loss: 1.0531
+==== Epoch 2483 avg loss: 1.1321 ====
+[Epoch 2484] step 0 loss: 1.2590
+==== Epoch 2484 avg loss: 1.1840 ====
+[Epoch 2485] step 0 loss: 1.1885
+==== Epoch 2485 avg loss: 1.2401 ====
+[Epoch 2486] step 0 loss: 0.9169
+==== Epoch 2486 avg loss: 1.3030 ====
+[Epoch 2487] step 0 loss: 1.3111
+==== Epoch 2487 avg loss: 1.1760 ====
+[Epoch 2488] step 0 loss: 1.0361
+==== Epoch 2488 avg loss: 1.1701 ====
+[Epoch 2489] step 0 loss: 0.9744
+==== Epoch 2489 avg loss: 1.1980 ====
+[Epoch 2490] step 0 loss: 2.4547
+==== Epoch 2490 avg loss: 1.4258 ====
+[Epoch 2491] step 0 loss: 0.9996
+==== Epoch 2491 avg loss: 1.2297 ====
+[Epoch 2492] step 0 loss: 0.9724
+==== Epoch 2492 avg loss: 1.1182 ====
+[Epoch 2493] step 0 loss: 1.4990
+==== Epoch 2493 avg loss: 1.1245 ====
+[Epoch 2494] step 0 loss: 1.0377
+==== Epoch 2494 avg loss: 1.1676 ====
+[Epoch 2495] step 0 loss: 1.1474
+==== Epoch 2495 avg loss: 1.2065 ====
+[Epoch 2496] step 0 loss: 0.9640
+==== Epoch 2496 avg loss: 1.1717 ====
+[Epoch 2497] step 0 loss: 0.7966
+==== Epoch 2497 avg loss: 1.1864 ====
+[Epoch 2498] step 0 loss: 1.7994
+==== Epoch 2498 avg loss: 1.2992 ====
+[Epoch 2499] step 0 loss: 1.0164
+==== Epoch 2499 avg loss: 1.3008 ====
+[Epoch 2500] step 0 loss: 1.5547
+==== Epoch 2500 avg loss: 1.5359 ====
+[Epoch 2501] step 0 loss: 1.4133
+==== Epoch 2501 avg loss: 1.2056 ====
+[Epoch 2502] step 0 loss: 1.6026
+==== Epoch 2502 avg loss: 1.1610 ====
+[Epoch 2503] step 0 loss: 1.2025
+==== Epoch 2503 avg loss: 1.2375 ====
+[Epoch 2504] step 0 loss: 1.1107
+==== Epoch 2504 avg loss: 1.2149 ====
+[Epoch 2505] step 0 loss: 1.9047
+==== Epoch 2505 avg loss: 1.3981 ====
+[Epoch 2506] step 0 loss: 1.5015
+==== Epoch 2506 avg loss: 1.1197 ====
+[Epoch 2507] step 0 loss: 1.0297
+==== Epoch 2507 avg loss: 1.2457 ====
+[Epoch 2508] step 0 loss: 1.7321
+==== Epoch 2508 avg loss: 1.1968 ====
+[Epoch 2509] step 0 loss: 1.7075
+==== Epoch 2509 avg loss: 1.3797 ====
+[Epoch 2510] step 0 loss: 1.2494
+==== Epoch 2510 avg loss: 1.2182 ====
+[Epoch 2511] step 0 loss: 1.0454
+==== Epoch 2511 avg loss: 1.1891 ====
+[Epoch 2512] step 0 loss: 1.1103
+==== Epoch 2512 avg loss: 1.1954 ====
+[Epoch 2513] step 0 loss: 1.1336
+==== Epoch 2513 avg loss: 1.1620 ====
+[Epoch 2514] step 0 loss: 1.0940
+==== Epoch 2514 avg loss: 1.3110 ====
+[Epoch 2515] step 0 loss: 1.6425
+==== Epoch 2515 avg loss: 1.2665 ====
+[Epoch 2516] step 0 loss: 1.4576
+==== Epoch 2516 avg loss: 1.2264 ====
+[Epoch 2517] step 0 loss: 1.4611
+==== Epoch 2517 avg loss: 1.1071 ====
+[Epoch 2518] step 0 loss: 1.5037
+==== Epoch 2518 avg loss: 1.2331 ====
+[Epoch 2519] step 0 loss: 1.3691
+==== Epoch 2519 avg loss: 1.1915 ====
+[Epoch 2520] step 0 loss: 1.2905
+==== Epoch 2520 avg loss: 1.1935 ====
+[Epoch 2521] step 0 loss: 1.2044
+==== Epoch 2521 avg loss: 1.0499 ====
+[Epoch 2522] step 0 loss: 0.8261
+==== Epoch 2522 avg loss: 1.0548 ====
+[Epoch 2523] step 0 loss: 1.0936
+==== Epoch 2523 avg loss: 1.1415 ====
+[Epoch 2524] step 0 loss: 1.1142
+==== Epoch 2524 avg loss: 1.3439 ====
+[Epoch 2525] step 0 loss: 1.1861
+==== Epoch 2525 avg loss: 1.1109 ====
+[Epoch 2526] step 0 loss: 1.1015
+==== Epoch 2526 avg loss: 1.1330 ====
+[Epoch 2527] step 0 loss: 1.2137
+==== Epoch 2527 avg loss: 1.1705 ====
+[Epoch 2528] step 0 loss: 1.6172
+==== Epoch 2528 avg loss: 1.2859 ====
+[Epoch 2529] step 0 loss: 0.7556
+==== Epoch 2529 avg loss: 1.2908 ====
+[Epoch 2530] step 0 loss: 1.2564
+==== Epoch 2530 avg loss: 1.2213 ====
+[Epoch 2531] step 0 loss: 1.1663
+==== Epoch 2531 avg loss: 1.2815 ====
+[Epoch 2532] step 0 loss: 1.0237
+==== Epoch 2532 avg loss: 1.3001 ====
+[Epoch 2533] step 0 loss: 1.2425
+==== Epoch 2533 avg loss: 1.1116 ====
+[Epoch 2534] step 0 loss: 1.0049
+==== Epoch 2534 avg loss: 1.1106 ====
+[Epoch 2535] step 0 loss: 1.1953
+==== Epoch 2535 avg loss: 1.1431 ====
+[Epoch 2536] step 0 loss: 1.1421
+==== Epoch 2536 avg loss: 1.0936 ====
+[Epoch 2537] step 0 loss: 1.2558
+==== Epoch 2537 avg loss: 1.0971 ====
+[Epoch 2538] step 0 loss: 1.5184
+==== Epoch 2538 avg loss: 1.4037 ====
+[Epoch 2539] step 0 loss: 1.1018
+==== Epoch 2539 avg loss: 1.0755 ====
+[Epoch 2540] step 0 loss: 1.0226
+==== Epoch 2540 avg loss: 1.1438 ====
+[Epoch 2541] step 0 loss: 1.1570
+==== Epoch 2541 avg loss: 1.1648 ====
+[Epoch 2542] step 0 loss: 1.1540
+==== Epoch 2542 avg loss: 1.3456 ====
+[Epoch 2543] step 0 loss: 1.1409
+==== Epoch 2543 avg loss: 1.1680 ====
+[Epoch 2544] step 0 loss: 0.9923
+==== Epoch 2544 avg loss: 1.2819 ====
+[Epoch 2545] step 0 loss: 1.0219
+==== Epoch 2545 avg loss: 1.1343 ====
+[Epoch 2546] step 0 loss: 1.2049
+==== Epoch 2546 avg loss: 1.1272 ====
+[Epoch 2547] step 0 loss: 1.1541
+==== Epoch 2547 avg loss: 1.3086 ====
+[Epoch 2548] step 0 loss: 1.5401
+==== Epoch 2548 avg loss: 1.1186 ====
+[Epoch 2549] step 0 loss: 1.1559
+==== Epoch 2549 avg loss: 1.3409 ====
+[Epoch 2550] step 0 loss: 1.5962
+==== Epoch 2550 avg loss: 1.2424 ====
+[Epoch 2551] step 0 loss: 1.1268
+==== Epoch 2551 avg loss: 1.0622 ====
+[Epoch 2552] step 0 loss: 0.8966
+==== Epoch 2552 avg loss: 1.1857 ====
+[Epoch 2553] step 0 loss: 1.1833
+==== Epoch 2553 avg loss: 1.2504 ====
+[Epoch 2554] step 0 loss: 1.0816
+==== Epoch 2554 avg loss: 1.1091 ====
+[Epoch 2555] step 0 loss: 0.5651
+==== Epoch 2555 avg loss: 1.1514 ====
+[Epoch 2556] step 0 loss: 1.1070
+==== Epoch 2556 avg loss: 1.2763 ====
+[Epoch 2557] step 0 loss: 1.0390
+==== Epoch 2557 avg loss: 1.1910 ====
+[Epoch 2558] step 0 loss: 1.4702
+==== Epoch 2558 avg loss: 1.2179 ====
+[Epoch 2559] step 0 loss: 1.0479
+==== Epoch 2559 avg loss: 1.0817 ====
+[Epoch 2560] step 0 loss: 1.0192
+==== Epoch 2560 avg loss: 1.2913 ====
+[Epoch 2561] step 0 loss: 0.9649
+==== Epoch 2561 avg loss: 1.3585 ====
+[Epoch 2562] step 0 loss: 2.1822
+==== Epoch 2562 avg loss: 1.3747 ====
+[Epoch 2563] step 0 loss: 0.9720
+==== Epoch 2563 avg loss: 1.2863 ====
+[Epoch 2564] step 0 loss: 0.9945
+==== Epoch 2564 avg loss: 1.2051 ====
+[Epoch 2565] step 0 loss: 1.2048
+==== Epoch 2565 avg loss: 1.1075 ====
+[Epoch 2566] step 0 loss: 1.2558
+==== Epoch 2566 avg loss: 1.1613 ====
+[Epoch 2567] step 0 loss: 1.1807
+==== Epoch 2567 avg loss: 1.1106 ====
+[Epoch 2568] step 0 loss: 0.8097
+==== Epoch 2568 avg loss: 1.2751 ====
+[Epoch 2569] step 0 loss: 0.9280
+==== Epoch 2569 avg loss: 1.1501 ====
+[Epoch 2570] step 0 loss: 1.5580
+==== Epoch 2570 avg loss: 1.2148 ====
+[Epoch 2571] step 0 loss: 1.2326
+==== Epoch 2571 avg loss: 1.1193 ====
+[Epoch 2572] step 0 loss: 0.9022
+==== Epoch 2572 avg loss: 1.0526 ====
+[Epoch 2573] step 0 loss: 0.9775
+==== Epoch 2573 avg loss: 1.0603 ====
+[Epoch 2574] step 0 loss: 0.7914
+==== Epoch 2574 avg loss: 1.1479 ====
+[Epoch 2575] step 0 loss: 0.9216
+==== Epoch 2575 avg loss: 1.1601 ====
+[Epoch 2576] step 0 loss: 1.2598
+==== Epoch 2576 avg loss: 1.2681 ====
+[Epoch 2577] step 0 loss: 0.8863
+==== Epoch 2577 avg loss: 1.1060 ====
+[Epoch 2578] step 0 loss: 0.9669
+==== Epoch 2578 avg loss: 1.0597 ====
+[Epoch 2579] step 0 loss: 1.1689
+==== Epoch 2579 avg loss: 1.2705 ====
+[Epoch 2580] step 0 loss: 1.1942
+==== Epoch 2580 avg loss: 1.1852 ====
+[Epoch 2581] step 0 loss: 1.1854
+==== Epoch 2581 avg loss: 1.2392 ====
+[Epoch 2582] step 0 loss: 1.0162
+==== Epoch 2582 avg loss: 1.1756 ====
+[Epoch 2583] step 0 loss: 1.5530
+==== Epoch 2583 avg loss: 1.3620 ====
+[Epoch 2584] step 0 loss: 0.8155
+==== Epoch 2584 avg loss: 1.2017 ====
+[Epoch 2585] step 0 loss: 1.0924
+==== Epoch 2585 avg loss: 1.2707 ====
+[Epoch 2586] step 0 loss: 1.6476
+==== Epoch 2586 avg loss: 1.1649 ====
+[Epoch 2587] step 0 loss: 0.7148
+==== Epoch 2587 avg loss: 1.2254 ====
+[Epoch 2588] step 0 loss: 0.9838
+==== Epoch 2588 avg loss: 1.0967 ====
+[Epoch 2589] step 0 loss: 0.9867
+==== Epoch 2589 avg loss: 1.1561 ====
+[Epoch 2590] step 0 loss: 1.6186
+==== Epoch 2590 avg loss: 1.1373 ====
+[Epoch 2591] step 0 loss: 0.8046
+==== Epoch 2591 avg loss: 1.0494 ====
+[Epoch 2592] step 0 loss: 1.0656
+==== Epoch 2592 avg loss: 1.2458 ====
+[Epoch 2593] step 0 loss: 1.0031
+==== Epoch 2593 avg loss: 1.0574 ====
+[Epoch 2594] step 0 loss: 0.8718
+==== Epoch 2594 avg loss: 1.1596 ====
+[Epoch 2595] step 0 loss: 0.6568
+==== Epoch 2595 avg loss: 1.2535 ====
+[Epoch 2596] step 0 loss: 1.0898
+==== Epoch 2596 avg loss: 1.2416 ====
+[Epoch 2597] step 0 loss: 1.1626
+==== Epoch 2597 avg loss: 1.1965 ====
+[Epoch 2598] step 0 loss: 0.9753
+==== Epoch 2598 avg loss: 1.1438 ====
+[Epoch 2599] step 0 loss: 1.0653
+==== Epoch 2599 avg loss: 1.1380 ====
+[Epoch 2600] step 0 loss: 1.3547
+==== Epoch 2600 avg loss: 1.0849 ====
+[Epoch 2601] step 0 loss: 0.8213
+==== Epoch 2601 avg loss: 1.1458 ====
+[Epoch 2602] step 0 loss: 0.8965
+==== Epoch 2602 avg loss: 1.1140 ====
+[Epoch 2603] step 0 loss: 1.0220
+==== Epoch 2603 avg loss: 1.1170 ====
+[Epoch 2604] step 0 loss: 0.8998
+==== Epoch 2604 avg loss: 1.1552 ====
+[Epoch 2605] step 0 loss: 0.9159
+==== Epoch 2605 avg loss: 1.1597 ====
+[Epoch 2606] step 0 loss: 1.5856
+==== Epoch 2606 avg loss: 1.1155 ====
+[Epoch 2607] step 0 loss: 0.9438
+==== Epoch 2607 avg loss: 1.3865 ====
+[Epoch 2608] step 0 loss: 1.3525
+==== Epoch 2608 avg loss: 1.1339 ====
+[Epoch 2609] step 0 loss: 1.1682
+==== Epoch 2609 avg loss: 1.3016 ====
+[Epoch 2610] step 0 loss: 1.6632
+==== Epoch 2610 avg loss: 1.1616 ====
+[Epoch 2611] step 0 loss: 0.9340
+==== Epoch 2611 avg loss: 1.4305 ====
+[Epoch 2612] step 0 loss: 0.7054
+==== Epoch 2612 avg loss: 1.2224 ====
+[Epoch 2613] step 0 loss: 1.5026
+==== Epoch 2613 avg loss: 1.2074 ====
+[Epoch 2614] step 0 loss: 1.2828
+==== Epoch 2614 avg loss: 1.2596 ====
+[Epoch 2615] step 0 loss: 1.0909
+==== Epoch 2615 avg loss: 1.1610 ====
+[Epoch 2616] step 0 loss: 0.8835
+==== Epoch 2616 avg loss: 1.0609 ====
+[Epoch 2617] step 0 loss: 0.8411
+==== Epoch 2617 avg loss: 1.1502 ====
+[Epoch 2618] step 0 loss: 1.2831
+==== Epoch 2618 avg loss: 1.2417 ====
+[Epoch 2619] step 0 loss: 0.9786
+==== Epoch 2619 avg loss: 1.3497 ====
+[Epoch 2620] step 0 loss: 0.6982
+==== Epoch 2620 avg loss: 1.1006 ====
+[Epoch 2621] step 0 loss: 0.8345
+==== Epoch 2621 avg loss: 1.0156 ====
+[Epoch 2622] step 0 loss: 1.3174
+==== Epoch 2622 avg loss: 1.2862 ====
+[Epoch 2623] step 0 loss: 0.9480
+==== Epoch 2623 avg loss: 1.2673 ====
+[Epoch 2624] step 0 loss: 1.2122
+==== Epoch 2624 avg loss: 1.0878 ====
+[Epoch 2625] step 0 loss: 1.4475
+==== Epoch 2625 avg loss: 1.1711 ====
+[Epoch 2626] step 0 loss: 1.0768
+==== Epoch 2626 avg loss: 1.2981 ====
+[Epoch 2627] step 0 loss: 1.9835
+==== Epoch 2627 avg loss: 1.3560 ====
+[Epoch 2628] step 0 loss: 1.6166
+==== Epoch 2628 avg loss: 1.2278 ====
+[Epoch 2629] step 0 loss: 1.7065
+==== Epoch 2629 avg loss: 1.2386 ====
+[Epoch 2630] step 0 loss: 0.9061
+==== Epoch 2630 avg loss: 1.1572 ====
+[Epoch 2631] step 0 loss: 1.2521
+==== Epoch 2631 avg loss: 1.0812 ====
+[Epoch 2632] step 0 loss: 1.2577
+==== Epoch 2632 avg loss: 1.1670 ====
+[Epoch 2633] step 0 loss: 0.9698
+==== Epoch 2633 avg loss: 1.0198 ====
+[Epoch 2634] step 0 loss: 0.9623
+==== Epoch 2634 avg loss: 1.0084 ====
+[Epoch 2635] step 0 loss: 1.2548
+==== Epoch 2635 avg loss: 1.1009 ====
+[Epoch 2636] step 0 loss: 0.9228
+==== Epoch 2636 avg loss: 1.0851 ====
+[Epoch 2637] step 0 loss: 1.0215
+==== Epoch 2637 avg loss: 1.0606 ====
+[Epoch 2638] step 0 loss: 1.1247
+==== Epoch 2638 avg loss: 1.0738 ====
+[Epoch 2639] step 0 loss: 0.9325
+==== Epoch 2639 avg loss: 1.1212 ====
+[Epoch 2640] step 0 loss: 1.0542
+==== Epoch 2640 avg loss: 1.0576 ====
+[Epoch 2641] step 0 loss: 0.9234
+==== Epoch 2641 avg loss: 1.0940 ====
+[Epoch 2642] step 0 loss: 1.2955
+==== Epoch 2642 avg loss: 1.2745 ====
+[Epoch 2643] step 0 loss: 0.7940
+==== Epoch 2643 avg loss: 1.0905 ====
+[Epoch 2644] step 0 loss: 1.1295
+==== Epoch 2644 avg loss: 1.1168 ====
+[Epoch 2645] step 0 loss: 1.1585
+==== Epoch 2645 avg loss: 1.0898 ====
+[Epoch 2646] step 0 loss: 1.0395
+==== Epoch 2646 avg loss: 1.0608 ====
+[Epoch 2647] step 0 loss: 1.0343
+==== Epoch 2647 avg loss: 1.1490 ====
+[Epoch 2648] step 0 loss: 1.0453
+==== Epoch 2648 avg loss: 1.1026 ====
+[Epoch 2649] step 0 loss: 0.9862
+==== Epoch 2649 avg loss: 1.2141 ====
+[Epoch 2650] step 0 loss: 0.8227
+==== Epoch 2650 avg loss: 1.1543 ====
+[Epoch 2651] step 0 loss: 0.8550
+==== Epoch 2651 avg loss: 0.9961 ====
+[Epoch 2652] step 0 loss: 1.2027
+==== Epoch 2652 avg loss: 1.0840 ====
+[Epoch 2653] step 0 loss: 1.6813
+==== Epoch 2653 avg loss: 1.1928 ====
+[Epoch 2654] step 0 loss: 1.0864
+==== Epoch 2654 avg loss: 1.1556 ====
+[Epoch 2655] step 0 loss: 1.1124
+==== Epoch 2655 avg loss: 1.1136 ====
+[Epoch 2656] step 0 loss: 0.8730
+==== Epoch 2656 avg loss: 1.0524 ====
+[Epoch 2657] step 0 loss: 1.3867
+==== Epoch 2657 avg loss: 1.3145 ====
+[Epoch 2658] step 0 loss: 0.8925
+==== Epoch 2658 avg loss: 1.1096 ====
+[Epoch 2659] step 0 loss: 1.4483
+==== Epoch 2659 avg loss: 1.0743 ====
+[Epoch 2660] step 0 loss: 0.7910
+==== Epoch 2660 avg loss: 1.0464 ====
+[Epoch 2661] step 0 loss: 1.0449
+==== Epoch 2661 avg loss: 1.1081 ====
+[Epoch 2662] step 0 loss: 1.4534
+==== Epoch 2662 avg loss: 1.1137 ====
+[Epoch 2663] step 0 loss: 1.5962
+==== Epoch 2663 avg loss: 1.1173 ====
+[Epoch 2664] step 0 loss: 1.1348
+==== Epoch 2664 avg loss: 1.1355 ====
+[Epoch 2665] step 0 loss: 0.7663
+==== Epoch 2665 avg loss: 1.0163 ====
+[Epoch 2666] step 0 loss: 1.5709
+==== Epoch 2666 avg loss: 1.1525 ====
+[Epoch 2667] step 0 loss: 1.8688
+==== Epoch 2667 avg loss: 1.2779 ====
+[Epoch 2668] step 0 loss: 1.1860
+==== Epoch 2668 avg loss: 1.1340 ====
+[Epoch 2669] step 0 loss: 1.2715
+==== Epoch 2669 avg loss: 1.1350 ====
+[Epoch 2670] step 0 loss: 1.4587
+==== Epoch 2670 avg loss: 1.0782 ====
+[Epoch 2671] step 0 loss: 1.0063
+==== Epoch 2671 avg loss: 1.1509 ====
+[Epoch 2672] step 0 loss: 1.3401
+==== Epoch 2672 avg loss: 1.2126 ====
+[Epoch 2673] step 0 loss: 1.0477
+==== Epoch 2673 avg loss: 1.1710 ====
+[Epoch 2674] step 0 loss: 1.1864
+==== Epoch 2674 avg loss: 1.2059 ====
+[Epoch 2675] step 0 loss: 0.9635
+==== Epoch 2675 avg loss: 1.1870 ====
+[Epoch 2676] step 0 loss: 1.6348
+==== Epoch 2676 avg loss: 1.0534 ====
+[Epoch 2677] step 0 loss: 0.8981
+==== Epoch 2677 avg loss: 1.0578 ====
+[Epoch 2678] step 0 loss: 1.2076
+==== Epoch 2678 avg loss: 1.0733 ====
+[Epoch 2679] step 0 loss: 0.8621
+==== Epoch 2679 avg loss: 1.0211 ====
+[Epoch 2680] step 0 loss: 1.7454
+==== Epoch 2680 avg loss: 1.3189 ====
+[Epoch 2681] step 0 loss: 1.0941
+==== Epoch 2681 avg loss: 0.9539 ====
+[Epoch 2682] step 0 loss: 1.1814
+==== Epoch 2682 avg loss: 1.1637 ====
+[Epoch 2683] step 0 loss: 1.2129
+==== Epoch 2683 avg loss: 1.2187 ====
+[Epoch 2684] step 0 loss: 0.9274
+==== Epoch 2684 avg loss: 0.9804 ====
+[Epoch 2685] step 0 loss: 1.2608
+==== Epoch 2685 avg loss: 1.1209 ====
+[Epoch 2686] step 0 loss: 1.2489
+==== Epoch 2686 avg loss: 1.0574 ====
+[Epoch 2687] step 0 loss: 0.9186
+==== Epoch 2687 avg loss: 1.1579 ====
+[Epoch 2688] step 0 loss: 0.9075
+==== Epoch 2688 avg loss: 1.1177 ====
+[Epoch 2689] step 0 loss: 1.0550
+==== Epoch 2689 avg loss: 1.2077 ====
+[Epoch 2690] step 0 loss: 0.5891
+==== Epoch 2690 avg loss: 1.0001 ====
+[Epoch 2691] step 0 loss: 1.1303
+==== Epoch 2691 avg loss: 1.1266 ====
+[Epoch 2692] step 0 loss: 0.9492
+==== Epoch 2692 avg loss: 1.2839 ====
+[Epoch 2693] step 0 loss: 1.2799
+==== Epoch 2693 avg loss: 1.1579 ====
+[Epoch 2694] step 0 loss: 0.9272
+==== Epoch 2694 avg loss: 1.1053 ====
+[Epoch 2695] step 0 loss: 0.9940
+==== Epoch 2695 avg loss: 0.9735 ====
+[Epoch 2696] step 0 loss: 0.9395
+==== Epoch 2696 avg loss: 1.0991 ====
+[Epoch 2697] step 0 loss: 0.8449
+==== Epoch 2697 avg loss: 1.0535 ====
+[Epoch 2698] step 0 loss: 1.6023
+==== Epoch 2698 avg loss: 1.0988 ====
+[Epoch 2699] step 0 loss: 1.6723
+==== Epoch 2699 avg loss: 1.2003 ====
+[Epoch 2700] step 0 loss: 1.3509
+==== Epoch 2700 avg loss: 1.1497 ====
+[Epoch 2701] step 0 loss: 1.2185
+==== Epoch 2701 avg loss: 1.2874 ====
+[Epoch 2702] step 0 loss: 1.4239
+==== Epoch 2702 avg loss: 1.3017 ====
+[Epoch 2703] step 0 loss: 0.7437
+==== Epoch 2703 avg loss: 1.0158 ====
+[Epoch 2704] step 0 loss: 0.7223
+==== Epoch 2704 avg loss: 1.0035 ====
+[Epoch 2705] step 0 loss: 1.1837
+==== Epoch 2705 avg loss: 1.0689 ====
+[Epoch 2706] step 0 loss: 0.9945
+==== Epoch 2706 avg loss: 1.1453 ====
+[Epoch 2707] step 0 loss: 0.9220
+==== Epoch 2707 avg loss: 1.1246 ====
+[Epoch 2708] step 0 loss: 0.8949
+==== Epoch 2708 avg loss: 1.0305 ====
+[Epoch 2709] step 0 loss: 0.9961
+==== Epoch 2709 avg loss: 1.0559 ====
+[Epoch 2710] step 0 loss: 0.8631
+==== Epoch 2710 avg loss: 1.0259 ====
+[Epoch 2711] step 0 loss: 1.5508
+==== Epoch 2711 avg loss: 1.0834 ====
+[Epoch 2712] step 0 loss: 1.0939
+==== Epoch 2712 avg loss: 1.2328 ====
+[Epoch 2713] step 0 loss: 1.0233
+==== Epoch 2713 avg loss: 1.1031 ====
+[Epoch 2714] step 0 loss: 0.7469
+==== Epoch 2714 avg loss: 1.0596 ====
+[Epoch 2715] step 0 loss: 1.1856
+==== Epoch 2715 avg loss: 1.0669 ====
+[Epoch 2716] step 0 loss: 1.0114
+==== Epoch 2716 avg loss: 0.9231 ====
+[Epoch 2717] step 0 loss: 1.5007
+==== Epoch 2717 avg loss: 1.0459 ====
+[Epoch 2718] step 0 loss: 1.2549
+==== Epoch 2718 avg loss: 1.2393 ====
+[Epoch 2719] step 0 loss: 0.9618
+==== Epoch 2719 avg loss: 1.0537 ====
+[Epoch 2720] step 0 loss: 1.2597
+==== Epoch 2720 avg loss: 1.0491 ====
+[Epoch 2721] step 0 loss: 0.5945
+==== Epoch 2721 avg loss: 0.9952 ====
+[Epoch 2722] step 0 loss: 1.2519
+==== Epoch 2722 avg loss: 1.0961 ====
+[Epoch 2723] step 0 loss: 0.7493
+==== Epoch 2723 avg loss: 0.9365 ====
+[Epoch 2724] step 0 loss: 0.8925
+==== Epoch 2724 avg loss: 0.9837 ====
+[Epoch 2725] step 0 loss: 1.2640
+==== Epoch 2725 avg loss: 1.1421 ====
+[Epoch 2726] step 0 loss: 1.0720
+==== Epoch 2726 avg loss: 1.0511 ====
+[Epoch 2727] step 0 loss: 1.0831
+==== Epoch 2727 avg loss: 1.0277 ====
+[Epoch 2728] step 0 loss: 1.2285
+==== Epoch 2728 avg loss: 0.9982 ====
+[Epoch 2729] step 0 loss: 1.2930
+==== Epoch 2729 avg loss: 0.9575 ====
+[Epoch 2730] step 0 loss: 1.1295
+==== Epoch 2730 avg loss: 1.0121 ====
+[Epoch 2731] step 0 loss: 1.1071
+==== Epoch 2731 avg loss: 1.0353 ====
+[Epoch 2732] step 0 loss: 0.8957
+==== Epoch 2732 avg loss: 1.0970 ====
+[Epoch 2733] step 0 loss: 0.7773
+==== Epoch 2733 avg loss: 0.9577 ====
+[Epoch 2734] step 0 loss: 0.6484
+==== Epoch 2734 avg loss: 1.1118 ====
+[Epoch 2735] step 0 loss: 0.7464
+==== Epoch 2735 avg loss: 0.9245 ====
+[Epoch 2736] step 0 loss: 1.1520
+==== Epoch 2736 avg loss: 0.8718 ====
+[Epoch 2737] step 0 loss: 1.5250
+==== Epoch 2737 avg loss: 1.0734 ====
+[Epoch 2738] step 0 loss: 0.7592
+==== Epoch 2738 avg loss: 0.9501 ====
+[Epoch 2739] step 0 loss: 0.9532
+==== Epoch 2739 avg loss: 1.0172 ====
+[Epoch 2740] step 0 loss: 1.0056
+==== Epoch 2740 avg loss: 0.9732 ====
+[Epoch 2741] step 0 loss: 0.9940
+==== Epoch 2741 avg loss: 0.9904 ====
+[Epoch 2742] step 0 loss: 0.7834
+==== Epoch 2742 avg loss: 0.9592 ====
+[Epoch 2743] step 0 loss: 0.7417
+==== Epoch 2743 avg loss: 0.8294 ====
+[Epoch 2744] step 0 loss: 0.9924
+==== Epoch 2744 avg loss: 0.9300 ====
+[Epoch 2745] step 0 loss: 0.7897
+==== Epoch 2745 avg loss: 0.8943 ====
+[Epoch 2746] step 0 loss: 0.7816
+==== Epoch 2746 avg loss: 0.9260 ====
+[Epoch 2747] step 0 loss: 1.1378
+==== Epoch 2747 avg loss: 1.0376 ====
+[Epoch 2748] step 0 loss: 1.0699
+==== Epoch 2748 avg loss: 1.0071 ====
+[Epoch 2749] step 0 loss: 0.8380
+==== Epoch 2749 avg loss: 1.0219 ====
+[Epoch 2750] step 0 loss: 0.8882
+==== Epoch 2750 avg loss: 0.8578 ====
+[Epoch 2751] step 0 loss: 0.7236
+==== Epoch 2751 avg loss: 0.9656 ====
+[Epoch 2752] step 0 loss: 1.0837
+==== Epoch 2752 avg loss: 1.0527 ====
+[Epoch 2753] step 0 loss: 0.7663
+==== Epoch 2753 avg loss: 0.9026 ====
+[Epoch 2754] step 0 loss: 1.0643
+==== Epoch 2754 avg loss: 1.0043 ====
+[Epoch 2755] step 0 loss: 0.8612
+==== Epoch 2755 avg loss: 0.9607 ====
+[Epoch 2756] step 0 loss: 0.9970
+==== Epoch 2756 avg loss: 0.9522 ====
+[Epoch 2757] step 0 loss: 1.0832
+==== Epoch 2757 avg loss: 0.9326 ====
+[Epoch 2758] step 0 loss: 0.7623
+==== Epoch 2758 avg loss: 0.9095 ====
+[Epoch 2759] step 0 loss: 0.9549
+==== Epoch 2759 avg loss: 0.8562 ====
+[Epoch 2760] step 0 loss: 1.0286
+==== Epoch 2760 avg loss: 0.8487 ====
+[Epoch 2761] step 0 loss: 0.6964
+==== Epoch 2761 avg loss: 0.8346 ====
+[Epoch 2762] step 0 loss: 1.0682
+==== Epoch 2762 avg loss: 0.9042 ====
+[Epoch 2763] step 0 loss: 0.9214
+==== Epoch 2763 avg loss: 0.9262 ====
+[Epoch 2764] step 0 loss: 0.9982
+==== Epoch 2764 avg loss: 1.0406 ====
+[Epoch 2765] step 0 loss: 0.8568
+==== Epoch 2765 avg loss: 0.8321 ====
+[Epoch 2766] step 0 loss: 0.8650
+==== Epoch 2766 avg loss: 0.9923 ====
+[Epoch 2767] step 0 loss: 0.9708
+==== Epoch 2767 avg loss: 0.9892 ====
+[Epoch 2768] step 0 loss: 0.8783
+==== Epoch 2768 avg loss: 1.0292 ====
+[Epoch 2769] step 0 loss: 0.5504
+==== Epoch 2769 avg loss: 1.1091 ====
+[Epoch 2770] step 0 loss: 0.7622
+==== Epoch 2770 avg loss: 0.9556 ====
+[Epoch 2771] step 0 loss: 0.9681
+==== Epoch 2771 avg loss: 0.8347 ====
+[Epoch 2772] step 0 loss: 0.9614
+==== Epoch 2772 avg loss: 0.8097 ====
+[Epoch 2773] step 0 loss: 0.9535
+==== Epoch 2773 avg loss: 0.9362 ====
+[Epoch 2774] step 0 loss: 0.7378
+==== Epoch 2774 avg loss: 0.9422 ====
+[Epoch 2775] step 0 loss: 1.0406
+==== Epoch 2775 avg loss: 0.9020 ====
+[Epoch 2776] step 0 loss: 0.7187
+==== Epoch 2776 avg loss: 0.8882 ====
+[Epoch 2777] step 0 loss: 0.7845
+==== Epoch 2777 avg loss: 0.9780 ====
+[Epoch 2778] step 0 loss: 0.8287
+==== Epoch 2778 avg loss: 0.9082 ====
+[Epoch 2779] step 0 loss: 0.5284
+==== Epoch 2779 avg loss: 0.9111 ====
+[Epoch 2780] step 0 loss: 1.1151
+==== Epoch 2780 avg loss: 0.9236 ====
+[Epoch 2781] step 0 loss: 1.3078
+==== Epoch 2781 avg loss: 0.9753 ====
+[Epoch 2782] step 0 loss: 1.2724
+==== Epoch 2782 avg loss: 0.8989 ====
+[Epoch 2783] step 0 loss: 0.8013
+==== Epoch 2783 avg loss: 0.9080 ====
+[Epoch 2784] step 0 loss: 0.7851
+==== Epoch 2784 avg loss: 0.9085 ====
+[Epoch 2785] step 0 loss: 0.8496
+==== Epoch 2785 avg loss: 0.9185 ====
+[Epoch 2786] step 0 loss: 1.0422
+==== Epoch 2786 avg loss: 0.8350 ====
+[Epoch 2787] step 0 loss: 0.9879
+==== Epoch 2787 avg loss: 0.9315 ====
+[Epoch 2788] step 0 loss: 0.6756
+==== Epoch 2788 avg loss: 0.8963 ====
+[Epoch 2789] step 0 loss: 0.7495
+==== Epoch 2789 avg loss: 1.0034 ====
+[Epoch 2790] step 0 loss: 1.0430
+==== Epoch 2790 avg loss: 0.8580 ====
+[Epoch 2791] step 0 loss: 0.7096
+==== Epoch 2791 avg loss: 0.8908 ====
+[Epoch 2792] step 0 loss: 0.9888
+==== Epoch 2792 avg loss: 0.9947 ====
+[Epoch 2793] step 0 loss: 0.9421
+==== Epoch 2793 avg loss: 0.9193 ====
+[Epoch 2794] step 0 loss: 0.6099
+==== Epoch 2794 avg loss: 0.9684 ====
+[Epoch 2795] step 0 loss: 0.8429
+==== Epoch 2795 avg loss: 1.0656 ====
+[Epoch 2796] step 0 loss: 0.8989
+==== Epoch 2796 avg loss: 1.0368 ====
+[Epoch 2797] step 0 loss: 0.6699
+==== Epoch 2797 avg loss: 0.9263 ====
+[Epoch 2798] step 0 loss: 0.9437
+==== Epoch 2798 avg loss: 0.9701 ====
+[Epoch 2799] step 0 loss: 0.9857
+==== Epoch 2799 avg loss: 0.9314 ====
+[Epoch 2800] step 0 loss: 0.7671
+==== Epoch 2800 avg loss: 0.9206 ====
+[Epoch 2801] step 0 loss: 1.1912
+==== Epoch 2801 avg loss: 1.2683 ====
+[Epoch 2802] step 0 loss: 0.6640
+==== Epoch 2802 avg loss: 1.1761 ====
+[Epoch 2803] step 0 loss: 1.2180
+==== Epoch 2803 avg loss: 1.1254 ====
+[Epoch 2804] step 0 loss: 1.2549
+==== Epoch 2804 avg loss: 0.9349 ====
+[Epoch 2805] step 0 loss: 1.1388
+==== Epoch 2805 avg loss: 0.9557 ====
+[Epoch 2806] step 0 loss: 1.2354
+==== Epoch 2806 avg loss: 1.0812 ====
+[Epoch 2807] step 0 loss: 0.9368
+==== Epoch 2807 avg loss: 1.0059 ====
+[Epoch 2808] step 0 loss: 0.8638
+==== Epoch 2808 avg loss: 1.1140 ====
+[Epoch 2809] step 0 loss: 0.9620
+==== Epoch 2809 avg loss: 0.9446 ====
+[Epoch 2810] step 0 loss: 0.5411
+==== Epoch 2810 avg loss: 0.9493 ====
+[Epoch 2811] step 0 loss: 0.4857
+==== Epoch 2811 avg loss: 1.0472 ====
+[Epoch 2812] step 0 loss: 1.1931
+==== Epoch 2812 avg loss: 0.9671 ====
+[Epoch 2813] step 0 loss: 1.1060
+==== Epoch 2813 avg loss: 1.0218 ====
+[Epoch 2814] step 0 loss: 1.0407
+==== Epoch 2814 avg loss: 1.1527 ====
+[Epoch 2815] step 0 loss: 1.1379
+==== Epoch 2815 avg loss: 0.9649 ====
+[Epoch 2816] step 0 loss: 1.0425
+==== Epoch 2816 avg loss: 0.8918 ====
+[Epoch 2817] step 0 loss: 1.1905
+==== Epoch 2817 avg loss: 0.9713 ====
+[Epoch 2818] step 0 loss: 0.9810
+==== Epoch 2818 avg loss: 0.8729 ====
+[Epoch 2819] step 0 loss: 0.8767
+==== Epoch 2819 avg loss: 1.1943 ====
+[Epoch 2820] step 0 loss: 0.6345
+==== Epoch 2820 avg loss: 1.0118 ====
+[Epoch 2821] step 0 loss: 1.2581
+==== Epoch 2821 avg loss: 1.1606 ====
+[Epoch 2822] step 0 loss: 0.8956
+==== Epoch 2822 avg loss: 1.1123 ====
+[Epoch 2823] step 0 loss: 0.8179
+==== Epoch 2823 avg loss: 1.0832 ====
+[Epoch 2824] step 0 loss: 1.1835
+==== Epoch 2824 avg loss: 1.0755 ====
+[Epoch 2825] step 0 loss: 1.0490
+==== Epoch 2825 avg loss: 1.0970 ====
+[Epoch 2826] step 0 loss: 1.2139
+==== Epoch 2826 avg loss: 1.0295 ====
+[Epoch 2827] step 0 loss: 0.6148
+==== Epoch 2827 avg loss: 1.0309 ====
+[Epoch 2828] step 0 loss: 0.6478
+==== Epoch 2828 avg loss: 0.9825 ====
+[Epoch 2829] step 0 loss: 0.8040
+==== Epoch 2829 avg loss: 1.1710 ====
+[Epoch 2830] step 0 loss: 1.0844
+==== Epoch 2830 avg loss: 0.9824 ====
+[Epoch 2831] step 0 loss: 1.1077
+==== Epoch 2831 avg loss: 1.1852 ====
+[Epoch 2832] step 0 loss: 1.5195
+==== Epoch 2832 avg loss: 1.1852 ====
+[Epoch 2833] step 0 loss: 1.5750
+==== Epoch 2833 avg loss: 0.9400 ====
+[Epoch 2834] step 0 loss: 1.2386
+==== Epoch 2834 avg loss: 1.1027 ====
+[Epoch 2835] step 0 loss: 1.4170
+==== Epoch 2835 avg loss: 1.0362 ====
+[Epoch 2836] step 0 loss: 0.7909
+==== Epoch 2836 avg loss: 1.0255 ====
+[Epoch 2837] step 0 loss: 0.6393
+==== Epoch 2837 avg loss: 1.0386 ====
+[Epoch 2838] step 0 loss: 1.1934
+==== Epoch 2838 avg loss: 1.1539 ====
+[Epoch 2839] step 0 loss: 0.9879
+==== Epoch 2839 avg loss: 0.9204 ====
+[Epoch 2840] step 0 loss: 1.2595
+==== Epoch 2840 avg loss: 1.0573 ====
+[Epoch 2841] step 0 loss: 0.9744
+==== Epoch 2841 avg loss: 1.1198 ====
+[Epoch 2842] step 0 loss: 1.1678
+==== Epoch 2842 avg loss: 1.0055 ====
+[Epoch 2843] step 0 loss: 1.6833
+==== Epoch 2843 avg loss: 1.1961 ====
+[Epoch 2844] step 0 loss: 1.0555
+==== Epoch 2844 avg loss: 1.0481 ====
+[Epoch 2845] step 0 loss: 0.7710
+==== Epoch 2845 avg loss: 1.0091 ====
+[Epoch 2846] step 0 loss: 1.0947
+==== Epoch 2846 avg loss: 1.2836 ====
+[Epoch 2847] step 0 loss: 1.0235
+==== Epoch 2847 avg loss: 0.9008 ====
+[Epoch 2848] step 0 loss: 0.7938
+==== Epoch 2848 avg loss: 1.0054 ====
+[Epoch 2849] step 0 loss: 1.2611
+==== Epoch 2849 avg loss: 1.1733 ====
+[Epoch 2850] step 0 loss: 1.5723
+==== Epoch 2850 avg loss: 1.0791 ====
+[Epoch 2851] step 0 loss: 1.3127
+==== Epoch 2851 avg loss: 1.0617 ====
+[Epoch 2852] step 0 loss: 0.9068
+==== Epoch 2852 avg loss: 0.9667 ====
+[Epoch 2853] step 0 loss: 1.2607
+==== Epoch 2853 avg loss: 0.9736 ====
+[Epoch 2854] step 0 loss: 1.0574
+==== Epoch 2854 avg loss: 1.1028 ====
+[Epoch 2855] step 0 loss: 0.5804
+==== Epoch 2855 avg loss: 1.0110 ====
+[Epoch 2856] step 0 loss: 1.0381
+==== Epoch 2856 avg loss: 1.0607 ====
+[Epoch 2857] step 0 loss: 1.2164
+==== Epoch 2857 avg loss: 1.0757 ====
+[Epoch 2858] step 0 loss: 1.2739
+==== Epoch 2858 avg loss: 0.8906 ====
+[Epoch 2859] step 0 loss: 0.6543
+==== Epoch 2859 avg loss: 0.9478 ====
+[Epoch 2860] step 0 loss: 1.0158
+==== Epoch 2860 avg loss: 1.1242 ====
+[Epoch 2861] step 0 loss: 1.3416
+==== Epoch 2861 avg loss: 0.9318 ====
+[Epoch 2862] step 0 loss: 0.9762
+==== Epoch 2862 avg loss: 0.9683 ====
+[Epoch 2863] step 0 loss: 0.6832
+==== Epoch 2863 avg loss: 1.0162 ====
+[Epoch 2864] step 0 loss: 1.2263
+==== Epoch 2864 avg loss: 1.1396 ====
+[Epoch 2865] step 0 loss: 0.7198
+==== Epoch 2865 avg loss: 0.9252 ====
+[Epoch 2866] step 0 loss: 1.4795
+==== Epoch 2866 avg loss: 1.0907 ====
+[Epoch 2867] step 0 loss: 0.9946
+==== Epoch 2867 avg loss: 1.1220 ====
+[Epoch 2868] step 0 loss: 0.7903
+==== Epoch 2868 avg loss: 1.1212 ====
+[Epoch 2869] step 0 loss: 0.5607
+==== Epoch 2869 avg loss: 1.1080 ====
+[Epoch 2870] step 0 loss: 1.1370
+==== Epoch 2870 avg loss: 1.0320 ====
+[Epoch 2871] step 0 loss: 1.0325
+==== Epoch 2871 avg loss: 0.9288 ====
+[Epoch 2872] step 0 loss: 1.1653
+==== Epoch 2872 avg loss: 0.9575 ====
+[Epoch 2873] step 0 loss: 0.9102
+==== Epoch 2873 avg loss: 0.9683 ====
+[Epoch 2874] step 0 loss: 0.6019
+==== Epoch 2874 avg loss: 0.9525 ====
+[Epoch 2875] step 0 loss: 1.5788
+==== Epoch 2875 avg loss: 1.0473 ====
+[Epoch 2876] step 0 loss: 0.9210
+==== Epoch 2876 avg loss: 0.8704 ====
+[Epoch 2877] step 0 loss: 1.3362
+==== Epoch 2877 avg loss: 0.9171 ====
+[Epoch 2878] step 0 loss: 1.0989
+==== Epoch 2878 avg loss: 1.0483 ====
+[Epoch 2879] step 0 loss: 1.1297
+==== Epoch 2879 avg loss: 1.0050 ====
+[Epoch 2880] step 0 loss: 0.8759
+==== Epoch 2880 avg loss: 0.9786 ====
+[Epoch 2881] step 0 loss: 0.6777
+==== Epoch 2881 avg loss: 0.9507 ====
+[Epoch 2882] step 0 loss: 0.8152
+==== Epoch 2882 avg loss: 0.9642 ====
+[Epoch 2883] step 0 loss: 1.1857
+==== Epoch 2883 avg loss: 1.1137 ====
+[Epoch 2884] step 0 loss: 1.0862
+==== Epoch 2884 avg loss: 1.0372 ====
+[Epoch 2885] step 0 loss: 1.4902
+==== Epoch 2885 avg loss: 1.0400 ====
+[Epoch 2886] step 0 loss: 1.2469
+==== Epoch 2886 avg loss: 0.9881 ====
+[Epoch 2887] step 0 loss: 0.9670
+==== Epoch 2887 avg loss: 0.8828 ====
+[Epoch 2888] step 0 loss: 1.0180
+==== Epoch 2888 avg loss: 1.0258 ====
+[Epoch 2889] step 0 loss: 1.2327
+==== Epoch 2889 avg loss: 1.0918 ====
+[Epoch 2890] step 0 loss: 1.8328
+==== Epoch 2890 avg loss: 1.3274 ====
+[Epoch 2891] step 0 loss: 0.5759
+==== Epoch 2891 avg loss: 0.9904 ====
+[Epoch 2892] step 0 loss: 0.8702
+==== Epoch 2892 avg loss: 1.1868 ====
+[Epoch 2893] step 0 loss: 1.3021
+==== Epoch 2893 avg loss: 0.9756 ====
+[Epoch 2894] step 0 loss: 1.2259
+==== Epoch 2894 avg loss: 1.1482 ====
+[Epoch 2895] step 0 loss: 0.9980
+==== Epoch 2895 avg loss: 1.1848 ====
+[Epoch 2896] step 0 loss: 0.7806
+==== Epoch 2896 avg loss: 1.0533 ====
+[Epoch 2897] step 0 loss: 1.1177
+==== Epoch 2897 avg loss: 0.8732 ====
+[Epoch 2898] step 0 loss: 0.9375
+==== Epoch 2898 avg loss: 1.0143 ====
+[Epoch 2899] step 0 loss: 0.7608
+==== Epoch 2899 avg loss: 1.0198 ====
+[Epoch 2900] step 0 loss: 1.0296
+==== Epoch 2900 avg loss: 1.0151 ====
+[Epoch 2901] step 0 loss: 0.7869
+==== Epoch 2901 avg loss: 0.9959 ====
+[Epoch 2902] step 0 loss: 0.9987
+==== Epoch 2902 avg loss: 0.9395 ====
+[Epoch 2903] step 0 loss: 0.9732
+==== Epoch 2903 avg loss: 0.9776 ====
+[Epoch 2904] step 0 loss: 0.8705
+==== Epoch 2904 avg loss: 0.8815 ====
+[Epoch 2905] step 0 loss: 0.7076
+==== Epoch 2905 avg loss: 0.9306 ====
+[Epoch 2906] step 0 loss: 1.2624
+==== Epoch 2906 avg loss: 1.3527 ====
+[Epoch 2907] step 0 loss: 0.9187
+==== Epoch 2907 avg loss: 1.1546 ====
+[Epoch 2908] step 0 loss: 0.8410
+==== Epoch 2908 avg loss: 1.0427 ====
+[Epoch 2909] step 0 loss: 0.6718
+==== Epoch 2909 avg loss: 0.9015 ====
+[Epoch 2910] step 0 loss: 0.9362
+==== Epoch 2910 avg loss: 1.0700 ====
+[Epoch 2911] step 0 loss: 0.6976
+==== Epoch 2911 avg loss: 0.9211 ====
+[Epoch 2912] step 0 loss: 1.2153
+==== Epoch 2912 avg loss: 1.0777 ====
+[Epoch 2913] step 0 loss: 1.1920
+==== Epoch 2913 avg loss: 0.8647 ====
+[Epoch 2914] step 0 loss: 1.0397
+==== Epoch 2914 avg loss: 1.0017 ====
+[Epoch 2915] step 0 loss: 0.6723
+==== Epoch 2915 avg loss: 0.9603 ====
+[Epoch 2916] step 0 loss: 1.1519
+==== Epoch 2916 avg loss: 1.0309 ====
+[Epoch 2917] step 0 loss: 1.0778
+==== Epoch 2917 avg loss: 1.0343 ====
+[Epoch 2918] step 0 loss: 0.9618
+==== Epoch 2918 avg loss: 1.0872 ====
+[Epoch 2919] step 0 loss: 0.6218
+==== Epoch 2919 avg loss: 0.9731 ====
+[Epoch 2920] step 0 loss: 0.7921
+==== Epoch 2920 avg loss: 0.9382 ====
+[Epoch 2921] step 0 loss: 0.5051
+==== Epoch 2921 avg loss: 1.0305 ====
+[Epoch 2922] step 0 loss: 0.8900
+==== Epoch 2922 avg loss: 0.9889 ====
+[Epoch 2923] step 0 loss: 1.2172
+==== Epoch 2923 avg loss: 1.0576 ====
+[Epoch 2924] step 0 loss: 0.7100
+==== Epoch 2924 avg loss: 0.9191 ====
+[Epoch 2925] step 0 loss: 1.2659
+==== Epoch 2925 avg loss: 0.9189 ====
+[Epoch 2926] step 0 loss: 0.9610
+==== Epoch 2926 avg loss: 1.0644 ====
+[Epoch 2927] step 0 loss: 0.8659
+==== Epoch 2927 avg loss: 0.9065 ====
+[Epoch 2928] step 0 loss: 0.5218
+==== Epoch 2928 avg loss: 0.9004 ====
+[Epoch 2929] step 0 loss: 1.0103
+==== Epoch 2929 avg loss: 1.0208 ====
+[Epoch 2930] step 0 loss: 1.3737
+==== Epoch 2930 avg loss: 1.1614 ====
+[Epoch 2931] step 0 loss: 0.9245
+==== Epoch 2931 avg loss: 0.8881 ====
+[Epoch 2932] step 0 loss: 1.1621
+==== Epoch 2932 avg loss: 0.9822 ====
+[Epoch 2933] step 0 loss: 0.9457
+==== Epoch 2933 avg loss: 0.9384 ====
+[Epoch 2934] step 0 loss: 1.7467
+==== Epoch 2934 avg loss: 0.9919 ====
+[Epoch 2935] step 0 loss: 0.8318
+==== Epoch 2935 avg loss: 0.9806 ====
+[Epoch 2936] step 0 loss: 0.6363
+==== Epoch 2936 avg loss: 1.1420 ====
+[Epoch 2937] step 0 loss: 1.2764
+==== Epoch 2937 avg loss: 1.1139 ====
+[Epoch 2938] step 0 loss: 0.5117
+==== Epoch 2938 avg loss: 0.9997 ====
+[Epoch 2939] step 0 loss: 0.7088
+==== Epoch 2939 avg loss: 1.1960 ====
+[Epoch 2940] step 0 loss: 1.4346
+==== Epoch 2940 avg loss: 1.1176 ====
+[Epoch 2941] step 0 loss: 0.8524
+==== Epoch 2941 avg loss: 0.9503 ====
+[Epoch 2942] step 0 loss: 1.2607
+==== Epoch 2942 avg loss: 1.0452 ====
+[Epoch 2943] step 0 loss: 2.1087
+==== Epoch 2943 avg loss: 1.0969 ====
+[Epoch 2944] step 0 loss: 0.6991
+==== Epoch 2944 avg loss: 0.9627 ====
+[Epoch 2945] step 0 loss: 1.1368
+==== Epoch 2945 avg loss: 0.8788 ====
+[Epoch 2946] step 0 loss: 1.1313
+==== Epoch 2946 avg loss: 1.1308 ====
+[Epoch 2947] step 0 loss: 1.0256
+==== Epoch 2947 avg loss: 0.8630 ====
+[Epoch 2948] step 0 loss: 0.9574
+==== Epoch 2948 avg loss: 0.9183 ====
+[Epoch 2949] step 0 loss: 1.7874
+==== Epoch 2949 avg loss: 1.1960 ====
+[Epoch 2950] step 0 loss: 1.1817
+==== Epoch 2950 avg loss: 1.0960 ====
+[Epoch 2951] step 0 loss: 0.9327
+==== Epoch 2951 avg loss: 1.0530 ====
+[Epoch 2952] step 0 loss: 0.9008
+==== Epoch 2952 avg loss: 1.0986 ====
+[Epoch 2953] step 0 loss: 0.9916
+==== Epoch 2953 avg loss: 1.0545 ====
+[Epoch 2954] step 0 loss: 1.6632
+==== Epoch 2954 avg loss: 1.1754 ====
+[Epoch 2955] step 0 loss: 1.0529
+==== Epoch 2955 avg loss: 0.9756 ====
+[Epoch 2956] step 0 loss: 0.9674
+==== Epoch 2956 avg loss: 0.8670 ====
+[Epoch 2957] step 0 loss: 1.2065
+==== Epoch 2957 avg loss: 0.9239 ====
+[Epoch 2958] step 0 loss: 0.7466
+==== Epoch 2958 avg loss: 0.9755 ====
+[Epoch 2959] step 0 loss: 0.9474
+==== Epoch 2959 avg loss: 1.0889 ====
+[Epoch 2960] step 0 loss: 1.5657
+==== Epoch 2960 avg loss: 1.1825 ====
+[Epoch 2961] step 0 loss: 0.7556
+==== Epoch 2961 avg loss: 0.9590 ====
+[Epoch 2962] step 0 loss: 0.8637
+==== Epoch 2962 avg loss: 0.9934 ====
+[Epoch 2963] step 0 loss: 1.1320
+==== Epoch 2963 avg loss: 1.0967 ====
+[Epoch 2964] step 0 loss: 1.0745
+==== Epoch 2964 avg loss: 1.1274 ====
+[Epoch 2965] step 0 loss: 1.2459
+==== Epoch 2965 avg loss: 1.0214 ====
+[Epoch 2966] step 0 loss: 0.9824
+==== Epoch 2966 avg loss: 0.8830 ====
+[Epoch 2967] step 0 loss: 1.2262
+==== Epoch 2967 avg loss: 1.0634 ====
+[Epoch 2968] step 0 loss: 1.5678
+==== Epoch 2968 avg loss: 1.2013 ====
+[Epoch 2969] step 0 loss: 1.5072
+==== Epoch 2969 avg loss: 1.0781 ====
+[Epoch 2970] step 0 loss: 1.0022
+==== Epoch 2970 avg loss: 0.9156 ====
+[Epoch 2971] step 0 loss: 1.0468
+==== Epoch 2971 avg loss: 0.9177 ====
+[Epoch 2972] step 0 loss: 0.7548
+==== Epoch 2972 avg loss: 0.9319 ====
+[Epoch 2973] step 0 loss: 1.0449
+==== Epoch 2973 avg loss: 1.0447 ====
+[Epoch 2974] step 0 loss: 1.1283
+==== Epoch 2974 avg loss: 1.0092 ====
+[Epoch 2975] step 0 loss: 1.2357
+==== Epoch 2975 avg loss: 0.9793 ====
+[Epoch 2976] step 0 loss: 1.4694
+==== Epoch 2976 avg loss: 0.9850 ====
+[Epoch 2977] step 0 loss: 0.5979
+==== Epoch 2977 avg loss: 0.8864 ====
+[Epoch 2978] step 0 loss: 0.8030
+==== Epoch 2978 avg loss: 0.8283 ====
+[Epoch 2979] step 0 loss: 0.8104
+==== Epoch 2979 avg loss: 1.0335 ====
+[Epoch 2980] step 0 loss: 1.4157
+==== Epoch 2980 avg loss: 1.2247 ====
+[Epoch 2981] step 0 loss: 1.0013
+==== Epoch 2981 avg loss: 1.1224 ====
+[Epoch 2982] step 0 loss: 1.1473
+==== Epoch 2982 avg loss: 0.9503 ====
+[Epoch 2983] step 0 loss: 1.5971
+==== Epoch 2983 avg loss: 1.0124 ====
+[Epoch 2984] step 0 loss: 1.0430
+==== Epoch 2984 avg loss: 0.9493 ====
+[Epoch 2985] step 0 loss: 0.8845
+==== Epoch 2985 avg loss: 0.9735 ====
+[Epoch 2986] step 0 loss: 1.3272
+==== Epoch 2986 avg loss: 0.9570 ====
+[Epoch 2987] step 0 loss: 0.7798
+==== Epoch 2987 avg loss: 1.0080 ====
+[Epoch 2988] step 0 loss: 1.4988
+==== Epoch 2988 avg loss: 0.9064 ====
+[Epoch 2989] step 0 loss: 0.8979
+==== Epoch 2989 avg loss: 0.8426 ====
+[Epoch 2990] step 0 loss: 1.0883
+==== Epoch 2990 avg loss: 0.9419 ====
+[Epoch 2991] step 0 loss: 1.1108
+==== Epoch 2991 avg loss: 1.1207 ====
+[Epoch 2992] step 0 loss: 0.6493
+==== Epoch 2992 avg loss: 0.9136 ====
+[Epoch 2993] step 0 loss: 0.8197
+==== Epoch 2993 avg loss: 0.9745 ====
+[Epoch 2994] step 0 loss: 1.0090
+==== Epoch 2994 avg loss: 1.0550 ====
+[Epoch 2995] step 0 loss: 1.5117
+==== Epoch 2995 avg loss: 0.9509 ====
+[Epoch 2996] step 0 loss: 1.3977
+==== Epoch 2996 avg loss: 1.0082 ====
+[Epoch 2997] step 0 loss: 1.5217
+==== Epoch 2997 avg loss: 1.0715 ====
+[Epoch 2998] step 0 loss: 0.6468
+==== Epoch 2998 avg loss: 0.9046 ====
+[Epoch 2999] step 0 loss: 0.9533
+==== Epoch 2999 avg loss: 1.0738 ====
+[Epoch 3000] step 0 loss: 1.0111
+==== Epoch 3000 avg loss: 1.0523 ====
+[Epoch 3001] step 0 loss: 1.0411
+==== Epoch 3001 avg loss: 0.9848 ====
+[Epoch 3002] step 0 loss: 0.9810
+==== Epoch 3002 avg loss: 0.9043 ====
+[Epoch 3003] step 0 loss: 0.8667
+==== Epoch 3003 avg loss: 1.1005 ====
+[Epoch 3004] step 0 loss: 1.2874
+==== Epoch 3004 avg loss: 0.9683 ====
+[Epoch 3005] step 0 loss: 0.8731
+==== Epoch 3005 avg loss: 0.9989 ====
+[Epoch 3006] step 0 loss: 0.4704
+==== Epoch 3006 avg loss: 0.9787 ====
+[Epoch 3007] step 0 loss: 0.8597
+==== Epoch 3007 avg loss: 1.2088 ====
+[Epoch 3008] step 0 loss: 1.2527
+==== Epoch 3008 avg loss: 1.0538 ====
+[Epoch 3009] step 0 loss: 1.0004
+==== Epoch 3009 avg loss: 0.9891 ====
+[Epoch 3010] step 0 loss: 0.9697
+==== Epoch 3010 avg loss: 0.9486 ====
+[Epoch 3011] step 0 loss: 0.6937
+==== Epoch 3011 avg loss: 0.8255 ====
+[Epoch 3012] step 0 loss: 1.1639
+==== Epoch 3012 avg loss: 0.9923 ====
+[Epoch 3013] step 0 loss: 0.8553
+==== Epoch 3013 avg loss: 0.9491 ====
+[Epoch 3014] step 0 loss: 1.0177
+==== Epoch 3014 avg loss: 0.9600 ====
+[Epoch 3015] step 0 loss: 1.0858
+==== Epoch 3015 avg loss: 0.9653 ====
+[Epoch 3016] step 0 loss: 0.9494
+==== Epoch 3016 avg loss: 0.8970 ====
+[Epoch 3017] step 0 loss: 0.6289
+==== Epoch 3017 avg loss: 0.8573 ====
+[Epoch 3018] step 0 loss: 1.1356
+==== Epoch 3018 avg loss: 0.8719 ====
+[Epoch 3019] step 0 loss: 1.0108
+==== Epoch 3019 avg loss: 0.9030 ====
+[Epoch 3020] step 0 loss: 0.8534
+==== Epoch 3020 avg loss: 1.0803 ====
+[Epoch 3021] step 0 loss: 1.0245
+==== Epoch 3021 avg loss: 0.9032 ====
+[Epoch 3022] step 0 loss: 0.8136
+==== Epoch 3022 avg loss: 0.9855 ====
+[Epoch 3023] step 0 loss: 0.9840
+==== Epoch 3023 avg loss: 0.9401 ====
+[Epoch 3024] step 0 loss: 0.8625
+==== Epoch 3024 avg loss: 0.9467 ====
+[Epoch 3025] step 0 loss: 1.0518
+==== Epoch 3025 avg loss: 0.9926 ====
+[Epoch 3026] step 0 loss: 1.0192
+==== Epoch 3026 avg loss: 0.9824 ====
+[Epoch 3027] step 0 loss: 0.9907
+==== Epoch 3027 avg loss: 1.0437 ====
+[Epoch 3028] step 0 loss: 1.5630
+==== Epoch 3028 avg loss: 1.1017 ====
+[Epoch 3029] step 0 loss: 1.1192
+==== Epoch 3029 avg loss: 1.0221 ====
+[Epoch 3030] step 0 loss: 0.8733
+==== Epoch 3030 avg loss: 0.9937 ====
+[Epoch 3031] step 0 loss: 0.7081
+==== Epoch 3031 avg loss: 0.9946 ====
+[Epoch 3032] step 0 loss: 1.4404
+==== Epoch 3032 avg loss: 0.9424 ====
+[Epoch 3033] step 0 loss: 0.9869
+==== Epoch 3033 avg loss: 0.9401 ====
+[Epoch 3034] step 0 loss: 0.8186
+==== Epoch 3034 avg loss: 0.8125 ====
+[Epoch 3035] step 0 loss: 1.0818
+==== Epoch 3035 avg loss: 0.8797 ====
+[Epoch 3036] step 0 loss: 1.0050
+==== Epoch 3036 avg loss: 0.8835 ====
+[Epoch 3037] step 0 loss: 1.0904
+==== Epoch 3037 avg loss: 0.9683 ====
+[Epoch 3038] step 0 loss: 1.0048
+==== Epoch 3038 avg loss: 0.8486 ====
+[Epoch 3039] step 0 loss: 0.8043
+==== Epoch 3039 avg loss: 0.8922 ====
+[Epoch 3040] step 0 loss: 0.9059
+==== Epoch 3040 avg loss: 0.9320 ====
+[Epoch 3041] step 0 loss: 0.6437
+==== Epoch 3041 avg loss: 1.2353 ====
+[Epoch 3042] step 0 loss: 0.8056
+==== Epoch 3042 avg loss: 0.9521 ====
+[Epoch 3043] step 0 loss: 1.1135
+==== Epoch 3043 avg loss: 0.8602 ====
+[Epoch 3044] step 0 loss: 0.8584
+==== Epoch 3044 avg loss: 0.9750 ====
+[Epoch 3045] step 0 loss: 1.4875
+==== Epoch 3045 avg loss: 1.1220 ====
+[Epoch 3046] step 0 loss: 1.0645
+==== Epoch 3046 avg loss: 1.0319 ====
+[Epoch 3047] step 0 loss: 1.1154
+==== Epoch 3047 avg loss: 1.0669 ====
+[Epoch 3048] step 0 loss: 1.3485
+==== Epoch 3048 avg loss: 1.0162 ====
+[Epoch 3049] step 0 loss: 0.9949
+==== Epoch 3049 avg loss: 0.8824 ====
+[Epoch 3050] step 0 loss: 1.5484
+==== Epoch 3050 avg loss: 1.2593 ====
+[Epoch 3051] step 0 loss: 1.1503
+==== Epoch 3051 avg loss: 1.0573 ====
+[Epoch 3052] step 0 loss: 1.0466
+==== Epoch 3052 avg loss: 1.0840 ====
+[Epoch 3053] step 0 loss: 1.8005
+==== Epoch 3053 avg loss: 1.0713 ====
+[Epoch 3054] step 0 loss: 0.9614
+==== Epoch 3054 avg loss: 0.9474 ====
+[Epoch 3055] step 0 loss: 0.9459
+==== Epoch 3055 avg loss: 0.9377 ====
+[Epoch 3056] step 0 loss: 1.2881
+==== Epoch 3056 avg loss: 0.9319 ====
+[Epoch 3057] step 0 loss: 1.1636
+==== Epoch 3057 avg loss: 1.1230 ====
+[Epoch 3058] step 0 loss: 0.8032
+==== Epoch 3058 avg loss: 0.9875 ====
+[Epoch 3059] step 0 loss: 0.8917
+==== Epoch 3059 avg loss: 1.0967 ====
+[Epoch 3060] step 0 loss: 0.8370
+==== Epoch 3060 avg loss: 0.9518 ====
+[Epoch 3061] step 0 loss: 0.9362
+==== Epoch 3061 avg loss: 0.8689 ====
+[Epoch 3062] step 0 loss: 1.4655
+==== Epoch 3062 avg loss: 1.0709 ====
+[Epoch 3063] step 0 loss: 1.1485
+==== Epoch 3063 avg loss: 0.9824 ====
+[Epoch 3064] step 0 loss: 1.6224
+==== Epoch 3064 avg loss: 0.9428 ====
+[Epoch 3065] step 0 loss: 1.1693
+==== Epoch 3065 avg loss: 1.0204 ====
+[Epoch 3066] step 0 loss: 1.1381
+==== Epoch 3066 avg loss: 0.8734 ====
+[Epoch 3067] step 0 loss: 0.9829
+==== Epoch 3067 avg loss: 0.9023 ====
+[Epoch 3068] step 0 loss: 0.9013
+==== Epoch 3068 avg loss: 0.8468 ====
+[Epoch 3069] step 0 loss: 0.7846
+==== Epoch 3069 avg loss: 0.9220 ====
+[Epoch 3070] step 0 loss: 0.9477
+==== Epoch 3070 avg loss: 0.9116 ====
+[Epoch 3071] step 0 loss: 0.8302
+==== Epoch 3071 avg loss: 0.9116 ====
+[Epoch 3072] step 0 loss: 0.9600
+==== Epoch 3072 avg loss: 0.9484 ====
+[Epoch 3073] step 0 loss: 0.8994
+==== Epoch 3073 avg loss: 0.9364 ====
+[Epoch 3074] step 0 loss: 1.3551
+==== Epoch 3074 avg loss: 1.1062 ====
+[Epoch 3075] step 0 loss: 1.4276
+==== Epoch 3075 avg loss: 0.9583 ====
+[Epoch 3076] step 0 loss: 1.0267
+==== Epoch 3076 avg loss: 1.0525 ====
+[Epoch 3077] step 0 loss: 1.2403
+==== Epoch 3077 avg loss: 0.9563 ====
+[Epoch 3078] step 0 loss: 1.1296
+==== Epoch 3078 avg loss: 1.0291 ====
+[Epoch 3079] step 0 loss: 1.1957
+==== Epoch 3079 avg loss: 0.9238 ====
+[Epoch 3080] step 0 loss: 0.7641
+==== Epoch 3080 avg loss: 0.8405 ====
+[Epoch 3081] step 0 loss: 0.8821
+==== Epoch 3081 avg loss: 0.9510 ====
+[Epoch 3082] step 0 loss: 0.9094
+==== Epoch 3082 avg loss: 0.8723 ====
+[Epoch 3083] step 0 loss: 0.8484
+==== Epoch 3083 avg loss: 0.9551 ====
+[Epoch 3084] step 0 loss: 0.7851
+==== Epoch 3084 avg loss: 0.9965 ====
+[Epoch 3085] step 0 loss: 0.9085
+==== Epoch 3085 avg loss: 0.9276 ====
+[Epoch 3086] step 0 loss: 1.2479
+==== Epoch 3086 avg loss: 1.0348 ====
+[Epoch 3087] step 0 loss: 0.6083
+==== Epoch 3087 avg loss: 0.8287 ====
+[Epoch 3088] step 0 loss: 0.8191
+==== Epoch 3088 avg loss: 0.8749 ====
+[Epoch 3089] step 0 loss: 1.1790
+==== Epoch 3089 avg loss: 0.9306 ====
+[Epoch 3090] step 0 loss: 0.6616
+==== Epoch 3090 avg loss: 0.9011 ====
+[Epoch 3091] step 0 loss: 1.0423
+==== Epoch 3091 avg loss: 0.9133 ====
+[Epoch 3092] step 0 loss: 0.6188
+==== Epoch 3092 avg loss: 1.1890 ====
+[Epoch 3093] step 0 loss: 0.6767
+==== Epoch 3093 avg loss: 0.8915 ====
+[Epoch 3094] step 0 loss: 0.9767
+==== Epoch 3094 avg loss: 0.9631 ====
+[Epoch 3095] step 0 loss: 0.6002
+==== Epoch 3095 avg loss: 0.9528 ====
+[Epoch 3096] step 0 loss: 0.7786
+==== Epoch 3096 avg loss: 0.8227 ====
+[Epoch 3097] step 0 loss: 0.6659
+==== Epoch 3097 avg loss: 0.8833 ====
+[Epoch 3098] step 0 loss: 0.6554
+==== Epoch 3098 avg loss: 1.0328 ====
+[Epoch 3099] step 0 loss: 0.6041
+==== Epoch 3099 avg loss: 0.7507 ====
+[Epoch 3100] step 0 loss: 0.6591
+==== Epoch 3100 avg loss: 0.9070 ====
+[Epoch 3101] step 0 loss: 0.6738
+==== Epoch 3101 avg loss: 0.8114 ====
+[Epoch 3102] step 0 loss: 0.6636
+==== Epoch 3102 avg loss: 0.8824 ====
+[Epoch 3103] step 0 loss: 0.9326
+==== Epoch 3103 avg loss: 1.0013 ====
+[Epoch 3104] step 0 loss: 0.7074
+==== Epoch 3104 avg loss: 0.9424 ====
+[Epoch 3105] step 0 loss: 0.7148
+==== Epoch 3105 avg loss: 0.9836 ====
+[Epoch 3106] step 0 loss: 1.6067
+==== Epoch 3106 avg loss: 0.8936 ====
+[Epoch 3107] step 0 loss: 1.3124
+==== Epoch 3107 avg loss: 0.9438 ====
+[Epoch 3108] step 0 loss: 0.9008
+==== Epoch 3108 avg loss: 1.0009 ====
+[Epoch 3109] step 0 loss: 1.0170
+==== Epoch 3109 avg loss: 0.8842 ====
+[Epoch 3110] step 0 loss: 1.3851
+==== Epoch 3110 avg loss: 0.9516 ====
+[Epoch 3111] step 0 loss: 0.8869
+==== Epoch 3111 avg loss: 0.9115 ====
+[Epoch 3112] step 0 loss: 0.5914
+==== Epoch 3112 avg loss: 0.7706 ====
+[Epoch 3113] step 0 loss: 0.6760
+==== Epoch 3113 avg loss: 0.9006 ====
+[Epoch 3114] step 0 loss: 1.0864
+==== Epoch 3114 avg loss: 0.9632 ====
+[Epoch 3115] step 0 loss: 0.9555
+==== Epoch 3115 avg loss: 0.8645 ====
+[Epoch 3116] step 0 loss: 0.9034
+==== Epoch 3116 avg loss: 1.0105 ====
+[Epoch 3117] step 0 loss: 0.5493
+==== Epoch 3117 avg loss: 1.0984 ====
+[Epoch 3118] step 0 loss: 1.0566
+==== Epoch 3118 avg loss: 0.9107 ====
+[Epoch 3119] step 0 loss: 1.2780
+==== Epoch 3119 avg loss: 0.9574 ====
+[Epoch 3120] step 0 loss: 0.8662
+==== Epoch 3120 avg loss: 0.9044 ====
+[Epoch 3121] step 0 loss: 1.3748
+==== Epoch 3121 avg loss: 0.9868 ====
+[Epoch 3122] step 0 loss: 0.8507
+==== Epoch 3122 avg loss: 1.0027 ====
+[Epoch 3123] step 0 loss: 0.7224
+==== Epoch 3123 avg loss: 1.1188 ====
+[Epoch 3124] step 0 loss: 1.3885
+==== Epoch 3124 avg loss: 0.9680 ====
+[Epoch 3125] step 0 loss: 0.8345
+==== Epoch 3125 avg loss: 0.9820 ====
+[Epoch 3126] step 0 loss: 1.1641
+==== Epoch 3126 avg loss: 0.9877 ====
+[Epoch 3127] step 0 loss: 0.8538
+==== Epoch 3127 avg loss: 1.0951 ====
+[Epoch 3128] step 0 loss: 1.0913
+==== Epoch 3128 avg loss: 0.9663 ====
+[Epoch 3129] step 0 loss: 0.8021
+==== Epoch 3129 avg loss: 1.0198 ====
+[Epoch 3130] step 0 loss: 1.0531
+==== Epoch 3130 avg loss: 0.8854 ====
+[Epoch 3131] step 0 loss: 0.7569
+==== Epoch 3131 avg loss: 0.7628 ====
+[Epoch 3132] step 0 loss: 0.7752
+==== Epoch 3132 avg loss: 0.7244 ====
+[Epoch 3133] step 0 loss: 0.8787
+==== Epoch 3133 avg loss: 0.7339 ====
+[Epoch 3134] step 0 loss: 1.2489
+==== Epoch 3134 avg loss: 0.8810 ====
+[Epoch 3135] step 0 loss: 1.1864
+==== Epoch 3135 avg loss: 0.9026 ====
+[Epoch 3136] step 0 loss: 0.6594
+==== Epoch 3136 avg loss: 0.7423 ====
+[Epoch 3137] step 0 loss: 0.5574
+==== Epoch 3137 avg loss: 0.8748 ====
+[Epoch 3138] step 0 loss: 0.8308
+==== Epoch 3138 avg loss: 0.8592 ====
+[Epoch 3139] step 0 loss: 0.8589
+==== Epoch 3139 avg loss: 0.8656 ====
+[Epoch 3140] step 0 loss: 0.5206
+==== Epoch 3140 avg loss: 0.7836 ====
+[Epoch 3141] step 0 loss: 0.8769
+==== Epoch 3141 avg loss: 0.8674 ====
+[Epoch 3142] step 0 loss: 0.7354
+==== Epoch 3142 avg loss: 0.8281 ====
+[Epoch 3143] step 0 loss: 0.7580
+==== Epoch 3143 avg loss: 0.9202 ====
+[Epoch 3144] step 0 loss: 0.5219
+==== Epoch 3144 avg loss: 0.7865 ====
+[Epoch 3145] step 0 loss: 0.8286
+==== Epoch 3145 avg loss: 0.7522 ====
+[Epoch 3146] step 0 loss: 0.7789
+==== Epoch 3146 avg loss: 0.8290 ====
+[Epoch 3147] step 0 loss: 0.7458
+==== Epoch 3147 avg loss: 0.7798 ====
+[Epoch 3148] step 0 loss: 0.8145
+==== Epoch 3148 avg loss: 0.8662 ====
+[Epoch 3149] step 0 loss: 1.0219
+==== Epoch 3149 avg loss: 0.8650 ====
+[Epoch 3150] step 0 loss: 0.6514
+==== Epoch 3150 avg loss: 0.7522 ====
+[Epoch 3151] step 0 loss: 0.9972
+==== Epoch 3151 avg loss: 0.8649 ====
+[Epoch 3152] step 0 loss: 0.6957
+==== Epoch 3152 avg loss: 0.7713 ====
+[Epoch 3153] step 0 loss: 0.6703
+==== Epoch 3153 avg loss: 0.6985 ====
+[Epoch 3154] step 0 loss: 0.6865
+==== Epoch 3154 avg loss: 0.8889 ====
+[Epoch 3155] step 0 loss: 0.6253
+==== Epoch 3155 avg loss: 0.7924 ====
+[Epoch 3156] step 0 loss: 1.1331
+==== Epoch 3156 avg loss: 0.7475 ====
+[Epoch 3157] step 0 loss: 0.9263
+==== Epoch 3157 avg loss: 0.7883 ====
+[Epoch 3158] step 0 loss: 0.9356
+==== Epoch 3158 avg loss: 0.7736 ====
+[Epoch 3159] step 0 loss: 0.9899
+==== Epoch 3159 avg loss: 0.7910 ====
+[Epoch 3160] step 0 loss: 1.1166
+==== Epoch 3160 avg loss: 0.8897 ====
+[Epoch 3161] step 0 loss: 0.4940
+==== Epoch 3161 avg loss: 0.8738 ====
+[Epoch 3162] step 0 loss: 0.8111
+==== Epoch 3162 avg loss: 0.8325 ====
+[Epoch 3163] step 0 loss: 0.9602
+==== Epoch 3163 avg loss: 0.8665 ====
+[Epoch 3164] step 0 loss: 1.0066
+==== Epoch 3164 avg loss: 0.8309 ====
+[Epoch 3165] step 0 loss: 0.7255
+==== Epoch 3165 avg loss: 0.7354 ====
+[Epoch 3166] step 0 loss: 0.7627
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   

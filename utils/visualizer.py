@@ -4,6 +4,7 @@ from configs.config import get_config, get_config22
 import torch
 import cv2
 import numpy as np
+import math
 
 """
 import matplotlib.font_manager as fm
@@ -478,7 +479,7 @@ def plot_pianoroll_event(pred, target, title="event_pianoroll", name="chord_pred
     fig, axs = plt.subplots(2, 1, figsize=(12, 6), sharex=True)
 
     draw(axs[0], pred, f"Prediction, bpm: {pred['bpm']}")
-    draw(axs[1], target, f"Ground Truth, bpm: {target['bpm']}")
+    draw(axs[1], target, f"Ground Truth, bpm: {math.exp(target['bpm'])}")
 
     axs[-1].set_xlabel("Time")
 

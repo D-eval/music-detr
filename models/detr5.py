@@ -1,5 +1,32 @@
 """
-加入不同类型的cell
+train stage:
+
+1、train beat
+2、train chord
+3、align beat-chord
+4、union train beat, chord, beat-chord
+
+cells: List[(L, C)]
+
+用 identity 进行 k(i) * x + b(i)
+
+chord_before cells:
+    L : 16 inter + Q event
+        C event:
+        36 pitch + 1 sustain + 1 exist
+
+chord cells:
+    L : 16 inter + Q event
+        C event:
+        36 pitch + 1 sustain + 1 start + 128 match_beat
+
+beat cell:
+    L : 16 inter + 1 global + Q event
+        C global:
+        1 bpm + 1 offset + 1 use_beat
+
+        C event:
+        1 start
 """
 
 import torch
@@ -906,7 +933,6 @@ class PitchTransformer(nn.Module):
         sustain_pred = output[:,1] # (Q,)
         before_pred = output[:,2] # (Q,)
         exist_pred = output[:,-1] # (Q)
-        exist_pred = torch.sigmoid(exist_pred)
         
         pitch_pred = output[:,3:3+self.output_dim_pitch]
         root_logits = pitch_pred[:,:12] # (Q,12)
@@ -914,11 +940,8 @@ class PitchTransformer(nn.Module):
         # print(chord_logits)
         tonic_logits = pitch_pred[:, 24:36] # (Q,12)
 
-        choice = exist_pred > threshold
+        choice = torch.sigmoid(exist_pred) > threshold
         before_pred = torch.sigmoid(before_pred) > before_threshold
-        
-        choice_pos = start_pred >= 0
-        choice = choice * choice_pos
         
         start_pred = start_pred[choice]
         sustain_pred = torch.exp(sustain_pred[choice]) * self.sustain_ref

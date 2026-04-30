@@ -263,7 +263,18 @@ def get_config21():
     
     cfg.pitch_vocab_size = cfg.max_midi - cfg.min_midi + 1
     cfg.music_scale = "12tone"
-    
+        
+    # augmentation switches
+    cfg.aug_noise = True
+    cfg.aug_distortion = True
+    cfg.aug_reverb = True
+    cfg.aug_pitch_shift = True
+
+    cfg.aug_pitch_shift_range = (-5, 5)  # 半音
+    cfg.aug_noise_level = 0.01
+    cfg.aug_distortion_gain = 5.0
+    cfg.aug_reverb_decay = 0.3
+
     cfg.min_freq = 50
     cfg.max_freq = 16000
     cfg.freq_scale = "mel" # mel, linear, log
@@ -326,8 +337,7 @@ def get_config21():
     cfg.time_mask_len = 5 # None
     
     # detr
-    cfg.num_cell = 2
-    cfg.cell_name = ["bpm", "chord"]
+    cfg.num_cell = 1
     cfg.cell = argparse.Namespace()
     cfg.cell.num_receptor_tokens = 5 # 细胞膜受体，和外部信息做注意力
     cfg.cell.num_distillation_tokens = 1 # 蒸馏token，用于接近 text_emb
@@ -363,7 +373,7 @@ def get_config21():
         "sustain": 0.5,
         "root": 1,
         "tonic": 0.3,
-        "chord": 1,
+        "chord": 10,
         "exist": 1,
         "before": 2,
         

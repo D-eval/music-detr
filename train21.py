@@ -20,7 +20,7 @@ sys.path.append(str(cfg.dataset_read_py_path))
 
 from read0 import AudioDataset, collate_fn, to_device
 from torch.utils.data import DataLoader
-dataset = AudioDataset(root_dir=cfg.dataset_data_path)
+dataset = AudioDataset(root_dir=cfg.dataset_data_path, cfg=cfg)
 
 loader = DataLoader(
     dataset,
@@ -32,7 +32,7 @@ loader = DataLoader(
 )
 
 
-from models.detr21 import PitchTransformer
+from models.detr4 import PitchTransformer
 from spec import wav2cqt_2C, wav2spec_2C
 from models.teacher import Teacher
 from utils.equipTarget import get_target_map, get_sustain_map, get_sustain_map_textwise, normalize_targets_pitch, render_pred_pitch_map, render_pred_group_pitch_map, embed_text
@@ -67,7 +67,7 @@ scaler = torch.cuda.amp.GradScaler()
 model.train()
 
 
-num_epochs = 5000
+num_epochs = 50000
 
 hist_len = recorder.history["loss"].__len__()
 start_epoch = cfg.save_epoch * (hist_len-1) if hist_len!=0 else 0
@@ -86,6 +86,7 @@ for epoch in range(start_epoch+1, num_epochs):
             spec, spec_pos, spec_freqs = wav2spec_2C(audio)
             output = model(cqt,cqt_freqs,cqt_pos,spec,spec_freqs,spec_pos)
             loss, loss_dict = model.get_loss(output, target)
+            assert ~torch.isnan(loss)
         # ---------- backward ----------
         optimizer.zero_grad()
 
