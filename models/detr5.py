@@ -37,6 +37,7 @@ import torch.nn.functional as F
 from typing import Callable, Optional, Union, Dict
 from scipy.optimize import linear_sum_assignment
 
+from .cell import Cells
 
 def hungarian_match(cost_matrix):
     """
@@ -696,27 +697,7 @@ class PitchTransformer(nn.Module):
         self.use_abs_pos_encoding = cfg.use_abs_pos_encoding
         if self.use_abs_pos_encoding:
             self.freq_time_encoding = apply_freq_time_encoding
-        
-        # 细胞数
-        self.num_cell = cfg.num_cell
-        
-        self.num_receptor_tokens = cfg.cell.num_receptor_tokens # 每个cell要有多个受体，接受多种信息因子
-        self.num_distillation_tokens = cfg.cell.num_distillation_tokens
-        assert self.num_distillation_tokens == 1, "wtf"
-        self.num_prompt_tokens = cfg.cell.num_prompt_tokens
-        self.num_event_tokens = cfg.cell.num_event_tokens
-        self.num_global_tokens = cfg.cell.num_global_tokens
-        
-        self.receptor_tokens = nn.Parameter(torch.randn((self.num_cell, self.num_receptor_tokens, self.d_model_list[0])))
-        if cfg.cell.share_params:
-            self.distillation_tokens = nn.Parameter(torch.randn((1, self.d_model_list[0])))
-            self.prompt_tokens = nn.Parameter(torch.randn((self.num_prompt_tokens, self.d_model_list[0])))
-            self.event_tokens = nn.Parameter(torch.randn((self.num_event_tokens, self.d_model_list[0])))
-            self.meta_tokens = nn.Parameter(torch.randn((self.num_global_tokens, self.d_model_list[0])))
-        else:
-            raise NotImplementedError("wtf")
-                
-        self.audio_embed = nn.Linear(cfg.audio_input_dim, self.d_model_list[0])
+         
         self.text_input_dim = cfg.text_input_dim
         
         self.num_layers = cfg.detr_num_decoder_layers
@@ -724,45 +705,19 @@ class PitchTransformer(nn.Module):
             TFDecoderLayer(i)
             for i in range(self.num_layers)
         ])
+        
         self.inner_decoder_layers = nn.ModuleList([
             Qwen2DecoderLayer(i)
             for i in range(self.num_layers)
         ])
         
-        self.output_mode = cfg.output_mode
-        
-        output_dim_dict = cfg.detr_output_dim_dict
-        self.output_dim_dict = output_dim_dict
-        
-        output_dim_event = output_dim_dict["event"]
-        output_dim_pitch = output_dim_dict["pitch"]
-        output_dim_exist = output_dim_dict["exist"]
-
-        self.output_dim_event = output_dim_event
-        self.output_dim_pitch = output_dim_pitch
-        self.output_dim_exist = output_dim_exist
-        
-        output_Qe_dim =  output_dim_event + output_dim_pitch + output_dim_exist
-        # 要进行两次 hungarian matching
-        # 第一次对 text 进行匹配
-        # 第二次在 text 内部对 event 和 pitch 进行匹配
-        
-        self.events_head = nn.Linear(self.d_model_list[-1], output_Qe_dim)
-        self.meta_head = nn.Linear(self.d_model_list[-1], output_dim_dict["meta"])
+        # query(cell) setting
+        self.cells = Cells(cfg.cell_structure, self.d_model_list[0])
         
         self.cost_weight = cfg.detr2_cost_weight
         self.loss_weight = cfg.detr2_loss_weight
-        self.sustain_ref = cfg.sustain_ref
-        
-        self.pos_weight_exist_text = cfg.detr_pos_weight_text
-        self.pos_weight_exist_event = cfg.detr_pos_weight_event
-        
-        self.text_cost_dist = cfg.text_cost_dist
-        self.text_loss_dist = cfg.text_loss_dist
         
         self.infer_threshold = cfg.infer_threshold
-        self.infer_chord_threshold = cfg.infer_chord_threshold
-        self.infer_before_threshold = cfg.infer_before_threshold
         
     def forward(self,
                 pitch_spec,
@@ -803,311 +758,58 @@ class PitchTransformer(nn.Module):
             pitch_embedding = pitch_embedding + self.pitch_token_embedding[None,None,None,:]
             freq_embedding = freq_embedding + self.freq_token_embedding[None,None,None,:]
         
-        # 组装 query_emb (B, N_cell * N_receptor, C)
-        query_emb = self.receptor_tokens.flatten(0,1)[None,:,:].expand(B,-1,-1)
         
-        N_cell = self.num_cell
-        assert N_cell==1
-        N_rec = self.num_receptor_tokens
-        N_teacher = self.num_distillation_tokens
-        N_prompt = self.num_prompt_tokens
-        N_event = self.num_event_tokens
-        N_global = self.num_global_tokens
-        
-        # 组装 cell (B, N_cell, L_cell, C)
-        receptors = self.receptor_tokens[None,:,:,:].expand(B, -1, -1, -1)
-        teachers = self.distillation_tokens[None,None,:,:].expand(B, N_cell, -1, -1)
-        prompts = self.prompt_tokens[None,None,:,:].expand(B, N_cell, -1, -1)
-        events = self.event_tokens[None,None,:,:].expand(B, N_cell, -1, -1)
-        meta = self.meta_tokens[None,None,:,:].expand(B, N_cell, -1, -1)
-        
-        # (B, N_cell, L_cell(n), C(n,l))
-        cells = torch.concat([receptors, teachers, prompts, events, meta], dim=2)
+        cell_state = self.cells.build_state(B)
+        cell_inter_state = self.cells.get_flatten_inter(cell_state) # (B, L_inter_all, C)
         
         modal_dict = {
-            "text": query_emb, # (B, Q, C)
+            "text": cell_inter_state, # (B, Q, C)
             "pitch": pitch_embedding, # (B, T, P+1, C)
             "freq": freq_embedding, # (B, T, F, C)
         }
         
         for i in range(self.num_layers):
             modal_dict = self.inter_decoder_layers[i](modal_dict) # (B, ..., C2)
-            # 此时 receptors 已经融合了信息
-            new_receptors = modal_dict['text'] # (B, Q, C1)
-            # 注意，我们要避免 inter_decoder_layers 中 new_receptors 升维
-            new_receptors = new_receptors.reshape(B, N_cell, -1, self.d_model_list[i])
-            cells[:,:,:N_rec,:] = new_receptors # 因为 inter_decoder_layers 的 receptors 有残差连接
-            cells = cells.flatten(0,1) # (B*N_cell, L_cell, C)
-            cells = self.inner_decoder_layers[i](cells)
-            cells = cells.reshape(B, N_cell, -1, self.d_model_list[i]*self.dim_up[i])
-            # 更新 modal_dict
-            new_query_emb = cells[:,:,:N_rec,:] # (B, N_cell, N_rec, C) # 每个cell负责不同的任务
-            new_query_emb = new_query_emb.flatten(1,2) # (B, N_cell*N_rec, C)
-            modal_dict['text'] = new_query_emb # (B, Q, C2)
-
-        output_distillation = cells[:,:,N_rec:N_rec+N_teacher,:] # (B, N, 1, C)
-        output_prompts = cells[:,:,N_rec+N_teacher:N_rec+N_teacher+N_prompt,:] # (B, N, prompt, C)
-        output_events = cells[:,:,N_rec+N_teacher+N_prompt:N_rec+N_teacher+N_prompt+N_event,:] # (B, N, E, C)
-        output_meta = cells[:,:,N_rec+N_teacher+N_prompt+N_event:N_rec+N_teacher+N_prompt+N_event+N_global,:] # (B, N, G, C)
-        
-        # output_distillation = self.distllation_head(output_distillation) # (B, N, 1, C_text)
-        # output_prompts = self.prompt_head(output_prompts) # (B, N, prompt, C_prompts)
-        output_events = self.events_head(output_events) # (B, N, E, C_events)
-        output_meta = self.meta_head(output_meta) # (B, N, G, C_meta), bpm, offset
-        # assert output_distillation.shape[2]==1
-        # output_distillation = output_distillation.squeeze(2) # (B, N, C)
-
-        outputs = [{
-            "text_distillation": None, # output_distillation[b,...], # (Qt, C)
-            "text_prompt": None, # output_prompts[b,...], # (Qt, prompt, C)
-            "event_out": output_events[b,...], # (Qt, Qe, C)
-            "bpm_out": output_meta[b, ...], # (1, 1, 2)
-        } for b in range(B)] # chord 只关注 event_out[0] 就好了
-
-        return outputs
-        
-    def get_sample_loss(self, output, target):
-        """
-            output: Dict
-            target: Dict Ne
-        """
-        bpm_pred = output['bpm_out'][0, 0, 0]
-        offset_pred = output['bpm_out'][0, 0, 1]
-        bpm_target = target['bpm']
-        offset_target = target['offset']
-        
-        
-        output = output['event_out'][0, ...] # (Qe, Ce)
-        gt_idxs, pred_idxs, loss_matrix = self.match_event(output, target)
-        M = gt_idxs.shape[0]
-        loss = 0
-        loss_dict = {}
-        for k, v in loss_matrix.items():
-            if k=="exist":
-                continue
-            loss += self.loss_weight[k] * v[gt_idxs, pred_idxs].mean()
-            loss_dict[k] = v[gt_idxs, pred_idxs].mean().item()
+            # 此时 inter 已经融合了信息
+            new_inter = modal_dict['text'] # (B, Q, C1)
+            self.cells.update_inter(new_inter, cell_state) # 更新 cell_state
             
-        # 2) exist loss: 所有 query 都参与
-        exist_pred = output[:, -1]  # (Qe,)
-        exist_target = torch.zeros_like(exist_pred)  # (Qe,)
-        exist_target[pred_idxs] = 1.0
-
-        loss_exist = F.binary_cross_entropy_with_logits(
-            exist_pred,
-            exist_target,
-            reduction="mean"
-        )
-        loss_dict['exist'] = loss_exist.item()
-
-        loss = loss + self.loss_weight["exist"] * loss_exist
-        
-        # bpm 预测
-        loss_bpm = F.l1_loss(bpm_pred, bpm_target)
-        loss_offset = F.l1_loss(offset_pred, offset_target)
-        
-        loss = loss + self.loss_weight["bpm"] * loss_bpm + self.loss_weight["bpm_offset"] * loss_offset
-        
-        return loss, loss_dict
-
-    def infer(self, output):
-        """
-        output: Dict
-        {
-            "text_distillation": output_distillation[b,...], # (Qt, C)
-            "text_prompt": output_prompts[b,...], # (Qt, prompt, C)
-            "event_out": output_events[b,...], # (Qt, Qe, C)
-            "bpm_out": (1,1,2)
-        }
-        """
-        bpm_pred = output['bpm_out'][0, 0, 0]
-        offset_pred = output['bpm_out'][0, 0, 1]
-        
-        output = output['event_out'][0, ...] # (Qe, Ce)
-
-        threshold = self.infer_threshold
-        chord_threshold = self.infer_chord_threshold
-        before_threshold = self.infer_before_threshold
-
-        start_pred = output[:,0] # (Q)
-        sustain_pred = output[:,1] # (Q,)
-        before_pred = output[:,2] # (Q,)
-        exist_pred = output[:,-1] # (Q)
-        
-        pitch_pred = output[:,3:3+self.output_dim_pitch]
-        root_logits = pitch_pred[:,:12] # (Q,12)
-        chord_logits = pitch_pred[:, 12:24] # (Q,12)
-        # print(chord_logits)
-        tonic_logits = pitch_pred[:, 24:36] # (Q,12)
-
-        choice = torch.sigmoid(exist_pred) > threshold
-        before_pred = torch.sigmoid(before_pred) > before_threshold
-        
-        start_pred = start_pred[choice]
-        sustain_pred = torch.exp(sustain_pred[choice]) * self.sustain_ref
-        exist_pred = exist_pred[choice]
-        root_pred = torch.argmax(root_logits[choice], dim=1)
-        chord_pred = torch.sigmoid(chord_logits[choice]) > chord_threshold
-        tonic_pred = torch.argmax(tonic_logits[choice], dim=1)
-        
-
-        result = {
-            "root": root_pred, # (M) 0~11
-            "chord": chord_pred, # (M, 12)
-            "tonic": tonic_pred, # (M) 0~11
-            "start": start_pred, # (M)
-            "sustain": sustain_pred, # (M)
-            "exist": exist_pred, # (M)
-            "before": before_pred, # (M) 0~1
+            cell_state = self.cells.inner_decode(
+                self.inner_decoder_layers[i],
+                cell_state,
+            )
             
-            "bpm": math.exp(bpm_pred),
-            "offset": offset_pred,
-        }
+            modal_dict['text'] = self.cells.get_flatten_inter(cell_state) # (B, Q, C2)
 
+        output_list = self.cells.extract_output(cell_state)
+        
+        """
+        List B [
+            {cls_name:
+                fea_name: (Q, C_fea)
+            }
+        ]
+        """
+        
+        return output_list
+      
+    def infer(self, output_dict_dict):
+        # 待修改
+        """
+        output: Dict cls_name Dict token_name (N, dim)
+        """
+        result = self.cells.infer(output_dict_dict, self.infer_threshold)
         return result
-        
 
     def get_loss(self, outputs, targets):
         loss = 0
         loss_dict = {}
         B = len(outputs)
         for b in range(B):
-            temp_loss, temp_loss_dict = self.get_sample_loss(outputs[b], targets[b])
-            loss += temp_loss / B
-            for k in temp_loss_dict.keys():
-                if loss_dict.get(k):
-                    loss_dict[k] += temp_loss_dict[k] /B
-                else:
-                    loss_dict[k] = temp_loss_dict[k] /B
-        return loss, loss_dict
- 
-    def get_cost_or_loss_matrix(self, output, target):
-        """
-            output: (Qe, Ce)
-            target: Dict
-        """
-        Ne = target['chord'].shape[0]
-        
-        start_gt = target['start'] # (N,)
-        sustain_gt = target['sustain'] # (N,)
-        before_gt = target['before'] # (N,)
-        root_gt = target['root'] # (N,) int
-        tonic_gt = target['tonic'] # (N,) int
-        chord_gt = target['chord'] # (N, 12) 0~1
-
-
-        Qe = output.shape[0]
-        assert output.shape[1]==3+36+1
-        
-        start_pred = output[:,0] # (Q)
-        sustain_pred = output[:,1] # (Q,)
-        before_pred = output[:,2] # (Q,)
-        
-        exist_pred = output[:,-1] # (Q)
-
-        pitch_pred = output[:,3:3+self.output_dim_pitch]
-        root_logits = pitch_pred[:,:12] # (Q,12)
-        chord_logits = pitch_pred[:, 12:24] # (Q,12)
-        tonic_logits = pitch_pred[:, 24:36] # (Q,12)
-
-        
-        cost_before = F.binary_cross_entropy_with_logits(before_pred[None,:].expand(Ne, Qe),
-                                                         before_gt[:,None].expand(Ne, Qe),
-                                                         reduction="none")
-        
-        prob_before = F.sigmoid(before_pred) # (Q,)
-        mask = (1 - before_gt[:, None]) # * (1 - prob_before[None, :])
-        
-        diff_start = start_gt[:,None] - start_pred[None,:] # (N, Q)
-        cost_start = diff_start**2 * mask # (N, Q)
-        
-        diff_sustain = (torch.log(sustain_gt[:, None] + 1e-6)-math.log(self.sustain_ref)) - sustain_pred[None,:] # (N, Q)
-        cost_sustain = diff_sustain**2 * mask # (N, Q)
-        
-        log_prob_root = F.log_softmax(root_logits, dim=-1) # (Q, 12)
-        cost_root = -log_prob_root[:, root_gt].T # (N, Q)
-        
-        log_prob_tonic = F.log_softmax(tonic_logits, dim=-1) # (Q, 12)
-        cost_tonic = -log_prob_tonic[:, tonic_gt].T # (N, Q)
-        
-        # 扩展维度对齐
-        chord_logits_exp = chord_logits[None, :, :]  # (1, Q, 12)
-        chord_gt = chord_gt.float()
-        chord_gt_exp = chord_gt[:, None, :]          # (N, 1, 12)
-
-        # BCE cost
-        cost_chord = F.binary_cross_entropy_with_logits(
-            chord_logits_exp.expand(Ne, Qe, 12),
-            chord_gt_exp.expand(Ne, Qe, 12),
-            reduction='none'
-        ).mean(dim=-1)  # (N, Q)
-        
-        # exist_prob = torch.sigmoid(exist_pred) # (Q,)
-        # exist_logprob = - torch.log(exist_prob + 1e-6)[None, :].expand(Ne, Qe) # (N, Q)
-
-        cost_exist = F.binary_cross_entropy_with_logits(
-            exist_pred[None, :].expand(Ne, Qe),
-            torch.ones((Ne, Qe), device=output.device),
-            reduction="none"
-        )
-        
-        return {
-            "start": cost_start,
-            "sustain": cost_sustain,
-            "root": cost_root,
-            "tonic": cost_tonic,
-            "chord": cost_chord,
-            "exist": cost_exist,
-            "before": cost_before
-        }
-
-    def match_event(self, output, target):
-        """
-            output: (Qe, Ce)
-            target: Dict
-        """
-        cost_matrix = self.get_cost_or_loss_matrix(output, target)
-
-        cost = 0
-        for k, v in cost_matrix.items():
-            weight = self.cost_weight[k]
-            cost = cost + weight * v
-
-        gt_idxs, pred_idxs = hungarian_match(cost)
-        return gt_idxs, pred_idxs, cost_matrix
-
-
-# def cal_cost_matrix(labors, tasks):
-#     # labors: 
-
-# def cal_cost_of_assign_a_to_b(a, b):
-
-# class PitchSpecEmbedding(nn.Module):
-#     def __init__(self):
-#         super().__init__()
-#         cfg = get_config()
-#         pitch_num = cfg.pitch_vocab_size
-#         assert cfg.music_scale == "12tone", "须采用12平均律"
-#         distance_metric = [
-#             0, 7, 2
-#         ]
-        
-
-# class ConditionalConv1d(nn.Module):
-#     def __init__(self, in_channels, out_channels, kernel_size, context_dim, group):
-#         super().__init__()
-
-#     def forward(self, x, context):
-#         # x: (B, C, T)
-#         # context: (B, D)
-
-
-
-# class DETRPitch(nn.Module):
-#     def __init__(self):
-#         super().__init__()
-#         cfg = get_config()
-        
-
-        
-        
+            temp_loss = self.cells.get_sample_loss(outputs[b],
+                                                   targets[b],
+                                                   self.cost_weight,
+                                                   self.loss_weight)
+            loss += temp_loss
+        loss /= B
+        return loss

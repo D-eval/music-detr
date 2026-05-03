@@ -442,6 +442,14 @@ def get_config21():
     cfg.lr = 1e-4
     cfg.save_epoch = 10
     
+    cfg.cell_structure = [
+        ("chord", 10),
+        ("before", 1),
+        ("beat", 20),
+        ("metronome", 1),
+    ]
+
+    
     return cfg
 
 
@@ -535,3 +543,5 @@ def get_config22():
     }
     cfg.conv.use_causal = False
     return cfg
+
+
