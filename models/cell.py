@@ -17,31 +17,6 @@ from typing import List, Dict, Tuple
 from scipy.optimize import linear_sum_assignment
 
 
-class Cell:
-    def __init__(self,
-                 inner_state : torch.Tensor,
-                 inter_state : torch.Tensor,
-                 inner_name_dim_dict : Dict[str, int]):
-        """
-        inner_name_dim_dict: {name1: dim1, ...}
-        """
-        
-        super().__init__()
-        self.inner_state = inner_state # (B, L_inner, C)
-        self.inter_state = inter_state # (B, L_inter, C)
-        assert self.inner_state.shape[2] == self.inter_state.shape[2]
-        assert sum(list(inner_name_dim_dict.values())) == self.inner_state.shape[1]
-
-
-def inner_attn(cells: List[Cell],
-            inner_decoder_layer: nn.Module):
-    new_cells = []
-    for cell in cells:
-        temp_data = torch.cat([cell.inter_state, cell.inner_state], dim=1) # (B, L_inner+L_inter, C)
-        new_cells.append(inner_decoder_layer(temp_data))
-    return new_cells
-
-
 from configs.cell_cls import CellCls
 class Cells(nn.Module):
     """
@@ -80,7 +55,7 @@ class Cells(nn.Module):
             head_dict[name] = token_head_dict
         self.head_dict = head_dict
 
-    def build_state(self, B):
+    def build_state(self, B:int):
         state = []
         for i, (name, N) in enumerate(self.structure):
             init = self.init_state[i]  # (N, L, C)
@@ -169,11 +144,12 @@ class Cells(nn.Module):
             state_flat = decoder(state_flat) # (B * N, L, C)
             new_cell_states.append(state_flat.reshape(B, N, L, -1))
         return new_cell_states
-        
+
     def infer(self,
               output_dict_dict,
               threshold):
         """
+        这里写的太任务相关了，没写好，但是要应用 CellCls.sustain_ref
         output_dict_dict: Dict cls_name Dict token_name (N, dim)
         """
         result = {}

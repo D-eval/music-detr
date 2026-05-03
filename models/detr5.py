@@ -670,6 +670,7 @@ def temporal_pool(x, stride=4):
     return x
 
 
+from configs.cell_cls import CellCls
 class PitchTransformer(nn.Module):
     def __init__(self):
         super().__init__()
@@ -698,8 +699,6 @@ class PitchTransformer(nn.Module):
         if self.use_abs_pos_encoding:
             self.freq_time_encoding = apply_freq_time_encoding
          
-        self.text_input_dim = cfg.text_input_dim
-        
         self.num_layers = cfg.detr_num_decoder_layers
         self.inter_decoder_layers = nn.ModuleList([
             TFDecoderLayer(i)
@@ -792,15 +791,64 @@ class PitchTransformer(nn.Module):
         """
         
         return output_list
-      
+
     def infer(self, output_dict_dict):
-        # 待修改
         """
         output: Dict cls_name Dict token_name (N, dim)
         """
-        result = self.cells.infer(output_dict_dict, self.infer_threshold)
+        threshold = self.infer_threshold
+        result = {}
+
+        for cls_name, output_dict in output_dict_dict.items():
+            if cls_name in CellCls.not_need_match_cls:
+                result[cls_name] = self._infer_no_match(output_dict, threshold)
+            else:
+                result[cls_name] = self._infer_match(output_dict, threshold)
+
         return result
 
+    def _infer_no_match(self, output_dict, threshold):
+        assert output_dict['exist'].numel() == 1
+
+        exist_prob = torch.sigmoid(output_dict['exist'][0, 0])
+        result = {}
+
+        if exist_prob > threshold:
+            result.update(output_dict)
+            result['exist'] = exist_prob
+
+            if "sustain" in result:
+                result['sustain'] = torch.exp(result['sustain']) * CellCls.sustain_ref
+        else:
+            result['exist'] = exist_prob
+
+        return result
+    
+    def _infer_match(self, output_dict, threshold):
+        exist_prob = torch.sigmoid(output_dict['exist'][:, 0])
+        choice = exist_prob > threshold
+
+        result = {}
+
+        for token_name, output in output_dict.items():
+            result[token_name] = self._process_token(token_name, output, choice)
+
+        result["exist"] = exist_prob[choice]
+
+        return result
+            
+    def _process_token(self, token_name, output, choice):
+        if token_name == "sustain":
+            return torch.exp(output[choice, :]) * CellCls.sustain_ref
+
+        if token_name == "anchor":
+            temp_out = output[choice, :].clone()
+            temp_out[:, 1] = torch.exp(temp_out[:, 1]) * CellCls.sustain_ref
+            return temp_out
+
+        return output[choice, :]
+        
+        
     def get_loss(self, outputs, targets):
         loss = 0
         loss_dict = {}
