@@ -42,24 +42,39 @@ posterior_cls_token_loss_dict = {
     "beat": {"exist": exist_loss}
 }
 
-sustain_ref = 0.1
-def anchor_cost(out, tar):
+def start_cost(out, tar):
     """
-    (Q or N, 2)
+    (Q or N, 1)
     """
     Q = out.shape[0]
     N = tar.shape[0]
-    tar[:, 1] = (torch.log(tar[:, 1] + 1e-6) - math.log(sustain_ref))
     diff = out[None, :, :] - tar[:, None, :]
     cost = (diff**2).sum(dim=-1)
     return cost
-cls_token_cost_dict["chord"]["anchor"] = anchor_cost
+cls_token_cost_dict["chord"]["start"] = start_cost
+
+
+sustain_ref = 0.1
+def sustain_cost(out, tar):
+    """
+    (Q or N, 1)
+    """
+    Q = out.shape[0]
+    N = tar.shape[0]
+    tar = (torch.log(tar + 1e-6) - math.log(sustain_ref))
+    diff = out[None, :, :] - tar[:, None, :]
+    cost = (diff**2).sum(dim=-1)
+    return cost
+cls_token_cost_dict["chord"]["sustain"] = sustain_cost
 
 
 def exist_cost(out):
     """
-    (Q,)
+    (Q, 1)
     """
+    assert out.dim()==2 and out.shape[1]==1
+    out = out.squeeze(-1)
+    
     cost = F.binary_cross_entropy_with_logits(
         out,
         torch.ones_like(out, device=out.device),
@@ -104,9 +119,13 @@ cls_token_cost_dict["chord"]["chord"] = chord_cost
 
 def beat_cost(out, tar):
     """
-    out: (Q,)
-    tar: (N,)
+    out: (Q, 1)
+    tar: (N, 1)
     """
+    assert out.dim()==2 and tar.dim()==2 and out.shape[1]==1 and tar.shape[1]==1
+    out = out[:,0]
+    tar = tar[:,0]
+    
     diff = out[None,:] - tar[:,None]
     cost = diff**2
     return cost
@@ -114,9 +133,13 @@ cls_token_cost_dict["beat"]["beat"] = beat_cost
 
 def is_downbeat_cost(out, tar):
     """
-    out: (Q,)
-    tar: (N,) {0,1}
+    out: (Q, 1)
+    tar: (N, 1) {0,1}
     """
+    assert out.dim()==2 and tar.dim()==2 and out.shape[1]==1 and tar.shape[1]==1
+    out = out[:,0]
+    tar = tar[:,0]
+    
     tar = tar.float()
     
     Qe = out.shape[0]

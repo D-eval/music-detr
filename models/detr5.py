@@ -30,7 +30,7 @@ beat cell:
 """
 
 import torch
-from configs.config import get_config21 as get_config
+from configs.config5 import get_config
 from torch import nn
 import math
 import torch.nn.functional as F
@@ -670,6 +670,7 @@ def temporal_pool(x, stride=4):
     return x
 
 
+from spec import wav2cqt_2C, wav2spec_2C
 from configs.cell_cls import CellCls
 class PitchTransformer(nn.Module):
     def __init__(self):
@@ -711,7 +712,7 @@ class PitchTransformer(nn.Module):
         ])
         
         # query(cell) setting
-        self.cells = Cells(cfg.cell_structure, self.d_model_list[0])
+        self.cells = Cells(cfg.cell_structure, self.d_model_list[0], self.d_model_list[-1])
         
         self.cost_weight = cfg.detr2_cost_weight
         self.loss_weight = cfg.detr2_loss_weight
@@ -719,12 +720,12 @@ class PitchTransformer(nn.Module):
         self.infer_threshold = cfg.infer_threshold
         
     def forward(self,
-                pitch_spec,
-                pitchs,
-                pitch_centre,
-                freq_spec,
-                freqs,
-                freq_centre):
+                audio):
+        """
+        audio: (B, T, 2)
+        """
+        pitch_spec, pitch_centre, pitchs = wav2cqt_2C(audio)
+        freq_spec, freq_centre, freqs = wav2spec_2C(audio)
         """
         inputs
             pitch_spec: (B, T, P, C)

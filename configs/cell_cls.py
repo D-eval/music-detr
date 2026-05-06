@@ -40,7 +40,8 @@ from .costoss import *
 class CellCls:
     cell_cls = {
         "chord": [("inter", 8, None),
-                ("anchor", 1, [("start", 1), ("sustain", 1)]),
+                ("start", 1, [("start", 1)]),
+                ("sustain", 1, [("sustain", 1)]),
                 ("exist", 1, [("exist", 1)]),
                 ("root", 1, [("root", 13)]),
                 ("chord", 1, [("chord", 12)]),
@@ -85,11 +86,11 @@ class CellCls:
     # infer_params
     sustain_ref = sustain_ref
     @staticmethod
-    def get_range(cls, cls_name, token_name):
+    def get_range(cls_name, token_name):
         assert cls_name in CellCls.cell_cls.keys(), f"{cls_name} not in cell_cls"
         
         start = 0
-        for name, num_tokens, head_dim_list in cls.cell_cls[cls_name]:
+        for name, num_tokens, head_dim_list in CellCls.cell_cls[cls_name]:
             if name == token_name:
                 end = start + num_tokens
                 return start, end

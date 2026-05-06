@@ -50,7 +50,7 @@ class Cells(nn.Module):
         head_dict = nn.ModuleDict()
         for name, _ in self.structure:
             token_head_dict = nn.ModuleDict()
-            for token_name, range, dim in CellCls.cls_token_output_dim_dict[name]:
+            for token_name, (range, dim) in CellCls.cls_token_output_dim_dict[name].items():
                 token_head_dict[token_name] = nn.Linear(head_dim, dim)
             head_dict[name] = token_head_dict
         self.head_dict = head_dict
@@ -239,6 +239,11 @@ class Cells(nn.Module):
                                 target_dict_dict,
                                 cost_weight,
                                 loss_weight):
+
+        if list(output_dict_dict[cls_name].values())[0].shape[0] == 0:
+            loss_func = CellCls.posterior_cls_token_loss_dict[cls_name]["exist"]
+            loss = loss_func(output_dict_dict[cls_name]['exist'], [])
+            return loss
         gt_idx, pred_idx, cost_dict = self.match_event(output_dict_dict, target_dict_dict, cls_name, cost_weight)
         loss = 0
         for token_name in cost_dict.keys():
