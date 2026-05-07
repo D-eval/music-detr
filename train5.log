@@ -36,76 +36,541 @@ device: cuda
 初始化注意力模块
 初始化注意力模块
 初始化注意力模块
-没有训练记录
 /home/vipuser/wby/proj_params/my/train5.py:67: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
   scaler = torch.cuda.amp.GradScaler()
-[Epoch 1] step 0 loss: 190.4098
-[Epoch 1] step 10 loss: 151.8975
-[Epoch 1] step 20 loss: 156.1422
-[Epoch 1] step 30 loss: 79.2743
-[Epoch 1] step 40 loss: 27.5451
-==== Epoch 1 avg loss: 121.4610 ====
-[Epoch 2] step 0 loss: 44.8137
-[Epoch 2] step 10 loss: 41.1913
-[Epoch 2] step 20 loss: 31.4529
-[Epoch 2] step 30 loss: 38.3715
-[Epoch 2] step 40 loss: 44.6820
-==== Epoch 2 avg loss: 40.4117 ====
-[Epoch 3] step 0 loss: 36.8143
-[Epoch 3] step 10 loss: 35.5361
-[Epoch 3] step 20 loss: 32.5665
-[Epoch 3] step 30 loss: 26.2286
-[Epoch 3] step 40 loss: 39.0595
-==== Epoch 3 avg loss: 38.3985 ====
-[Epoch 4] step 0 loss: 24.5489
-[Epoch 4] step 10 loss: 17.4398
-[Epoch 4] step 20 loss: 31.5078
-[Epoch 4] step 30 loss: 42.3176
-[Epoch 4] step 40 loss: 34.5456
-==== Epoch 4 avg loss: 38.7282 ====
-[Epoch 5] step 0 loss: 31.9725
-[Epoch 5] step 10 loss: 34.8557
-[Epoch 5] step 20 loss: 30.9429
-[Epoch 5] step 30 loss: 29.5473
-[Epoch 5] step 40 loss: 33.1716
-==== Epoch 5 avg loss: 37.4391 ====
-[Epoch 6] step 0 loss: 31.9212
-[Epoch 6] step 10 loss: 52.0370
-[Epoch 6] step 20 loss: 33.2845
-[Epoch 6] step 30 loss: 40.3003
-[Epoch 6] step 40 loss: 27.5075
-==== Epoch 6 avg loss: 37.2190 ====
-[Epoch 7] step 0 loss: 30.1198
-[Epoch 7] step 10 loss: 23.3152
-[Epoch 7] step 20 loss: 37.0619
-[Epoch 7] step 30 loss: 36.5800
-[Epoch 7] step 40 loss: 27.6464
-==== Epoch 7 avg loss: 37.5510 ====
-[Epoch 8] step 0 loss: 62.0594
-[Epoch 8] step 10 loss: 41.0038
-[Epoch 8] step 20 loss: 35.2391
-[Epoch 8] step 30 loss: 37.6870
-[Epoch 8] step 40 loss: 29.7320
-==== Epoch 8 avg loss: 37.2325 ====
-[Epoch 9] step 0 loss: 42.7318
-[Epoch 9] step 10 loss: 60.3187
-[Epoch 9] step 20 loss: 34.4215
-[Epoch 9] step 30 loss: 32.1303
-[Epoch 9] step 40 loss: 24.1266
-==== Epoch 9 avg loss: 37.0046 ====
-[Epoch 10] step 0 loss: 51.1768
-[Epoch 10] step 10 loss: 34.9891
-[Epoch 10] step 20 loss: 34.5744
-[Epoch 10] step 30 loss: 45.0343
-[Epoch 10] step 40 loss: 54.6180
-==== Epoch 10 avg loss: 35.7843 ====
-[Epoch 11] step 0 loss: 42.0056
-[Epoch 11] step 10 loss: 42.6702
-[Epoch 11] step 20 loss: 26.6405
-[Epoch 11] step 30 loss: 18.7776
-[Epoch 11] step 40 loss: 65.9410
-==== Epoch 11 avg loss: 36.4135 ====
-[Epoch 12] step 0 loss: 38.7494
-[Epoch 12] step 10 loss: 35.6331
-[Epoch 12] step 20 loss: 36.0952
-[Epoch 12] step 30 loss: 26.3043
+[Epoch 101] step 0 loss: 30.1832
+[Epoch 101] step 10 loss: 20.8835
+[Epoch 101] step 20 loss: 28.6435
+[Epoch 101] step 30 loss: 22.3044
+[Epoch 101] step 40 loss: 33.9828
+==== Epoch 101 avg loss: 32.9807 ====
+[Epoch 102] step 0 loss: 27.4908
+[Epoch 102] step 10 loss: 32.4769
+[Epoch 102] step 20 loss: 25.8661
+[Epoch 102] step 30 loss: 40.8224
+[Epoch 102] step 40 loss: 29.4659
+==== Epoch 102 avg loss: 33.1978 ====
+[Epoch 103] step 0 loss: 38.5761
+[Epoch 103] step 10 loss: 42.2372
+[Epoch 103] step 20 loss: 22.1016
+[Epoch 103] step 30 loss: 20.6753
+[Epoch 103] step 40 loss: 47.2155
+==== Epoch 103 avg loss: 34.3928 ====
+[Epoch 104] step 0 loss: 32.7695
+[Epoch 104] step 10 loss: 32.6530
+[Epoch 104] step 20 loss: 37.3943
+[Epoch 104] step 30 loss: 49.3041
+[Epoch 104] step 40 loss: 28.5315
+==== Epoch 104 avg loss: 34.1513 ====
+[Epoch 105] step 0 loss: 25.6980
+[Epoch 105] step 10 loss: 42.0862
+[Epoch 105] step 20 loss: 21.0594
+[Epoch 105] step 30 loss: 18.4098
+[Epoch 105] step 40 loss: 48.1256
+==== Epoch 105 avg loss: 33.2320 ====
+[Epoch 106] step 0 loss: 27.5190
+[Epoch 106] step 10 loss: 34.3810
+[Epoch 106] step 20 loss: 24.0531
+[Epoch 106] step 30 loss: 59.2825
+[Epoch 106] step 40 loss: 31.3194
+==== Epoch 106 avg loss: 33.3445 ====
+[Epoch 107] step 0 loss: 34.6007
+[Epoch 107] step 10 loss: 40.0327
+[Epoch 107] step 20 loss: 25.0773
+[Epoch 107] step 30 loss: 40.4073
+[Epoch 107] step 40 loss: 25.9994
+==== Epoch 107 avg loss: 33.5099 ====
+[Epoch 108] step 0 loss: 52.8995
+[Epoch 108] step 10 loss: 25.8155
+[Epoch 108] step 20 loss: 23.6049
+[Epoch 108] step 30 loss: 33.8710
+[Epoch 108] step 40 loss: 48.6893
+==== Epoch 108 avg loss: 32.6342 ====
+[Epoch 109] step 0 loss: 37.2375
+[Epoch 109] step 10 loss: 27.8101
+[Epoch 109] step 20 loss: 17.5775
+[Epoch 109] step 30 loss: 30.8768
+[Epoch 109] step 40 loss: 41.8296
+==== Epoch 109 avg loss: 33.0180 ====
+[Epoch 110] step 0 loss: 29.7083
+[Epoch 110] step 10 loss: 43.7481
+[Epoch 110] step 20 loss: 43.6287
+[Epoch 110] step 30 loss: 35.0172
+[Epoch 110] step 40 loss: 29.8899
+==== Epoch 110 avg loss: 33.1841 ====
+[Epoch 111] step 0 loss: 22.4854
+[Epoch 111] step 10 loss: 29.0735
+[Epoch 111] step 20 loss: 24.5876
+[Epoch 111] step 30 loss: 24.0699
+[Epoch 111] step 40 loss: 23.0202
+==== Epoch 111 avg loss: 33.4934 ====
+[Epoch 112] step 0 loss: 20.0447
+[Epoch 112] step 10 loss: 28.1900
+[Epoch 112] step 20 loss: 12.5763
+[Epoch 112] step 30 loss: 30.6390
+[Epoch 112] step 40 loss: 32.3467
+==== Epoch 112 avg loss: 33.0686 ====
+[Epoch 113] step 0 loss: 25.9658
+[Epoch 113] step 10 loss: 28.7166
+[Epoch 113] step 20 loss: 54.6534
+[Epoch 113] step 30 loss: 34.6795
+[Epoch 113] step 40 loss: 30.4552
+==== Epoch 113 avg loss: 33.1718 ====
+[Epoch 114] step 0 loss: 41.0722
+[Epoch 114] step 10 loss: 26.2008
+[Epoch 114] step 20 loss: 48.1907
+[Epoch 114] step 30 loss: 28.4355
+[Epoch 114] step 40 loss: 42.1422
+==== Epoch 114 avg loss: 33.3875 ====
+[Epoch 115] step 0 loss: 43.7780
+[Epoch 115] step 10 loss: 36.1426
+[Epoch 115] step 20 loss: 17.5598
+[Epoch 115] step 30 loss: 49.8194
+[Epoch 115] step 40 loss: 33.1838
+==== Epoch 115 avg loss: 33.2679 ====
+[Epoch 116] step 0 loss: 30.7033
+[Epoch 116] step 10 loss: 37.9256
+[Epoch 116] step 20 loss: 41.8146
+[Epoch 116] step 30 loss: 29.7756
+[Epoch 116] step 40 loss: 30.0706
+==== Epoch 116 avg loss: 33.0574 ====
+[Epoch 117] step 0 loss: 42.5964
+[Epoch 117] step 10 loss: 36.6176
+[Epoch 117] step 20 loss: 34.6531
+[Epoch 117] step 30 loss: 33.3930
+[Epoch 117] step 40 loss: 57.7096
+==== Epoch 117 avg loss: 33.3210 ====
+[Epoch 118] step 0 loss: 46.5639
+[Epoch 118] step 10 loss: 27.9451
+[Epoch 118] step 20 loss: 39.2998
+[Epoch 118] step 30 loss: 37.5828
+[Epoch 118] step 40 loss: 21.6035
+==== Epoch 118 avg loss: 33.6387 ====
+[Epoch 119] step 0 loss: 28.3343
+[Epoch 119] step 10 loss: 33.0522
+[Epoch 119] step 20 loss: 42.0451
+[Epoch 119] step 30 loss: 48.2240
+[Epoch 119] step 40 loss: 30.9349
+==== Epoch 119 avg loss: 32.9598 ====
+[Epoch 120] step 0 loss: 27.8061
+[Epoch 120] step 10 loss: 33.0900
+[Epoch 120] step 20 loss: 17.9065
+[Epoch 120] step 30 loss: 23.3906
+[Epoch 120] step 40 loss: 21.0896
+==== Epoch 120 avg loss: 34.1262 ====
+[Epoch 121] step 0 loss: 27.8950
+[Epoch 121] step 10 loss: 29.4414
+[Epoch 121] step 20 loss: 31.2149
+[Epoch 121] step 30 loss: 28.6531
+[Epoch 121] step 40 loss: 35.3080
+==== Epoch 121 avg loss: 33.3555 ====
+[Epoch 122] step 0 loss: 35.3445
+[Epoch 122] step 10 loss: 21.0711
+[Epoch 122] step 20 loss: 26.2507
+[Epoch 122] step 30 loss: 22.5841
+[Epoch 122] step 40 loss: 25.3705
+==== Epoch 122 avg loss: 32.9526 ====
+[Epoch 123] step 0 loss: 18.9825
+[Epoch 123] step 10 loss: 23.8183
+[Epoch 123] step 20 loss: 29.4235
+[Epoch 123] step 30 loss: 34.5156
+[Epoch 123] step 40 loss: 36.6705
+==== Epoch 123 avg loss: 33.0986 ====
+[Epoch 124] step 0 loss: 26.0120
+[Epoch 124] step 10 loss: 45.3174
+[Epoch 124] step 20 loss: 24.6700
+[Epoch 124] step 30 loss: 44.3313
+[Epoch 124] step 40 loss: 47.8254
+==== Epoch 124 avg loss: 33.6066 ====
+[Epoch 125] step 0 loss: 36.9363
+[Epoch 125] step 10 loss: 40.6260
+[Epoch 125] step 20 loss: 29.8690
+[Epoch 125] step 30 loss: 35.9815
+[Epoch 125] step 40 loss: 32.5168
+==== Epoch 125 avg loss: 35.7675 ====
+[Epoch 126] step 0 loss: 25.6678
+[Epoch 126] step 10 loss: 34.5745
+[Epoch 126] step 20 loss: 27.5277
+[Epoch 126] step 30 loss: 40.2563
+[Epoch 126] step 40 loss: 32.5629
+==== Epoch 126 avg loss: 33.4998 ====
+[Epoch 127] step 0 loss: 59.3706
+[Epoch 127] step 10 loss: 33.0902
+[Epoch 127] step 20 loss: 49.9294
+[Epoch 127] step 30 loss: 27.4973
+[Epoch 127] step 40 loss: 18.2121
+==== Epoch 127 avg loss: 32.9436 ====
+[Epoch 128] step 0 loss: 35.3085
+[Epoch 128] step 10 loss: 32.1025
+[Epoch 128] step 20 loss: 25.3906
+[Epoch 128] step 30 loss: 35.9067
+[Epoch 128] step 40 loss: 43.7128
+==== Epoch 128 avg loss: 32.9804 ====
+[Epoch 129] step 0 loss: 39.1308
+[Epoch 129] step 10 loss: 40.0144
+[Epoch 129] step 20 loss: 27.3598
+[Epoch 129] step 30 loss: 40.0657
+[Epoch 129] step 40 loss: 31.7671
+==== Epoch 129 avg loss: 35.2096 ====
+[Epoch 130] step 0 loss: 30.8784
+[Epoch 130] step 10 loss: 25.3012
+[Epoch 130] step 20 loss: 26.6005
+[Epoch 130] step 30 loss: 33.9179
+[Epoch 130] step 40 loss: 35.2077
+==== Epoch 130 avg loss: 33.1049 ====
+[Epoch 131] step 0 loss: 40.6623
+[Epoch 131] step 10 loss: 64.5428
+[Epoch 131] step 20 loss: 33.7692
+[Epoch 131] step 30 loss: 24.0013
+[Epoch 131] step 40 loss: 26.8563
+==== Epoch 131 avg loss: 32.9717 ====
+[Epoch 132] step 0 loss: 28.0929
+[Epoch 132] step 10 loss: 40.3506
+[Epoch 132] step 20 loss: 51.1442
+[Epoch 132] step 30 loss: 47.9097
+[Epoch 132] step 40 loss: 35.4367
+==== Epoch 132 avg loss: 32.7897 ====
+[Epoch 133] step 0 loss: 28.5630
+[Epoch 133] step 10 loss: 39.2313
+[Epoch 133] step 20 loss: 30.4922
+[Epoch 133] step 30 loss: 27.4665
+[Epoch 133] step 40 loss: 30.7428
+==== Epoch 133 avg loss: 33.1962 ====
+[Epoch 134] step 0 loss: 45.6272
+[Epoch 134] step 10 loss: 48.6128
+[Epoch 134] step 20 loss: 56.7226
+[Epoch 134] step 30 loss: 27.5456
+[Epoch 134] step 40 loss: 23.2454
+==== Epoch 134 avg loss: 33.3464 ====
+[Epoch 135] step 0 loss: 32.4454
+[Epoch 135] step 10 loss: 38.6341
+[Epoch 135] step 20 loss: 38.9509
+[Epoch 135] step 30 loss: 34.2913
+[Epoch 135] step 40 loss: 27.1995
+==== Epoch 135 avg loss: 34.6736 ====
+[Epoch 136] step 0 loss: 28.7194
+[Epoch 136] step 10 loss: 21.0876
+[Epoch 136] step 20 loss: 16.4188
+[Epoch 136] step 30 loss: 36.2719
+[Epoch 136] step 40 loss: 45.7954
+==== Epoch 136 avg loss: 33.2066 ====
+[Epoch 137] step 0 loss: 33.8637
+[Epoch 137] step 10 loss: 32.0410
+[Epoch 137] step 20 loss: 31.1627
+[Epoch 137] step 30 loss: 28.5361
+[Epoch 137] step 40 loss: 20.1760
+==== Epoch 137 avg loss: 32.9964 ====
+[Epoch 138] step 0 loss: 33.4013
+[Epoch 138] step 10 loss: 35.5012
+[Epoch 138] step 20 loss: 20.7345
+[Epoch 138] step 30 loss: 36.8942
+[Epoch 138] step 40 loss: 50.3611
+==== Epoch 138 avg loss: 33.5047 ====
+[Epoch 139] step 0 loss: 26.3637
+[Epoch 139] step 10 loss: 37.4166
+[Epoch 139] step 20 loss: 33.3988
+[Epoch 139] step 30 loss: 30.4596
+[Epoch 139] step 40 loss: 29.7380
+==== Epoch 139 avg loss: 32.4582 ====
+[Epoch 140] step 0 loss: 31.7801
+[Epoch 140] step 10 loss: 31.0427
+[Epoch 140] step 20 loss: 20.3468
+[Epoch 140] step 30 loss: 53.5493
+[Epoch 140] step 40 loss: 16.2785
+==== Epoch 140 avg loss: 33.4746 ====
+[Epoch 141] step 0 loss: 31.5109
+[Epoch 141] step 10 loss: 20.5468
+[Epoch 141] step 20 loss: 25.3539
+[Epoch 141] step 30 loss: 23.3978
+[Epoch 141] step 40 loss: 34.6157
+==== Epoch 141 avg loss: 32.9887 ====
+[Epoch 142] step 0 loss: 24.6603
+[Epoch 142] step 10 loss: 26.6216
+[Epoch 142] step 20 loss: 28.3431
+[Epoch 142] step 30 loss: 20.0060
+[Epoch 142] step 40 loss: 32.2825
+==== Epoch 142 avg loss: 32.9611 ====
+[Epoch 143] step 0 loss: 35.2193
+[Epoch 143] step 10 loss: 31.1000
+[Epoch 143] step 20 loss: 36.4778
+[Epoch 143] step 30 loss: 25.0164
+[Epoch 143] step 40 loss: 43.7325
+==== Epoch 143 avg loss: 33.0171 ====
+[Epoch 144] step 0 loss: 36.5919
+[Epoch 144] step 10 loss: 16.9624
+[Epoch 144] step 20 loss: 43.5644
+[Epoch 144] step 30 loss: 23.6735
+[Epoch 144] step 40 loss: 37.2414
+==== Epoch 144 avg loss: 32.8185 ====
+[Epoch 145] step 0 loss: 32.5207
+[Epoch 145] step 10 loss: 37.2929
+[Epoch 145] step 20 loss: 37.8395
+[Epoch 145] step 30 loss: 25.9952
+[Epoch 145] step 40 loss: 39.9646
+==== Epoch 145 avg loss: 33.4840 ====
+[Epoch 146] step 0 loss: 40.5601
+[Epoch 146] step 10 loss: 35.1205
+[Epoch 146] step 20 loss: 24.0826
+[Epoch 146] step 30 loss: 28.0483
+[Epoch 146] step 40 loss: 34.2728
+==== Epoch 146 avg loss: 33.5029 ====
+[Epoch 147] step 0 loss: 22.4435
+[Epoch 147] step 10 loss: 47.8167
+[Epoch 147] step 20 loss: 33.2917
+[Epoch 147] step 30 loss: 19.7467
+[Epoch 147] step 40 loss: 34.6021
+==== Epoch 147 avg loss: 33.4932 ====
+[Epoch 148] step 0 loss: 22.3539
+[Epoch 148] step 10 loss: 32.5479
+[Epoch 148] step 20 loss: 23.1016
+[Epoch 148] step 30 loss: 36.4176
+[Epoch 148] step 40 loss: 46.8742
+==== Epoch 148 avg loss: 33.1891 ====
+[Epoch 149] step 0 loss: 28.0797
+[Epoch 149] step 10 loss: 26.7545
+[Epoch 149] step 20 loss: 24.9739
+[Epoch 149] step 30 loss: 45.7991
+[Epoch 149] step 40 loss: 28.4099
+==== Epoch 149 avg loss: 32.9176 ====
+[Epoch 150] step 0 loss: 44.7274
+[Epoch 150] step 10 loss: 22.7964
+[Epoch 150] step 20 loss: 32.0227
+[Epoch 150] step 30 loss: 29.3976
+[Epoch 150] step 40 loss: 25.9661
+==== Epoch 150 avg loss: 32.8775 ====
+[Epoch 151] step 0 loss: 31.6630
+[Epoch 151] step 10 loss: 32.7152
+[Epoch 151] step 20 loss: 33.8855
+[Epoch 151] step 30 loss: 27.4456
+[Epoch 151] step 40 loss: 24.9585
+==== Epoch 151 avg loss: 33.2455 ====
+[Epoch 152] step 0 loss: 50.4579
+[Epoch 152] step 10 loss: 34.2829
+[Epoch 152] step 20 loss: 23.8283
+[Epoch 152] step 30 loss: 32.4707
+[Epoch 152] step 40 loss: 38.5130
+==== Epoch 152 avg loss: 32.9181 ====
+[Epoch 153] step 0 loss: 22.0918
+[Epoch 153] step 10 loss: 39.9573
+[Epoch 153] step 20 loss: 38.5268
+[Epoch 153] step 30 loss: 23.8771
+[Epoch 153] step 40 loss: 27.2614
+==== Epoch 153 avg loss: 33.0769 ====
+[Epoch 154] step 0 loss: 33.0663
+[Epoch 154] step 10 loss: 35.2731
+[Epoch 154] step 20 loss: 35.9731
+[Epoch 154] step 30 loss: 24.8071
+[Epoch 154] step 40 loss: 37.9973
+==== Epoch 154 avg loss: 32.8986 ====
+[Epoch 155] step 0 loss: 50.7183
+[Epoch 155] step 10 loss: 29.6463
+[Epoch 155] step 20 loss: 40.2243
+[Epoch 155] step 30 loss: 39.5200
+[Epoch 155] step 40 loss: 33.0688
+==== Epoch 155 avg loss: 34.5505 ====
+[Epoch 156] step 0 loss: 29.5271
+[Epoch 156] step 10 loss: 47.5171
+[Epoch 156] step 20 loss: 23.2483
+[Epoch 156] step 30 loss: 47.0339
+[Epoch 156] step 40 loss: 31.1483
+==== Epoch 156 avg loss: 32.7181 ====
+[Epoch 157] step 0 loss: 46.8759
+[Epoch 157] step 10 loss: 27.6939
+[Epoch 157] step 20 loss: 60.4846
+[Epoch 157] step 30 loss: 28.0976
+[Epoch 157] step 40 loss: 44.0984
+==== Epoch 157 avg loss: 33.6172 ====
+[Epoch 158] step 0 loss: 31.2634
+[Epoch 158] step 10 loss: 24.5872
+[Epoch 158] step 20 loss: 19.5748
+[Epoch 158] step 30 loss: 37.5601
+[Epoch 158] step 40 loss: 41.7014
+==== Epoch 158 avg loss: 34.3854 ====
+[Epoch 159] step 0 loss: 49.8612
+[Epoch 159] step 10 loss: 20.4973
+[Epoch 159] step 20 loss: 30.0387
+[Epoch 159] step 30 loss: 21.8885
+[Epoch 159] step 40 loss: 55.7959
+==== Epoch 159 avg loss: 32.6361 ====
+[Epoch 160] step 0 loss: 33.9264
+[Epoch 160] step 10 loss: 36.4201
+[Epoch 160] step 20 loss: 46.7900
+[Epoch 160] step 30 loss: 26.8743
+[Epoch 160] step 40 loss: 24.3270
+==== Epoch 160 avg loss: 32.6174 ====
+[Epoch 161] step 0 loss: 37.2250
+[Epoch 161] step 10 loss: 62.4113
+[Epoch 161] step 20 loss: 25.2756
+[Epoch 161] step 30 loss: 36.1106
+[Epoch 161] step 40 loss: 28.7051
+==== Epoch 161 avg loss: 33.5441 ====
+[Epoch 162] step 0 loss: 20.9966
+[Epoch 162] step 10 loss: 14.2536
+[Epoch 162] step 20 loss: 53.5704
+[Epoch 162] step 30 loss: 22.7185
+[Epoch 162] step 40 loss: 25.8176
+==== Epoch 162 avg loss: 32.9560 ====
+[Epoch 163] step 0 loss: 48.2654
+[Epoch 163] step 10 loss: 25.0818
+[Epoch 163] step 20 loss: 26.8903
+[Epoch 163] step 30 loss: 22.6911
+[Epoch 163] step 40 loss: 34.5643
+==== Epoch 163 avg loss: 32.5337 ====
+[Epoch 164] step 0 loss: 32.8177
+[Epoch 164] step 10 loss: 34.3619
+[Epoch 164] step 20 loss: 35.6017
+[Epoch 164] step 30 loss: 27.1080
+[Epoch 164] step 40 loss: 24.7875
+==== Epoch 164 avg loss: 33.5151 ====
+[Epoch 165] step 0 loss: 16.2692
+[Epoch 165] step 10 loss: 28.5588
+[Epoch 165] step 20 loss: 33.4045
+[Epoch 165] step 30 loss: 27.4553
+[Epoch 165] step 40 loss: 40.1420
+==== Epoch 165 avg loss: 33.1492 ====
+[Epoch 166] step 0 loss: 25.9790
+[Epoch 166] step 10 loss: 31.5156
+[Epoch 166] step 20 loss: 28.7299
+[Epoch 166] step 30 loss: 34.7645
+[Epoch 166] step 40 loss: 27.4940
+==== Epoch 166 avg loss: 32.8495 ====
+[Epoch 167] step 0 loss: 30.6865
+[Epoch 167] step 10 loss: 43.4957
+[Epoch 167] step 20 loss: 28.2041
+[Epoch 167] step 30 loss: 54.3972
+[Epoch 167] step 40 loss: 40.7706
+==== Epoch 167 avg loss: 34.1234 ====
+[Epoch 168] step 0 loss: 28.4060
+[Epoch 168] step 10 loss: 30.6558
+[Epoch 168] step 20 loss: 29.5517
+[Epoch 168] step 30 loss: 27.4920
+[Epoch 168] step 40 loss: 43.5367
+==== Epoch 168 avg loss: 32.9872 ====
+[Epoch 169] step 0 loss: 42.7251
+[Epoch 169] step 10 loss: 35.3793
+[Epoch 169] step 20 loss: 23.8435
+[Epoch 169] step 30 loss: 14.2530
+[Epoch 169] step 40 loss: 32.9473
+==== Epoch 169 avg loss: 33.2258 ====
+[Epoch 170] step 0 loss: 40.0610
+[Epoch 170] step 10 loss: 34.7014
+[Epoch 170] step 20 loss: 38.2680
+[Epoch 170] step 30 loss: 29.7399
+[Epoch 170] step 40 loss: 23.8843
+==== Epoch 170 avg loss: 33.2198 ====
+[Epoch 171] step 0 loss: 25.2688
+[Epoch 171] step 10 loss: 29.4633
+[Epoch 171] step 20 loss: 53.1357
+[Epoch 171] step 30 loss: 40.6115
+[Epoch 171] step 40 loss: 28.2830
+==== Epoch 171 avg loss: 32.8914 ====
+[Epoch 172] step 0 loss: 27.9081
+[Epoch 172] step 10 loss: 34.6777
+[Epoch 172] step 20 loss: 49.3879
+[Epoch 172] step 30 loss: 37.1030
+[Epoch 172] step 40 loss: 35.3167
+==== Epoch 172 avg loss: 33.5450 ====
+[Epoch 173] step 0 loss: 31.5877
+[Epoch 173] step 10 loss: 20.7028
+[Epoch 173] step 20 loss: 32.5337
+[Epoch 173] step 30 loss: 35.3151
+[Epoch 173] step 40 loss: 39.5513
+==== Epoch 173 avg loss: 32.7094 ====
+[Epoch 174] step 0 loss: 23.2006
+[Epoch 174] step 10 loss: 55.5317
+[Epoch 174] step 20 loss: 27.1213
+[Epoch 174] step 30 loss: 25.8193
+[Epoch 174] step 40 loss: 28.4002
+==== Epoch 174 avg loss: 32.5616 ====
+[Epoch 175] step 0 loss: 35.8648
+[Epoch 175] step 10 loss: 36.7611
+[Epoch 175] step 20 loss: 22.7465
+[Epoch 175] step 30 loss: 42.6912
+[Epoch 175] step 40 loss: 34.7412
+==== Epoch 175 avg loss: 33.0067 ====
+[Epoch 176] step 0 loss: 41.6424
+[Epoch 176] step 10 loss: 23.4711
+[Epoch 176] step 20 loss: 38.3492
+[Epoch 176] step 30 loss: 33.5065
+[Epoch 176] step 40 loss: 30.3096
+==== Epoch 176 avg loss: 32.7027 ====
+[Epoch 177] step 0 loss: 30.0723
+[Epoch 177] step 10 loss: 42.1588
+[Epoch 177] step 20 loss: 42.2158
+[Epoch 177] step 30 loss: 39.8832
+[Epoch 177] step 40 loss: 29.3909
+==== Epoch 177 avg loss: 33.3077 ====
+[Epoch 178] step 0 loss: 34.3293
+[Epoch 178] step 10 loss: 16.5317
+[Epoch 178] step 20 loss: 33.5980
+[Epoch 178] step 30 loss: 21.6587
+[Epoch 178] step 40 loss: 39.5404
+==== Epoch 178 avg loss: 32.6199 ====
+[Epoch 179] step 0 loss: 58.8476
+[Epoch 179] step 10 loss: 47.7326
+[Epoch 179] step 20 loss: 42.9235
+[Epoch 179] step 30 loss: 37.0370
+[Epoch 179] step 40 loss: 47.7050
+==== Epoch 179 avg loss: 32.8821 ====
+[Epoch 180] step 0 loss: 40.0339
+[Epoch 180] step 10 loss: 36.4725
+[Epoch 180] step 20 loss: 41.3298
+[Epoch 180] step 30 loss: 26.0214
+[Epoch 180] step 40 loss: 60.0346
+==== Epoch 180 avg loss: 32.8703 ====
+[Epoch 181] step 0 loss: 52.2342
+[Epoch 181] step 10 loss: 32.3160
+[Epoch 181] step 20 loss: 47.4363
+[Epoch 181] step 30 loss: 39.7190
+[Epoch 181] step 40 loss: 38.2890
+==== Epoch 181 avg loss: 33.5708 ====
+[Epoch 182] step 0 loss: 20.8050
+[Epoch 182] step 10 loss: 27.8579
+[Epoch 182] step 20 loss: 26.5805
+[Epoch 182] step 30 loss: 46.1181
+[Epoch 182] step 40 loss: 27.4527
+==== Epoch 182 avg loss: 32.5916 ====
+[Epoch 183] step 0 loss: 26.6775
+[Epoch 183] step 10 loss: 25.9619
+[Epoch 183] step 20 loss: 46.7278
+[Epoch 183] step 30 loss: 28.2771
+[Epoch 183] step 40 loss: 20.2303
+==== Epoch 183 avg loss: 33.0890 ====
+[Epoch 184] step 0 loss: 28.3832
+[Epoch 184] step 10 loss: 50.6773
+[Epoch 184] step 20 loss: 23.9391
+[Epoch 184] step 30 loss: 27.2643
+[Epoch 184] step 40 loss: 30.2452
+==== Epoch 184 avg loss: 33.0826 ====
+[Epoch 185] step 0 loss: 44.2262
+[Epoch 185] step 10 loss: 31.8127
+[Epoch 185] step 20 loss: 27.5667
+[Epoch 185] step 30 loss: 43.2455
+[Epoch 185] step 40 loss: 35.7700
+==== Epoch 185 avg loss: 33.4713 ====
+[Epoch 186] step 0 loss: 31.0360
+[Epoch 186] step 10 loss: 26.5370
+[Epoch 186] step 20 loss: 34.6694
+[Epoch 186] step 30 loss: 36.1494
+[Epoch 186] step 40 loss: 43.6904
+==== Epoch 186 avg loss: 33.7976 ====
+[Epoch 187] step 0 loss: 22.5064
+[Epoch 187] step 10 loss: 25.4230
+[Epoch 187] step 20 loss: 26.5256
+[Epoch 187] step 30 loss: 28.2039
+[Epoch 187] step 40 loss: 48.9093
+==== Epoch 187 avg loss: 33.8371 ====
+[Epoch 188] step 0 loss: 25.8000
+[Epoch 188] step 10 loss: 34.2422
+[Epoch 188] step 20 loss: 29.3472
+[Epoch 188] step 30 loss: 41.2970
+[Epoch 188] step 40 loss: 42.9667
+==== Epoch 188 avg loss: 32.7723 ====
+[Epoch 189] step 0 loss: 50.7534
+[Epoch 189] step 10 loss: 44.1142
+[Epoch 189] step 20 loss: 32.7809
+[Epoch 189] step 30 loss: 28.2367
+[Epoch 189] step 40 loss: 37.1589
+==== Epoch 189 avg loss: 33.5939 ====
+[Epoch 190] step 0 loss: 28.1497
+[Epoch 190] step 10 loss: 27.9381

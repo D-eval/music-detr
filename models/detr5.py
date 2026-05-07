@@ -836,7 +836,6 @@ class PitchTransformer(nn.Module):
     def _infer_match(self, output_dict, threshold):
         exist_prob = torch.sigmoid(output_dict['exist'][:, 0])
         choice = exist_prob > threshold
-
         result = {}
 
         for token_name, output in output_dict.items():

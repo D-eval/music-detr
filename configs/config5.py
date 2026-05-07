@@ -180,7 +180,7 @@ def get_config():
         "chord": {
             "start": 1,
             "sustain": 0.2,
-            "exist": 1,
+            "exist": 0.5,
             "root": 0.1,
             "chord": 0.1,
             "tonic": 0.1,

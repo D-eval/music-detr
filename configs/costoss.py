@@ -100,6 +100,8 @@ def chord_cost(out, tar):
     out: (Q, 12)
     tar: (N, 12) 0~1
     """
+    assert out.dim()==2 and tar.dim()==2 and out.shape[1]==12 and tar.shape[1]==12
+    
     chord_logits_exp = out[None, :, :]  # (1, Q, 12)
     chord_gt = tar.float()
     chord_gt_exp = chord_gt[:, None, :]          # (N, 1, 12)
