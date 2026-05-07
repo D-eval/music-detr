@@ -165,9 +165,9 @@ def events_to_midi(events, out_path="output.mid"):
     print("Saved MIDI:", out_path)
 
 
-from read0 import AudioDataset, collate_fn, to_device
-from torch.utils.data import DataLoader
-dataset = AudioDataset(root_dir=cfg.dataset_data_path, cfg=cfg)
+# from read0 import AudioDataset, collate_fn, to_device
+# from torch.utils.data import DataLoader
+# dataset = AudioDataset(root_dir=cfg.dataset_data_path, cfg=cfg)
 
 
 

@@ -64335,3 +64335,2397 @@ torch.Size([6, 12])
 {'start': 0.05655392806511372, 'sustain': 0.0624343258132285, 'root': 1.119635799783282, 'tonic': 1.0050631869162316, 'chord': 0.3201992336544208, 'before': 4.27798214316542e-06, 'exist': 0.11682015215046704}
 torch.Size([6, 12])
 3
+torch.Size([4, 12])
+-2
+torch.Size([4, 12])
+-2
+torch.Size([5, 12])
+5
+torch.Size([3, 12])
+2
+torch.Size([2, 12])
+-4
+torch.Size([1, 12])
+-5
+torch.Size([4, 12])
+1
+torch.Size([4, 12])
+5
+torch.Size([12, 12])
+1
+torch.Size([3, 12])
+-5
+torch.Size([9, 12])
+-1
+torch.Size([3, 12])
+3
+torch.Size([4, 12])
+-1
+torch.Size([3, 12])
+-5
+torch.Size([6, 12])
+-1
+torch.Size([5, 12])
+-1
+torch.Size([2, 12])
+2
+torch.Size([10, 12])
+-3
+torch.Size([10, 12])
+-5
+torch.Size([2, 12])
+5
+torch.Size([5, 12])
+-2
+torch.Size([6, 12])
+-2
+torch.Size([3, 12])
+2
+[Epoch 4372] step 20 loss: 2.8686
+{'start': 0.08436244889162481, 'sustain': 0.0695322286337614, 'root': 0.43146669313819075, 'tonic': 0.6238948306709062, 'chord': 0.17011363615165465, 'before': 1.7754651497337015e-06, 'exist': 0.18518268899060786}
+torch.Size([3, 12])
+2
+==== Epoch 4372 avg loss: 4.1189 ====
+torch.Size([5, 12])
+2
+torch.Size([3, 12])
+-1
+torch.Size([5, 12])
+2
+[Epoch 4373] step 0 loss: 4.1290
+{'start': 0.07443977962248027, 'sustain': 0.055695711402222514, 'root': 0.9868614223232726, 'tonic': 0.9867433343897574, 'chord': 0.23875239142216742, 'before': 2.5017591660722593e-06, 'exist': 0.1725685856072232}
+torch.Size([7, 12])
+-1
+torch.Size([4, 12])
+2
+torch.Size([2, 12])
+3
+torch.Size([6, 12])
+3
+torch.Size([3, 12])
+5
+torch.Size([3, 12])
+4
+torch.Size([4, 12])
+-4
+torch.Size([4, 12])
+1
+torch.Size([2, 12])
+-1
+torch.Size([2, 12])
+2
+torch.Size([6, 12])
+1
+torch.Size([3, 12])
+-5
+torch.Size([5, 12])
+1
+torch.Size([3, 12])
+-2
+torch.Size([4, 12])
+1
+torch.Size([3, 12])
+-4
+[Epoch 4373] step 10 loss: 3.2038
+{'start': 0.09543420930094726, 'sustain': 0.06497486168518662, 'root': 0.7439029884553747, 'tonic': 0.7904589773024782, 'chord': 0.17226455276249908, 'before': 1.6074319209642996e-06, 'exist': 0.10257475543767214}
+torch.Size([7, 12])
+-5
+torch.Size([3, 12])
+3
+torch.Size([2, 12])
+-3
+torch.Size([3, 12])
+-1
+torch.Size([4, 12])
+-2
+torch.Size([3, 12])
+3
+torch.Size([2, 12])
+4
+torch.Size([4, 12])
+-4
+torch.Size([5, 12])
+-5
+torch.Size([2, 12])
+3
+torch.Size([4, 12])
+4
+torch.Size([2, 12])
+-1
+torch.Size([5, 12])
+5
+torch.Size([2, 12])
+2
+torch.Size([12, 12])
+4
+torch.Size([6, 12])
+5
+torch.Size([10, 12])
+-5
+torch.Size([5, 12])
+1
+torch.Size([9, 12])
+-3
+[Epoch 4373] step 20 loss: 5.8561
+{'start': 0.0959698068909347, 'sustain': 0.2651432740385644, 'root': 1.2559225359000266, 'tonic': 1.2051469860598445, 'chord': 0.3516277866438031, 'before': 4.969970218349131e-05, 'exist': 0.22244784142822027}
+==== Epoch 4373 avg loss: 3.3991 ====
+torch.Size([3, 12])
+-2
+[Epoch 4374] step 0 loss: 2.5039
+{'start': 0.05934460865682922, 'sustain': 0.0587746417731978, 'root': 0.545370398380328, 'tonic': 0.4853915363783017, 'chord': 0.14345638365193736, 'before': 4.791814175683932e-06, 'exist': 0.09785084050963633}
+torch.Size([7, 12])
+4
+torch.Size([4, 12])
+2
+torch.Size([5, 12])
+-3
+torch.Size([4, 12])
+-3
+torch.Size([10, 12])
+4
+torch.Size([3, 12])
+-4
+torch.Size([4, 12])
+4
+torch.Size([7, 12])
+-3
+torch.Size([5, 12])
+-1
+torch.Size([5, 12])
+2
+torch.Size([2, 12])
+1
+torch.Size([4, 12])
+-5
+torch.Size([7, 12])
+4
+torch.Size([8, 12])
+4
+torch.Size([7, 12])
+1
+torch.Size([2, 12])
+-2
+torch.Size([4, 12])
+2
+torch.Size([4, 12])
+-1
+torch.Size([4, 12])
+-4
+torch.Size([4, 12])
+-4
+torch.Size([3, 12])
+2
+torch.Size([3, 12])
+-3
+[Epoch 4374] step 10 loss: 0.6284
+{'start': 0.06980907544493675, 'sustain': 0.026668906852137297, 'root': 0.03197213554813061, 'tonic': 0.020344575179478852, 'chord': 0.019881565785908606, 'before': 1.8880847701477355e-06, 'exist': 0.12403117437497713}
+torch.Size([3, 12])
+-1
+torch.Size([5, 12])
+2
+torch.Size([3, 12])
+-2
+torch.Size([6, 12])
+5
+torch.Size([4, 12])
+5
+torch.Size([2, 12])
+5
+torch.Size([4, 12])
+-2
+torch.Size([6, 12])
+-2
+torch.Size([3, 12])
+2
+torch.Size([3, 12])
+2
+torch.Size([6, 12])
+-3
+torch.Size([2, 12])
+3
+torch.Size([8, 12])
+3
+torch.Size([8, 12])
+1
+torch.Size([3, 12])
+-5
+torch.Size([6, 12])
+2
+torch.Size([11, 12])
+1
+torch.Size([9, 12])
+2
+torch.Size([4, 12])
+-3
+[Epoch 4374] step 20 loss: 2.9273
+{'start': 0.04139703547116369, 'sustain': 0.05791006260551512, 'root': 0.603658433714827, 'tonic': 0.7150683160266453, 'chord': 0.173736138050117, 'before': 1.842221861840694e-06, 'exist': 0.16550207964610308}
+==== Epoch 4374 avg loss: 3.7796 ====
+torch.Size([7, 12])
+1
+torch.Size([3, 12])
+-1
+torch.Size([4, 12])
+5
+torch.Size([2, 12])
+5
+[Epoch 4375] step 0 loss: 5.4061
+{'start': 0.05539814587973524, 'sustain': 0.15440459692035802, 'root': 1.1120166692999192, 'tonic': 1.2153980786679313, 'chord': 0.3367931004613638, 'before': 0.0001952092199218666, 'exist': 0.20970428362488747}
+torch.Size([3, 12])
+5
+torch.Size([2, 12])
+-2
+torch.Size([4, 12])
+-4
+torch.Size([9, 12])
+-1
+torch.Size([5, 12])
+2
+torch.Size([4, 12])
+-4
+torch.Size([4, 12])
+-1
+torch.Size([3, 12])
+-1
+torch.Size([3, 12])
+-4
+torch.Size([3, 12])
+3
+torch.Size([4, 12])
+3
+torch.Size([3, 12])
+-4
+torch.Size([4, 12])
+3
+torch.Size([4, 12])
+-1
+torch.Size([4, 12])
+1
+torch.Size([5, 12])
+-1
+torch.Size([5, 12])
+4
+torch.Size([2, 12])
+-3
+torch.Size([5, 12])
+5
+torch.Size([2, 12])
+-4
+torch.Size([3, 12])
+3
+torch.Size([6, 12])
+4
+[Epoch 4375] step 10 loss: 1.9166
+{'start': 0.08654358773492277, 'sustain': 0.07745930930832401, 'root': 0.3688190213579219, 'tonic': 0.1870108979055658, 'chord': 0.0938815715489909, 'before': 3.153389817019288e-05, 'exist': 0.19300222396850586}
+torch.Size([3, 12])
+-5
+torch.Size([3, 12])
+2
+torch.Size([3, 12])
+3
+torch.Size([3, 12])
+-2
+torch.Size([4, 12])
+-1
+torch.Size([2, 12])
+4
+torch.Size([6, 12])
+1
+torch.Size([2, 12])
+-1
+torch.Size([7, 12])
+2
+torch.Size([2, 12])
+-5
+torch.Size([6, 12])
+4
+torch.Size([4, 12])
+2
+torch.Size([4, 12])
+2
+torch.Size([6, 12])
+3
+torch.Size([7, 12])
+3
+torch.Size([2, 12])
+-2
+torch.Size([6, 12])
+-3
+torch.Size([3, 12])
+1
+[Epoch 4375] step 20 loss: 5.3076
+{'start': 0.07986378064379096, 'sustain': 0.08533998462371528, 'root': 1.2979401997290552, 'tonic': 1.246828141156584, 'chord': 0.31484691018704325, 'before': 8.340529117134565e-06, 'exist': 0.1029548505321145}
+torch.Size([4, 12])
+3
+==== Epoch 4375 avg loss: 3.7059 ====
+torch.Size([3, 12])
+-1
+torch.Size([2, 12])
+-4
+[Epoch 4376] step 0 loss: 3.7962
+{'start': 0.08336613420397043, 'sustain': 0.08652042099492974, 'root': 0.8329669657396153, 'tonic': 0.7182890679687262, 'chord': 0.2214048802270554, 'before': 2.100021290780442e-06, 'exist': 0.14407845260575414}
+torch.Size([4, 12])
+-1
+torch.Size([6, 12])
+2
+torch.Size([4, 12])
+1
+torch.Size([3, 12])
+3
+torch.Size([2, 12])
+1
+torch.Size([3, 12])
+5
+torch.Size([6, 12])
+-1
+torch.Size([2, 12])
+5
+torch.Size([3, 12])
+-1
+torch.Size([3, 12])
+4
+torch.Size([5, 12])
+4
+torch.Size([3, 12])
+4
+torch.Size([2, 12])
+-2
+torch.Size([6, 12])
+-1
+torch.Size([5, 12])
+-5
+torch.Size([4, 12])
+1
+torch.Size([5, 12])
+5
+torch.Size([2, 12])
+-2
+torch.Size([2, 12])
+-1
+torch.Size([6, 12])
+4
+[Epoch 4376] step 10 loss: 1.0558
+{'start': 0.06905692693544552, 'sustain': 0.06183575256727636, 'root': 0.173897008287895, 'tonic': 0.18831153454084415, 'chord': 0.04282721786876209, 'before': 3.3433060753470573e-07, 'exist': 0.10793087515048683}
+torch.Size([3, 12])
+-2
+torch.Size([5, 12])
+4
+torch.Size([3, 12])
+-4
+torch.Size([4, 12])
+-5
+torch.Size([4, 12])
+-2
+torch.Size([4, 12])
+-3
+torch.Size([4, 12])
+-5
+torch.Size([2, 12])
+2
+torch.Size([3, 12])
+-1
+torch.Size([2, 12])
+-1
+torch.Size([7, 12])
+4
+torch.Size([6, 12])
+3
+torch.Size([9, 12])
+2
+torch.Size([2, 12])
+2
+torch.Size([3, 12])
+2
+torch.Size([3, 12])
+3
+torch.Size([2, 12])
+4
+torch.Size([3, 12])
+1
+torch.Size([3, 12])
+4
+torch.Size([2, 12])
+-5
+torch.Size([2, 12])
+4
+torch.Size([3, 12])
+-4
+torch.Size([5, 12])
+1
+torch.Size([3, 12])
+-5
+[Epoch 4376] step 20 loss: 0.7638
+{'start': 0.042098769001313485, 'sustain': 0.04511998521047644, 'root': 0.18153575019096024, 'tonic': 0.08346177801286103, 'chord': 0.028186063253087923, 'before': 3.9307217377781284e-07, 'exist': 0.06572840953595005}
+torch.Size([2, 12])
+-2
+==== Epoch 4376 avg loss: 3.9324 ====
+torch.Size([2, 12])
+-3
+torch.Size([4, 12])
+-3
+[Epoch 4377] step 0 loss: 3.1618
+{'start': 0.09214943641563877, 'sustain': 0.09934178221737966, 'root': 0.7006204184817761, 'tonic': 0.6427690563141368, 'chord': 0.17359002924058586, 'before': 0.00010213505864925197, 'exist': 0.1335512640653178}
+torch.Size([7, 12])
+-4
+torch.Size([4, 12])
+3
+torch.Size([6, 12])
+3
+torch.Size([6, 12])
+-4
+torch.Size([6, 12])
+5
+torch.Size([3, 12])
+-3
+torch.Size([9, 12])
+1
+torch.Size([6, 12])
+-3
+torch.Size([2, 12])
+3
+torch.Size([4, 12])
+1
+torch.Size([3, 12])
+1
+torch.Size([2, 12])
+-1
+torch.Size([3, 12])
+-1
+torch.Size([4, 12])
+3
+torch.Size([2, 12])
+5
+torch.Size([6, 12])
+-4
+torch.Size([1, 12])
+4
+torch.Size([2, 12])
+-2
+torch.Size([5, 12])
+-1
+torch.Size([3, 12])
+-3
+torch.Size([4, 12])
+-5
+torch.Size([6, 12])
+-4
+torch.Size([4, 12])
+4
+torch.Size([3, 12])
+3
+torch.Size([6, 12])
+-5
+torch.Size([6, 12])
+-2
+torch.Size([4, 12])
+-5
+torch.Size([3, 12])
+1
+[Epoch 4377] step 10 loss: 2.6871
+{'start': 0.04921146697597578, 'sustain': 0.027736781165003777, 'root': 0.6216717914794572, 'tonic': 0.6628933237516321, 'chord': 0.15342690850957297, 'before': 3.796666825482827e-07, 'exist': 0.11147591122426093}
+torch.Size([2, 12])
+4
+torch.Size([7, 12])
+-1
+torch.Size([2, 12])
+2
+torch.Size([4, 12])
+-4
+torch.Size([5, 12])
+3
+torch.Size([6, 12])
+4
+torch.Size([4, 12])
+-2
+torch.Size([5, 12])
+-4
+torch.Size([3, 12])
+-1
+torch.Size([2, 12])
+-3
+torch.Size([2, 12])
+-2
+torch.Size([4, 12])
+1
+torch.Size([4, 12])
+-5
+torch.Size([5, 12])
+-5
+torch.Size([3, 12])
+-5
+[Epoch 4377] step 20 loss: 0.8436
+{'start': 0.02729523542802781, 'sustain': 0.046425625201663934, 'root': 0.11872327636228874, 'tonic': 0.12355940394627396, 'chord': 0.04799819728896182, 'before': 2.15582394240757e-06, 'exist': 0.05896172724897042}
+==== Epoch 4377 avg loss: 3.6589 ====
+torch.Size([4, 12])
+1
+torch.Size([2, 12])
+-1
+torch.Size([3, 12])
+3
+[Epoch 4378] step 0 loss: 4.3244
+{'start': 0.07078279205597937, 'sustain': 0.05687291524372995, 'root': 0.9694438952938071, 'tonic': 0.9229830645490438, 'chord': 0.2630935084889643, 'before': 4.266297539853164e-06, 'exist': 0.14821203400788363}
+torch.Size([4, 12])
+3
+torch.Size([7, 12])
+-5
+torch.Size([3, 12])
+-4
+torch.Size([3, 12])
+-4
+torch.Size([3, 12])
+-2
+torch.Size([6, 12])
+-4
+torch.Size([2, 12])
+-2
+torch.Size([3, 12])
+5
+torch.Size([5, 12])
+-2
+torch.Size([6, 12])
+5
+torch.Size([3, 12])
+-2
+torch.Size([3, 12])
+2
+torch.Size([4, 12])
+-1
+torch.Size([5, 12])
+5
+torch.Size([5, 12])
+-2
+torch.Size([7, 12])
+3
+torch.Size([10, 12])
+2
+torch.Size([5, 12])
+-2
+torch.Size([2, 12])
+-3
+torch.Size([4, 12])
+2
+torch.Size([11, 12])
+-1
+torch.Size([4, 12])
+-4
+[Epoch 4378] step 10 loss: 2.7652
+{'start': 0.07283584511242225, 'sustain': 0.07220881315879524, 'root': 0.5507872228117776, 'tonic': 0.5855105088703567, 'chord': 0.15817215415881947, 'before': 1.2425089631579547e-06, 'exist': 0.11227011727169156}
+torch.Size([9, 12])
+2
+torch.Size([2, 12])
+-2
+torch.Size([3, 12])
+-3
+torch.Size([4, 12])
+2
+torch.Size([3, 12])
+1
+torch.Size([9, 12])
+3
+torch.Size([3, 12])
+-2
+torch.Size([2, 12])
+4
+torch.Size([4, 12])
+-2
+torch.Size([11, 12])
+-1
+torch.Size([6, 12])
+5
+torch.Size([3, 12])
+-5
+torch.Size([2, 12])
+2
+torch.Size([3, 12])
+3
+torch.Size([7, 12])
+5
+torch.Size([4, 12])
+-5
+torch.Size([4, 12])
+-1
+torch.Size([3, 12])
+-2
+[Epoch 4378] step 20 loss: 2.4124
+{'start': 0.029269106249557808, 'sustain': 0.04916435549966991, 'root': 0.49807151310596964, 'tonic': 0.40986862876616215, 'chord': 0.13965761035797186, 'before': 6.536731570615281e-06, 'exist': 0.12919243646319956}
+torch.Size([3, 12])
+-2
+==== Epoch 4378 avg loss: 3.5297 ====
+torch.Size([3, 12])
+5
+torch.Size([2, 12])
+-2
+torch.Size([6, 12])
+-4
+torch.Size([4, 12])
+-4
+[Epoch 4379] step 0 loss: 6.0865
+{'start': 0.05250718095339835, 'sustain': 0.21245310263475403, 'root': 1.352656144888897, 'tonic': 1.3999890503910137, 'chord': 0.3879470297397347, 'before': 1.7364249280483806e-05, 'exist': 0.11364966537803411}
+torch.Size([6, 12])
+-5
+torch.Size([4, 12])
+-5
+torch.Size([2, 12])
+1
+torch.Size([3, 12])
+-2
+torch.Size([2, 12])
+-1
+torch.Size([2, 12])
+-2
+torch.Size([3, 12])
+4
+torch.Size([3, 12])
+-3
+torch.Size([5, 12])
+-4
+torch.Size([6, 12])
+-4
+torch.Size([9, 12])
+1
+torch.Size([3, 12])
+-1
+torch.Size([7, 12])
+2
+torch.Size([8, 12])
+-2
+torch.Size([4, 12])
+-3
+torch.Size([8, 12])
+-5
+torch.Size([6, 12])
+4
+torch.Size([5, 12])
+-3
+torch.Size([3, 12])
+-4
+torch.Size([3, 12])
+-3
+torch.Size([1, 12])
+1
+torch.Size([3, 12])
+-5
+torch.Size([4, 12])
+-1
+torch.Size([2, 12])
+3
+[Epoch 4379] step 10 loss: 1.6397
+{'start': 0.09158319840207696, 'sustain': 0.065707694622688, 'root': 0.2523022506138659, 'tonic': 0.2573846243612934, 'chord': 0.08441118389600888, 'before': 3.7174132542848184e-07, 'exist': 0.12404445430729538}
+torch.Size([3, 12])
+-5
+torch.Size([2, 12])
+-4
+torch.Size([4, 12])
+-4
+torch.Size([4, 12])
+2
+torch.Size([4, 12])
+-5
+torch.Size([4, 12])
+-3
+torch.Size([6, 12])
+1
+torch.Size([4, 12])
+1
+torch.Size([3, 12])
+2
+torch.Size([4, 12])
+2
+torch.Size([2, 12])
+3
+torch.Size([7, 12])
+-2
+torch.Size([1, 12])
+1
+torch.Size([3, 12])
+-3
+torch.Size([4, 12])
+3
+torch.Size([4, 12])
+-3
+torch.Size([4, 12])
+4
+torch.Size([2, 12])
+2
+torch.Size([3, 12])
+-1
+[Epoch 4379] step 20 loss: 3.8664
+{'start': 0.10156214959715726, 'sustain': 0.05441507856812677, 'root': 0.8074458998326008, 'tonic': 0.7272145114475279, 'chord': 0.23188207141356543, 'before': 4.329540099603027e-07, 'exist': 0.13439250621013343}
+==== Epoch 4379 avg loss: 3.8811 ====
+torch.Size([3, 12])
+4
+torch.Size([2, 12])
+-2
+[Epoch 4380] step 0 loss: 3.5468
+{'start': 0.03381223345422768, 'sustain': 0.09292148655549681, 'root': 0.7018813973118085, 'tonic': 0.8435810538649093, 'chord': 0.2191699043760309, 'before': 5.545384961516686e-06, 'exist': 0.11847972974646837}
+torch.Size([3, 12])
+2
+torch.Size([3, 12])
+-5
+torch.Size([3, 12])
+4
+torch.Size([4, 12])
+-3
+torch.Size([3, 12])
+-2
+torch.Size([2, 12])
+-4
+torch.Size([6, 12])
+3
+torch.Size([2, 12])
+-3
+torch.Size([4, 12])
+2
+torch.Size([5, 12])
+2
+torch.Size([2, 12])
+3
+torch.Size([3, 12])
+-3
+torch.Size([5, 12])
+5
+torch.Size([3, 12])
+-4
+torch.Size([2, 12])
+-2
+torch.Size([7, 12])
+2
+torch.Size([9, 12])
+3
+torch.Size([3, 12])
+1
+torch.Size([3, 12])
+-3
+torch.Size([3, 12])
+3
+torch.Size([3, 12])
+5
+torch.Size([3, 12])
+-4
+torch.Size([3, 12])
+4
+torch.Size([4, 12])
+-3
+torch.Size([4, 12])
+-5
+torch.Size([3, 12])
+1
+torch.Size([1, 12])
+3
+torch.Size([4, 12])
+3
+torch.Size([1, 12])
+-5
+torch.Size([10, 12])
+4
+[Epoch 4380] step 10 loss: 6.5324
+{'start': 0.044437713931984035, 'sustain': 0.13884398411028087, 'root': 1.6350938981049694, 'tonic': 1.357985167822335, 'chord': 0.39298558594600763, 'before': 0.00046994719476588665, 'exist': 0.23395402333699167}
+torch.Size([4, 12])
+-2
+torch.Size([4, 12])
+3
+torch.Size([4, 12])
+2
+torch.Size([5, 12])
+-4
+torch.Size([3, 12])
+-2
+torch.Size([4, 12])
+-2
+torch.Size([5, 12])
+-4
+torch.Size([5, 12])
+2
+torch.Size([5, 12])
+4
+torch.Size([3, 12])
+-2
+torch.Size([4, 12])
+4
+torch.Size([3, 12])
+-3
+torch.Size([3, 12])
+4
+torch.Size([3, 12])
+-1
+torch.Size([5, 12])
+-3
+[Epoch 4380] step 20 loss: 6.4811
+{'start': 0.04885462191305123, 'sustain': 0.15511525748297572, 'root': 1.5050173038762296, 'tonic': 1.5155771317658946, 'chord': 0.40098781400593, 'before': 1.223203240030557e-05, 'exist': 0.15540047897957265}
+torch.Size([4, 12])
+-5
+==== Epoch 4380 avg loss: 3.9043 ====
+torch.Size([2, 12])
+-2
+torch.Size([6, 12])
+-2
+torch.Size([3, 12])
+-4
+[Epoch 4381] step 0 loss: 4.9289
+{'start': 0.08754868007963523, 'sustain': 0.12366202448902186, 'root': 1.0594998039887287, 'tonic': 1.1081557761062868, 'chord': 0.2941366779632517, 'before': 1.8928064589474047e-05, 'exist': 0.18979978887364268}
+torch.Size([2, 12])
+2
+torch.Size([7, 12])
+2
+torch.Size([5, 12])
+5
+torch.Size([4, 12])
+-4
+torch.Size([1, 12])
+3
+torch.Size([4, 12])
+-2
+torch.Size([2, 12])
+3
+torch.Size([4, 12])
+-1
+torch.Size([4, 12])
+-2
+torch.Size([3, 12])
+-4
+torch.Size([3, 12])
+-3
+torch.Size([3, 12])
+1
+torch.Size([4, 12])
+4
+torch.Size([3, 12])
+-4
+torch.Size([2, 12])
+-2
+torch.Size([3, 12])
+-4
+[Epoch 4381] step 10 loss: 1.1216
+{'start': 0.07377951650414616, 'sustain': 0.08174860035069287, 'root': 0.14232580599491484, 'tonic': 0.10281552994274534, 'chord': 0.05458910472225398, 'before': 1.843533495868646e-07, 'exist': 0.099120429425966}
+torch.Size([4, 12])
+-3
+torch.Size([6, 12])
+-5
+torch.Size([3, 12])
+2
+torch.Size([2, 12])
+1
+torch.Size([3, 12])
+3
+torch.Size([2, 12])
+4
+torch.Size([5, 12])
+3
+torch.Size([3, 12])
+1
+torch.Size([2, 12])
+-4
+torch.Size([1, 12])
+3
+torch.Size([5, 12])
+-5
+torch.Size([5, 12])
+-3
+torch.Size([4, 12])
+2
+torch.Size([3, 12])
+-5
+torch.Size([3, 12])
+1
+torch.Size([3, 12])
+5
+torch.Size([3, 12])
+-1
+torch.Size([4, 12])
+4
+torch.Size([4, 12])
+-2
+torch.Size([4, 12])
+1
+[Epoch 4381] step 20 loss: 3.0237
+{'start': 0.04537220683414489, 'sustain': 0.057461099699139595, 'root': 0.6209849209044478, 'tonic': 0.7413009162119124, 'chord': 0.1823570503947849, 'before': 8.463810431203541e-07, 'exist': 0.12491378607228398}
+torch.Size([4, 12])
+3
+torch.Size([6, 12])
+-2
+==== Epoch 4381 avg loss: 3.6588 ====
+[Epoch 4382] step 0 loss: 0.9318
+{'start': 0.0819567240350807, 'sustain': 0.038868503586854786, 'root': 0.09265634951589163, 'tonic': 0.10910566301026847, 'chord': 0.035973284335341305, 'before': 3.4135614157341e-05, 'exist': 0.12030187784694135}
+torch.Size([2, 12])
+1
+torch.Size([3, 12])
+-3
+torch.Size([4, 12])
+5
+torch.Size([2, 12])
+2
+torch.Size([5, 12])
+-2
+torch.Size([6, 12])
+-3
+torch.Size([4, 12])
+-4
+torch.Size([5, 12])
+-1
+torch.Size([2, 12])
+1
+torch.Size([5, 12])
+3
+torch.Size([8, 12])
+-4
+torch.Size([4, 12])
+1
+torch.Size([1, 12])
+4
+torch.Size([9, 12])
+4
+torch.Size([2, 12])
+2
+torch.Size([2, 12])
+-3
+torch.Size([10, 12])
+3
+torch.Size([6, 12])
+5
+torch.Size([3, 12])
+-1
+torch.Size([3, 12])
+-2
+torch.Size([3, 12])
+1
+torch.Size([5, 12])
+-5
+torch.Size([6, 12])
+-3
+torch.Size([3, 12])
+1
+torch.Size([4, 12])
+3
+torch.Size([2, 12])
+-2
+[Epoch 4382] step 10 loss: 4.2989
+{'start': 0.12607269641011953, 'sustain': 0.08664192236028612, 'root': 0.9548277626126946, 'tonic': 0.9070748197382272, 'chord': 0.25088057151515386, 'before': 6.973858290279522e-06, 'exist': 0.10695787775330245}
+torch.Size([3, 12])
+2
+torch.Size([4, 12])
+-2
+torch.Size([3, 12])
+1
+torch.Size([2, 12])
+-5
+torch.Size([3, 12])
+3
+torch.Size([6, 12])
+-4
+torch.Size([4, 12])
+3
+torch.Size([3, 12])
+4
+torch.Size([3, 12])
+-4
+torch.Size([1, 12])
+5
+torch.Size([2, 12])
+-1
+torch.Size([2, 12])
+-1
+torch.Size([5, 12])
+-5
+torch.Size([4, 12])
+-3
+torch.Size([4, 12])
+-1
+torch.Size([3, 12])
+2
+torch.Size([7, 12])
+3
+torch.Size([2, 12])
+-3
+torch.Size([2, 12])
+4
+torch.Size([5, 12])
+1
+torch.Size([5, 12])
+-1
+torch.Size([4, 12])
+3
+torch.Size([3, 12])
+-1
+torch.Size([9, 12])
+2
+[Epoch 4382] step 20 loss: 6.8933
+{'start': 0.07373715139692649, 'sustain': 0.14136002049781382, 'root': 1.6759721217676997, 'tonic': 1.6708905920386314, 'chord': 0.41232820600271225, 'before': 1.1533868650688309e-05, 'exist': 0.1936242152005434}
+torch.Size([5, 12])
+4
+torch.Size([4, 12])
+3
+torch.Size([5, 12])
+-4
+==== Epoch 4382 avg loss: 4.6554 ====
+torch.Size([6, 12])
+-5
+torch.Size([7, 12])
+-4
+[Epoch 4383] step 0 loss: 3.1414
+{'start': 0.06997883453732356, 'sustain': 0.11394901806488633, 'root': 0.6724339442371274, 'tonic': 0.7352790514269145, 'chord': 0.18062046903651208, 'before': 1.1487691545091386e-06, 'exist': 0.10188663727603853}
+torch.Size([2, 12])
+2
+torch.Size([3, 12])
+3
+torch.Size([5, 12])
+2
+torch.Size([7, 12])
+5
+torch.Size([3, 12])
+4
+torch.Size([3, 12])
+5
+torch.Size([3, 12])
+-5
+torch.Size([4, 12])
+5
+torch.Size([12, 12])
+3
+torch.Size([4, 12])
+-2
+torch.Size([4, 12])
+-2
+torch.Size([7, 12])
+1
+torch.Size([2, 12])
+5
+torch.Size([5, 12])
+2
+torch.Size([1, 12])
+-3
+[Epoch 4383] step 10 loss: 3.4165
+{'start': 0.09764753194758669, 'sustain': 0.04082165256841108, 'root': 0.8122119241306791, 'tonic': 0.9279130079448805, 'chord': 0.17468073348209145, 'before': 0.0007197103822443819, 'exist': 0.16222881712019444}
+torch.Size([4, 12])
+-5
+torch.Size([9, 12])
+1
+torch.Size([5, 12])
+-2
+torch.Size([3, 12])
+4
+torch.Size([3, 12])
+2
+torch.Size([12, 12])
+-5
+torch.Size([3, 12])
+5
+torch.Size([4, 12])
+-3
+torch.Size([5, 12])
+1
+torch.Size([5, 12])
+-2
+torch.Size([2, 12])
+5
+torch.Size([3, 12])
+-3
+torch.Size([2, 12])
+-3
+torch.Size([4, 12])
+1
+torch.Size([6, 12])
+3
+torch.Size([2, 12])
+-1
+torch.Size([2, 12])
+-3
+torch.Size([5, 12])
+5
+torch.Size([7, 12])
+5
+torch.Size([7, 12])
+3
+torch.Size([3, 12])
+-1
+torch.Size([3, 12])
+-3
+[Epoch 4383] step 20 loss: 4.4377
+{'start': 0.05675446960958652, 'sustain': 0.16195973702997435, 'root': 0.9705456344663617, 'tonic': 0.9902296498912619, 'chord': 0.26610697971955233, 'before': 3.7174120416691816e-06, 'exist': 0.18306543864309788}
+torch.Size([2, 12])
+-5
+torch.Size([2, 12])
+-5
+==== Epoch 4383 avg loss: 3.5368 ====
+torch.Size([3, 12])
+-2
+[Epoch 4384] step 0 loss: 2.2546
+{'start': 0.03871061932295561, 'sustain': 0.03136672889377223, 'root': 0.429261134006083, 'tonic': 0.452669453665294, 'chord': 0.14183476152538788, 'before': 6.113773037792352e-06, 'exist': 0.07791120954789221}
+torch.Size([1, 12])
+-3
+torch.Size([2, 12])
+-3
+torch.Size([3, 12])
+-2
+torch.Size([1, 12])
+-4
+torch.Size([4, 12])
+-3
+torch.Size([5, 12])
+5
+torch.Size([4, 12])
+-4
+torch.Size([3, 12])
+2
+torch.Size([6, 12])
+2
+torch.Size([3, 12])
+-3
+torch.Size([4, 12])
+2
+torch.Size([3, 12])
+-1
+torch.Size([6, 12])
+3
+torch.Size([4, 12])
+5
+torch.Size([7, 12])
+-2
+torch.Size([6, 12])
+3
+torch.Size([3, 12])
+5
+torch.Size([3, 12])
+-2
+torch.Size([2, 12])
+3
+torch.Size([12, 12])
+-1
+torch.Size([6, 12])
+5
+[Epoch 4384] step 10 loss: 5.3101
+{'start': 0.06685148982796818, 'sustain': 0.13804486341541633, 'root': 1.0393921108407085, 'tonic': 1.0382540134887677, 'chord': 0.3200309053354431, 'before': 0.11027325958435741, 'exist': 0.1818835875019431}
+torch.Size([2, 12])
+2
+torch.Size([6, 12])
+-5
+torch.Size([3, 12])
+4
+torch.Size([3, 12])
+-2
+torch.Size([10, 12])
+4
+torch.Size([2, 12])
+-5
+torch.Size([1, 12])
+4
+torch.Size([2, 12])
+-2
+torch.Size([3, 12])
+4
+torch.Size([5, 12])
+4
+torch.Size([5, 12])
+4
+torch.Size([4, 12])
+-1
+torch.Size([3, 12])
+-1
+torch.Size([3, 12])
+-2
+torch.Size([2, 12])
+2
+torch.Size([2, 12])
+5
+torch.Size([3, 12])
+-1
+torch.Size([4, 12])
+-3
+torch.Size([4, 12])
+2
+torch.Size([8, 12])
+-4
+torch.Size([10, 12])
+4
+torch.Size([4, 12])
+-4
+torch.Size([1, 12])
+4
+torch.Size([1, 12])
+-5
+torch.Size([5, 12])
+4
+torch.Size([4, 12])
+1
+[Epoch 4384] step 20 loss: 4.5772
+{'start': 0.06772534141782671, 'sustain': 0.0708071191329509, 'root': 0.9496433778549545, 'tonic': 0.9982723433640786, 'chord': 0.2869738594163209, 'before': 2.3369064091364675e-06, 'exist': 0.15800821827724576}
+torch.Size([4, 12])
+1
+==== Epoch 4384 avg loss: 4.1050 ====
+torch.Size([3, 12])
+5
+torch.Size([4, 12])
+-2
+[Epoch 4385] step 0 loss: 2.7884
+{'start': 0.03903325321152806, 'sustain': 0.07797854044474661, 'root': 0.6574554643593729, 'tonic': 0.6346376077308378, 'chord': 0.16210600291378796, 'before': 2.164679990749631e-05, 'exist': 0.07741071084456053}
+torch.Size([7, 12])
+-5
+torch.Size([3, 12])
+-5
+torch.Size([5, 12])
+-1
+torch.Size([4, 12])
+-1
+torch.Size([1, 12])
+-2
+torch.Size([4, 12])
+-1
+torch.Size([3, 12])
+3
+torch.Size([5, 12])
+-5
+torch.Size([3, 12])
+-3
+torch.Size([2, 12])
+-2
+torch.Size([2, 12])
+-2
+torch.Size([10, 12])
+-2
+torch.Size([4, 12])
+5
+torch.Size([7, 12])
+-2
+torch.Size([4, 12])
+-3
+torch.Size([3, 12])
+5
+[Epoch 4385] step 10 loss: 3.4759
+{'start': 0.07144009362673387, 'sustain': 0.03554434305988252, 'root': 0.8164436049919459, 'tonic': 0.6887078219779141, 'chord': 0.20203847454104107, 'before': 2.315541983432222e-06, 'exist': 0.12643211413524114}
+torch.Size([5, 12])
+-3
+torch.Size([3, 12])
+5
+torch.Size([5, 12])
+-4
+torch.Size([3, 12])
+4
+torch.Size([5, 12])
+4
+torch.Size([3, 12])
+2
+torch.Size([2, 12])
+3
+torch.Size([2, 12])
+-3
+torch.Size([5, 12])
+1
+torch.Size([4, 12])
+1
+torch.Size([3, 12])
+5
+torch.Size([3, 12])
+-4
+torch.Size([6, 12])
+-1
+torch.Size([4, 12])
+3
+torch.Size([12, 12])
+-5
+torch.Size([1, 12])
+5
+torch.Size([3, 12])
+-5
+torch.Size([5, 12])
+-4
+torch.Size([7, 12])
+-2
+torch.Size([2, 12])
+2
+torch.Size([5, 12])
+5
+torch.Size([2, 12])
+-4
+torch.Size([2, 12])
+-5
+[Epoch 4385] step 20 loss: 1.7738
+{'start': 0.055681320489384234, 'sustain': 0.07119267148664221, 'root': 0.2897544467705302, 'tonic': 0.44335753668565303, 'chord': 0.09659334388561547, 'before': 0.00021804475492952701, 'exist': 0.08999143281835131}
+==== Epoch 4385 avg loss: 3.6724 ====
+torch.Size([8, 12])
+-4
+[Epoch 4386] step 0 loss: 2.0648
+{'start': 0.05973782012006268, 'sustain': 0.14483110059518367, 'root': 0.37243787944316864, 'tonic': 0.4610647512017749, 'chord': 0.10576907359063625, 'before': 0.0017967236491477794, 'exist': 0.17293819598853588}
+torch.Size([5, 12])
+1
+torch.Size([1, 12])
+5
+torch.Size([3, 12])
+-5
+torch.Size([4, 12])
+-3
+torch.Size([6, 12])
+-2
+torch.Size([3, 12])
+2
+torch.Size([2, 12])
+3
+torch.Size([6, 12])
+-5
+torch.Size([3, 12])
+1
+torch.Size([3, 12])
+-5
+torch.Size([4, 12])
+-3
+torch.Size([4, 12])
+1
+torch.Size([2, 12])
+1
+torch.Size([3, 12])
+-1
+torch.Size([4, 12])
+1
+torch.Size([2, 12])
+4
+[Epoch 4386] step 10 loss: 0.6796
+{'start': 0.05341551537276246, 'sustain': 0.044388844562490704, 'root': 0.056693556703976355, 'tonic': 0.15388385355618084, 'chord': 0.029346194896788802, 'before': 3.6732885043376517e-06, 'exist': 0.061107851448468864}
+torch.Size([4, 12])
+5
+torch.Size([6, 12])
+4
+torch.Size([3, 12])
+4
+torch.Size([4, 12])
+3
+torch.Size([3, 12])
+-4
+torch.Size([7, 12])
+5
+torch.Size([3, 12])
+-2
+torch.Size([3, 12])
+-1
+torch.Size([2, 12])
+-3
+torch.Size([3, 12])
+-5
+torch.Size([3, 12])
+-1
+torch.Size([5, 12])
+-2
+torch.Size([3, 12])
+-1
+torch.Size([3, 12])
+-4
+torch.Size([4, 12])
+1
+torch.Size([4, 12])
+-5
+torch.Size([4, 12])
+5
+torch.Size([4, 12])
+3
+torch.Size([3, 12])
+-4
+torch.Size([3, 12])
+1
+torch.Size([2, 12])
+3
+torch.Size([4, 12])
+4
+[Epoch 4386] step 20 loss: 3.2859
+{'start': 0.04395540675614029, 'sustain': 0.04007290885783732, 'root': 0.7520459316729102, 'tonic': 0.8196297419490293, 'chord': 0.19214892870513722, 'before': 1.6717149765740034e-06, 'exist': 0.09088091738522053}
+torch.Size([6, 12])
+-2
+torch.Size([1, 12])
+-1
+==== Epoch 4386 avg loss: 3.7850 ====
+torch.Size([3, 12])
+4
+[Epoch 4387] step 0 loss: 1.7689
+{'start': 0.03845364134758711, 'sustain': 0.0651035528317152, 'root': 0.333770310611726, 'tonic': 0.4214651890360983, 'chord': 0.10274025840772083, 'before': 1.4261835247959126e-05, 'exist': 0.08886524470290169}
+torch.Size([4, 12])
+2
+torch.Size([10, 12])
+-3
+torch.Size([6, 12])
+5
+torch.Size([12, 12])
+-1
+torch.Size([3, 12])
+4
+torch.Size([3, 12])
+1
+torch.Size([6, 12])
+-1
+torch.Size([3, 12])
+4
+torch.Size([7, 12])
+4
+torch.Size([5, 12])
+1
+torch.Size([2, 12])
+-3
+torch.Size([3, 12])
+-2
+torch.Size([4, 12])
+-1
+torch.Size([8, 12])
+-3
+torch.Size([4, 12])
+-5
+torch.Size([5, 12])
+5
+torch.Size([5, 12])
+-3
+torch.Size([2, 12])
+-3
+torch.Size([1, 12])
+-2
+torch.Size([4, 12])
+-2
+[Epoch 4387] step 10 loss: 6.6842
+{'start': 0.044062542263418436, 'sustain': 0.09970400342717767, 'root': 1.685036964569008, 'tonic': 1.6573424106027232, 'chord': 0.3973080997238867, 'before': 4.880827283098438e-06, 'exist': 0.17054776661098003}
+torch.Size([2, 12])
+-2
+torch.Size([6, 12])
+2
+torch.Size([2, 12])
+-4
+torch.Size([4, 12])
+1
+torch.Size([8, 12])
+2
+torch.Size([3, 12])
+3
+torch.Size([5, 12])
+-1
+torch.Size([6, 12])
+-1
+torch.Size([4, 12])
+5
+torch.Size([6, 12])
+5
+torch.Size([4, 12])
+4
+torch.Size([8, 12])
+3
+torch.Size([3, 12])
+3
+torch.Size([6, 12])
+-3
+torch.Size([3, 12])
+-2
+torch.Size([4, 12])
+5
+torch.Size([3, 12])
+-3
+torch.Size([3, 12])
+-4
+torch.Size([6, 12])
+4
+torch.Size([4, 12])
+2
+torch.Size([2, 12])
+5
+torch.Size([5, 12])
+-4
+torch.Size([4, 12])
+-3
+torch.Size([5, 12])
+4
+torch.Size([6, 12])
+-2
+torch.Size([7, 12])
+-2
+torch.Size([2, 12])
+4
+[Epoch 4387] step 20 loss: 6.3640
+{'start': 0.11230075638741255, 'sustain': 0.09753186778107192, 'root': 1.433579069464031, 'tonic': 1.5022867386433063, 'chord': 0.3871023587853415, 'before': 3.34946544486292e-06, 'exist': 0.119363212143071}
+==== Epoch 4387 avg loss: 3.6370 ====
+torch.Size([5, 12])
+1
+torch.Size([6, 12])
+-3
+[Epoch 4388] step 0 loss: 3.8890
+{'start': 0.031761145539348945, 'sustain': 0.14868834128719755, 'root': 0.8504434129745277, 'tonic': 0.7641333852370735, 'chord': 0.2410852159591741, 'before': 9.801211055422525e-06, 'exist': 0.14998472831211984}
+torch.Size([2, 12])
+-1
+torch.Size([5, 12])
+-1
+torch.Size([3, 12])
+2
+torch.Size([3, 12])
+2
+torch.Size([2, 12])
+-1
+torch.Size([3, 12])
+3
+torch.Size([7, 12])
+-1
+torch.Size([4, 12])
+-3
+torch.Size([4, 12])
+-3
+torch.Size([2, 12])
+-4
+torch.Size([3, 12])
+4
+torch.Size([2, 12])
+5
+torch.Size([2, 12])
+-4
+torch.Size([3, 12])
+-3
+torch.Size([4, 12])
+-5
+[Epoch 4388] step 10 loss: 3.4246
+{'start': 0.07882059691473842, 'sustain': 0.13080788702063728, 'root': 0.7004468650557101, 'tonic': 0.7639861973293591, 'chord': 0.19557386892847717, 'before': 2.70495106292944e-06, 'exist': 0.16344296606257558}
+torch.Size([4, 12])
+1
+torch.Size([10, 12])
+-3
+torch.Size([2, 12])
+-5
+torch.Size([5, 12])
+-1
+torch.Size([2, 12])
+-2
+torch.Size([3, 12])
+3
+torch.Size([2, 12])
+-4
+torch.Size([4, 12])
+5
+torch.Size([5, 12])
+5
+torch.Size([1, 12])
+-1
+torch.Size([3, 12])
+4
+torch.Size([6, 12])
+3
+torch.Size([2, 12])
+3
+torch.Size([4, 12])
+5
+torch.Size([3, 12])
+-4
+torch.Size([5, 12])
+2
+torch.Size([6, 12])
+5
+torch.Size([3, 12])
+-3
+torch.Size([3, 12])
+2
+torch.Size([9, 12])
+-1
+[Epoch 4388] step 20 loss: 5.7817
+{'start': 0.0733114193280926, 'sustain': 0.10499045672622742, 'root': 1.3009498878182058, 'tonic': 1.450979009270668, 'chord': 0.34561300302448217, 'before': 1.0620982466125195e-05, 'exist': 0.1405173531966284}
+torch.Size([3, 12])
+4
+==== Epoch 4388 avg loss: 3.5521 ====
+torch.Size([7, 12])
+-2
+torch.Size([6, 12])
+5
+torch.Size([3, 12])
+3
+[Epoch 4389] step 0 loss: 4.5986
+{'start': 0.06134154926985502, 'sustain': 0.18182118982076645, 'root': 1.004710494482424, 'tonic': 1.009547414338158, 'chord': 0.27500422406592406, 'before': 3.4430878308455704e-06, 'exist': 0.19516165275126696}
+torch.Size([4, 12])
+-2
+torch.Size([6, 12])
+2
+torch.Size([2, 12])
+-4
+torch.Size([2, 12])
+-5
+torch.Size([3, 12])
+-3
+torch.Size([4, 12])
+5
+torch.Size([9, 12])
+1
+torch.Size([4, 12])
+4
+torch.Size([2, 12])
+1
+torch.Size([4, 12])
+5
+torch.Size([7, 12])
+4
+torch.Size([3, 12])
+-3
+torch.Size([5, 12])
+2
+torch.Size([3, 12])
+-2
+torch.Size([6, 12])
+2
+torch.Size([4, 12])
+-2
+torch.Size([2, 12])
+3
+torch.Size([6, 12])
+1
+torch.Size([7, 12])
+2
+[Epoch 4389] step 10 loss: 3.1323
+{'start': 0.06458952068351209, 'sustain': 0.16530581680126488, 'root': 0.6121327967775869, 'tonic': 0.7213020874914946, 'chord': 0.1855021134542767, 'before': 1.900450524801371e-05, 'exist': 0.09869697038084269}
+torch.Size([4, 12])
+-5
+torch.Size([6, 12])
+2
+torch.Size([4, 12])
+5
+torch.Size([3, 12])
+-1
+torch.Size([7, 12])
+-5
+torch.Size([4, 12])
+-4
+torch.Size([5, 12])
+2
+torch.Size([4, 12])
+-2
+torch.Size([3, 12])
+3
+torch.Size([3, 12])
+3
+torch.Size([11, 12])
+5
+torch.Size([5, 12])
+3
+torch.Size([9, 12])
+1
+torch.Size([1, 12])
+-4
+torch.Size([6, 12])
+1
+torch.Size([6, 12])
+2
+torch.Size([2, 12])
+4
+torch.Size([4, 12])
+5
+torch.Size([4, 12])
+3
+torch.Size([3, 12])
+3
+torch.Size([3, 12])
+-3
+torch.Size([4, 12])
+-5
+torch.Size([5, 12])
+4
+torch.Size([5, 12])
+1
+torch.Size([2, 12])
+-5
+torch.Size([3, 12])
+2
+torch.Size([4, 12])
+-3
+[Epoch 4389] step 20 loss: 4.6175
+{'start': 0.1007580829973449, 'sustain': 0.11207924895279575, 'root': 1.0613724989962066, 'tonic': 1.0717284330057737, 'chord': 0.26439820021914784, 'before': 2.8480984885594952e-06, 'exist': 0.14757022695266642}
+torch.Size([5, 12])
+-5
+torch.Size([3, 12])
+-3
+==== Epoch 4389 avg loss: 4.1569 ====
+torch.Size([6, 12])
+5
+torch.Size([3, 12])
+-3
+torch.Size([4, 12])
+-1
+torch.Size([4, 12])
+-5
+[Epoch 4390] step 0 loss: 5.4106
+{'start': 0.042132288857828826, 'sustain': 0.05726781231351197, 'root': 1.2854708638551529, 'tonic': 1.3814912536654447, 'chord': 0.3340634332562331, 'before': 2.9376246767805203e-06, 'exist': 0.12349669495597482}
+torch.Size([6, 12])
+3
+torch.Size([5, 12])
+-5
+torch.Size([5, 12])
+-1
+torch.Size([2, 12])
+-4
+torch.Size([3, 12])
+-2
+torch.Size([4, 12])
+-4
+torch.Size([6, 12])
+-5
+torch.Size([5, 12])
+2
+torch.Size([2, 12])
+-1
+torch.Size([6, 12])
+-3
+torch.Size([4, 12])
+4
+torch.Size([4, 12])
+-1
+torch.Size([3, 12])
+2
+torch.Size([3, 12])
+4
+torch.Size([3, 12])
+2
+torch.Size([3, 12])
+-4
+torch.Size([7, 12])
+3
+torch.Size([2, 12])
+3
+torch.Size([3, 12])
+-3
+torch.Size([5, 12])
+-3
+torch.Size([3, 12])
+-1
+torch.Size([6, 12])
+-2
+[Epoch 4390] step 10 loss: 2.4187
+{'start': 0.08018256712239236, 'sustain': 0.055237945198314264, 'root': 0.5203158908771002, 'tonic': 0.4350572033526987, 'chord': 0.1341446124279173, 'before': 3.0320836295498374e-06, 'exist': 0.10076641733758152}
+torch.Size([3, 12])
+2
+torch.Size([3, 12])
+-5
+torch.Size([6, 12])
+-1
+torch.Size([6, 12])
+2
+torch.Size([5, 12])
+3
+torch.Size([9, 12])
+3
+torch.Size([6, 12])
+4
+torch.Size([4, 12])
+3
+torch.Size([4, 12])
+-2
+torch.Size([4, 12])
+-4
+torch.Size([6, 12])
+-1
+torch.Size([5, 12])
+-5
+torch.Size([2, 12])
+-2
+torch.Size([2, 12])
+2
+torch.Size([4, 12])
+4
+torch.Size([6, 12])
+5
+torch.Size([3, 12])
+-3
+torch.Size([2, 12])
+-5
+[Epoch 4390] step 20 loss: 5.2305
+{'start': 0.06096613872796297, 'sustain': 0.08219285804079846, 'root': 1.2340585170313716, 'tonic': 1.2014015057939105, 'chord': 0.3241627255920321, 'before': 1.147034107695788e-06, 'exist': 0.11976781487464905}
+torch.Size([4, 12])
+1
+==== Epoch 4390 avg loss: 3.8000 ====
+torch.Size([3, 12])
+4
+[Epoch 4391] step 0 loss: 2.0756
+{'start': 0.04307401517871767, 'sustain': 0.05985303242050577, 'root': 0.44213711463089567, 'tonic': 0.4372063703776803, 'chord': 0.1215868002109346, 'before': 9.80037891760562e-06, 'exist': 0.0720108988462016}
+torch.Size([4, 12])
+3
+torch.Size([4, 12])
+3
+torch.Size([3, 12])
+1
+torch.Size([5, 12])
+-5
+torch.Size([5, 12])
+-2
+torch.Size([2, 12])
+-1
+torch.Size([6, 12])
+-1
+torch.Size([9, 12])
+1
+torch.Size([5, 12])
+5
+torch.Size([7, 12])
+4
+torch.Size([4, 12])
+-3
+torch.Size([4, 12])
+-1
+torch.Size([2, 12])
+-4
+torch.Size([9, 12])
+5
+torch.Size([1, 12])
+1
+torch.Size([6, 12])
+-3
+torch.Size([5, 12])
+2
+torch.Size([4, 12])
+1
+torch.Size([1, 12])
+-5
+torch.Size([4, 12])
+2
+torch.Size([3, 12])
+-5
+[Epoch 4391] step 10 loss: 4.6259
+{'start': 0.08018708368763328, 'sustain': 0.0701647421810776, 'root': 0.9478925713337958, 'tonic': 0.9604311512084678, 'chord': 0.2845628848881461, 'before': 4.248400838388622e-06, 'exist': 0.16218525590375066}
+torch.Size([4, 12])
+-1
+torch.Size([4, 12])
+-1
+torch.Size([4, 12])
+-2
+torch.Size([6, 12])
+1
+torch.Size([3, 12])
+-2
+torch.Size([4, 12])
+5
+torch.Size([1, 12])
+1
+torch.Size([3, 12])
+-5
+torch.Size([4, 12])
+3
+torch.Size([3, 12])
+5
+torch.Size([2, 12])
+-3
+torch.Size([3, 12])
+-3
+torch.Size([2, 12])
+-2
+torch.Size([4, 12])
+-4
+torch.Size([2, 12])
+1
+torch.Size([3, 12])
+-5
+torch.Size([5, 12])
+-4
+torch.Size([3, 12])
+-4
+torch.Size([2, 12])
+-5
+torch.Size([6, 12])
+3
+torch.Size([8, 12])
+3
+torch.Size([7, 12])
+-4
+torch.Size([9, 12])
+1
+torch.Size([2, 12])
+3
+torch.Size([2, 12])
+1
+[Epoch 4391] step 20 loss: 2.7744
+{'start': 0.08599500311538577, 'sustain': 0.07780870818533003, 'root': 0.5720535093914805, 'tonic': 0.4931115534955097, 'chord': 0.16207608827244258, 'before': 3.3558881132318523e-06, 'exist': 0.10476638772524893}
+==== Epoch 4391 avg loss: 3.7372 ====
+torch.Size([2, 12])
+-4
+torch.Size([7, 12])
+3
+[Epoch 4392] step 0 loss: 4.7895
+{'start': 0.05576849507633597, 'sustain': 0.09881991276051849, 'root': 0.965583751865779, 'tonic': 1.0029259319417179, 'chord': 0.30949276116734836, 'before': 6.741518724958685e-05, 'exist': 0.16507989377714694}
+torch.Size([2, 12])
+-3
+torch.Size([3, 12])
+-2
+torch.Size([3, 12])
+4
+torch.Size([5, 12])
+-3
+torch.Size([6, 12])
+-3
+torch.Size([4, 12])
+-5
+torch.Size([2, 12])
+-3
+torch.Size([6, 12])
+-4
+torch.Size([3, 12])
+5
+torch.Size([4, 12])
+-2
+torch.Size([4, 12])
+5
+torch.Size([2, 12])
+1
+torch.Size([3, 12])
+3
+torch.Size([3, 12])
+-2
+torch.Size([1, 12])
+5
+torch.Size([3, 12])
+-4
+torch.Size([5, 12])
+-2
+torch.Size([2, 12])
+-5
+torch.Size([3, 12])
+4
+torch.Size([3, 12])
+5
+torch.Size([1, 12])
+1
+torch.Size([3, 12])
+2
+torch.Size([6, 12])
+-3
+[Epoch 4392] step 10 loss: 4.5763
+{'start': 0.09842382464557886, 'sustain': 0.04334554844535887, 'root': 1.0869587139168289, 'tonic': 1.0737199586292263, 'chord': 0.26416211255127564, 'before': 4.01842452706899e-06, 'exist': 0.13095989159774035}
+torch.Size([4, 12])
+-4
+torch.Size([4, 12])
+-4
+torch.Size([5, 12])
+-2
+torch.Size([5, 12])
+-5
+torch.Size([1, 12])
+-5
+torch.Size([4, 12])
+-5
+torch.Size([4, 12])
+-3
+torch.Size([2, 12])
+-1
+torch.Size([6, 12])
+4
+torch.Size([2, 12])
+4
+torch.Size([1, 12])
+-2
+torch.Size([5, 12])
+-4
+torch.Size([6, 12])
+-5
+torch.Size([5, 12])
+-5
+torch.Size([5, 12])
+-4
+torch.Size([11, 12])
+-5
+torch.Size([4, 12])
+1
+torch.Size([1, 12])
+1
+torch.Size([4, 12])
+-5
+torch.Size([3, 12])
+4
+torch.Size([6, 12])
+-5
+torch.Size([3, 12])
+-2
+torch.Size([11, 12])
+-4
+torch.Size([2, 12])
+-3
+torch.Size([4, 12])
+-4
+torch.Size([2, 12])
+-1
+[Epoch 4392] step 20 loss: 3.5525
+{'start': 0.08312710403697565, 'sustain': 0.09891360689653084, 'root': 0.7335082229692489, 'tonic': 0.7369970531144645, 'chord': 0.2096916851005517, 'before': 1.580381197921482e-05, 'exist': 0.110730173997581}
+torch.Size([4, 12])
+-5
+torch.Size([7, 12])
+-3
+==== Epoch 4392 avg loss: 4.2949 ====
+torch.Size([3, 12])
+5
+torch.Size([4, 12])
+-2
+torch.Size([2, 12])
+-1
+[Epoch 4393] step 0 loss: 4.1490
+{'start': 0.04280013759853318, 'sustain': 0.16307578061241657, 'root': 0.92451033112593, 'tonic': 0.9565632832236588, 'chord': 0.25142066915577743, 'before': 9.060485416849048e-05, 'exist': 0.11874489020556211}
+torch.Size([1, 12])
+-1
+torch.Size([2, 12])
+5
+torch.Size([4, 12])
+3
+torch.Size([6, 12])
+-5
+torch.Size([2, 12])
+5
+torch.Size([5, 12])
+3
+torch.Size([3, 12])
+4
+torch.Size([2, 12])
+3
+torch.Size([3, 12])
+-3
+torch.Size([6, 12])
+-4
+torch.Size([3, 12])
+-3
+torch.Size([3, 12])
+-1
+torch.Size([3, 12])
+-5
+torch.Size([7, 12])
+-1
+torch.Size([3, 12])
+-1
+torch.Size([3, 12])
+-3
+torch.Size([7, 12])
+-2
+torch.Size([1, 12])
+5
+torch.Size([2, 12])
+-5
+[Epoch 4393] step 10 loss: 3.7040
+{'start': 0.08026768954005092, 'sustain': 0.04322977436822839, 'root': 0.8633969100410468, 'tonic': 0.8981930494992412, 'chord': 0.21013598708668724, 'before': 4.038423617049582e-06, 'exist': 0.11963710910640657}
+torch.Size([3, 12])
+4
+torch.Size([5, 12])
+-1
+torch.Size([4, 12])
+-4
+torch.Size([3, 12])
+3
+torch.Size([3, 12])
+4
+torch.Size([5, 12])
+-4
+torch.Size([12, 12])
+1
+torch.Size([4, 12])
+2
+torch.Size([5, 12])
+5
+torch.Size([3, 12])
+-5
+torch.Size([3, 12])
+-4
+torch.Size([2, 12])
+1
+torch.Size([3, 12])
+-5
+torch.Size([12, 12])
+4
+torch.Size([6, 12])
+3
+torch.Size([2, 12])
+2
+[Epoch 4393] step 20 loss: 6.4710
+{'start': 0.07180967128078919, 'sustain': 0.25504726792132715, 'root': 1.4781569031620165, 'tonic': 1.3347020691726357, 'chord': 0.3916346172627527, 'before': 4.8447517509453766e-05, 'exist': 0.1721866432344541}
+==== Epoch 4393 avg loss: 3.2899 ====
+torch.Size([5, 12])
+-5
+[Epoch 4394] step 0 loss: 1.8360
+{'start': 0.07200968370307237, 'sustain': 0.041187577589880675, 'root': 0.31825535061216215, 'tonic': 0.3493140492355451, 'chord': 0.10295345028134761, 'before': 4.038838620017658e-07, 'exist': 0.09289359266404063}
+torch.Size([6, 12])
+-3
+torch.Size([1, 12])
+5
+torch.Size([2, 12])
+1
+torch.Size([6, 12])
+-3
+torch.Size([7, 12])
+-2
+torch.Size([4, 12])
+1
+torch.Size([4, 12])
+5
+torch.Size([4, 12])
+4
+torch.Size([3, 12])
+5
+torch.Size([5, 12])
+3
+torch.Size([3, 12])
+2
+torch.Size([2, 12])
+-1
+torch.Size([5, 12])
+4
+torch.Size([6, 12])
+-4
+torch.Size([4, 12])
+5
+torch.Size([5, 12])
+2
+torch.Size([3, 12])
+-5
+torch.Size([5, 12])
+5
+torch.Size([2, 12])
+-2
+[Epoch 4394] step 10 loss: 2.0922
+{'start': 0.04475054777776677, 'sustain': 0.04365281556965783, 'root': 0.39445743791293353, 'tonic': 0.43436671530798776, 'chord': 0.11509298929013312, 'before': 8.637929083780429e-08, 'exist': 0.11881824256852269}
+torch.Size([2, 12])
+1
+torch.Size([8, 12])
+-2
+torch.Size([4, 12])
+5
+torch.Size([4, 12])
+-2
+torch.Size([3, 12])
+-3
+torch.Size([6, 12])
+-1
+torch.Size([1, 12])
+5
+torch.Size([5, 12])
+-2
+torch.Size([5, 12])
+4
+torch.Size([5, 12])
+5
+torch.Size([2, 12])
+5
+torch.Size([3, 12])
+3
+torch.Size([6, 12])
+-3
+torch.Size([9, 12])
+5
+torch.Size([5, 12])
+-5
+torch.Size([3, 12])
+-3
+torch.Size([2, 12])
+-3
+torch.Size([2, 12])
+-2
+torch.Size([3, 12])
+5
+torch.Size([8, 12])
+2
+torch.Size([4, 12])
+3
+torch.Size([5, 12])
+-5
+torch.Size([4, 12])
+-3
+torch.Size([3, 12])
+2
+[Epoch 4394] step 20 loss: 3.2951
+{'start': 0.06646186055149883, 'sustain': 0.059358993981732056, 'root': 0.6882518014408561, 'tonic': 0.6523099023761461, 'chord': 0.1881913109391462, 'before': 7.717363011677109e-07, 'exist': 0.11763861389772501}
+torch.Size([4, 12])
+-4
+==== Epoch 4394 avg loss: 3.5563 ====
+torch.Size([3, 12])
+2
+[Epoch 4395] step 0 loss: 3.1810
+{'start': 0.03963158483384177, 'sustain': 0.11283926572650671, 'root': 0.6717297654104186, 'tonic': 0.6164618991315365, 'chord': 0.19172245124354959, 'before': 4.300005520117833e-06, 'exist': 0.15535801695659757}
+torch.Size([4, 12])
+5
+torch.Size([4, 12])
+-5
+torch.Size([4, 12])
+1
+torch.Size([3, 12])
+5
+torch.Size([4, 12])
+-1
+torch.Size([6, 12])
+5
+torch.Size([2, 12])
+3
+torch.Size([2, 12])
+3
+torch.Size([5, 12])
+4
+torch.Size([2, 12])
+2
+torch.Size([4, 12])
+1
+torch.Size([6, 12])
+-3
+torch.Size([4, 12])
+-4
+torch.Size([7, 12])
+-4
+torch.Size([2, 12])
+5
+torch.Size([2, 12])
+1
+torch.Size([6, 12])
+4
+torch.Size([6, 12])
+2
+torch.Size([2, 12])
+2
+torch.Size([4, 12])
+-1
+torch.Size([2, 12])
+-3
+torch.Size([6, 12])
+1
+torch.Size([3, 12])
+4
+torch.Size([2, 12])
+1
+torch.Size([5, 12])
+-1
+torch.Size([3, 12])
+-2
+torch.Size([4, 12])
+-1
+torch.Size([6, 12])
+5
+torch.Size([2, 12])
+1
+torch.Size([2, 12])
+-1
+[Epoch 4395] step 10 loss: 4.3121
+{'start': 0.024987140379380435, 'sustain': 0.14948042831383646, 'root': 0.9517661188438069, 'tonic': 0.9400169883156195, 'chord': 0.26757107858429663, 'before': 1.1451976517761722e-05, 'exist': 0.13420328020583838}
+torch.Size([3, 12])
+-1
+torch.Size([3, 12])
+-4
+torch.Size([4, 12])
+2
+torch.Size([5, 12])
+4
+torch.Size([3, 12])
+-2
+torch.Size([5, 12])
+4
+torch.Size([4, 12])
+-3
+torch.Size([1, 12])
+-3
+torch.Size([3, 12])
+2
+torch.Size([3, 12])
+1
+torch.Size([3, 12])
+-4
+torch.Size([2, 12])
+1
+torch.Size([4, 12])
+-4
+torch.Size([5, 12])
+-3
+torch.Size([4, 12])
+-5
+torch.Size([2, 12])
+1
+torch.Size([2, 12])
+-1
+torch.Size([2, 12])
+-5
+torch.Size([4, 12])
+1
+torch.Size([5, 12])
+1
+torch.Size([10, 12])
+-1
+torch.Size([2, 12])
+2
+torch.Size([6, 12])
+5
+torch.Size([3, 12])
+-1
+torch.Size([3, 12])
+-4
+torch.Size([6, 12])
+1
+[Epoch 4395] step 20 loss: 4.2680
+{'start': 0.09617625463579316, 'sustain': 0.10072917025536299, 'root': 0.8436536388180684, 'tonic': 0.8800318728026468, 'chord': 0.2595456363633275, 'before': 4.8303810134676765e-06, 'exist': 0.13627478008856997}
+==== Epoch 4395 avg loss: 4.5189 ====
+torch.Size([8, 12])
+-4
+[Epoch 4396] step 0 loss: 2.0903
+{'start': 0.07031457149423659, 'sustain': 0.13490801095031202, 'root': 0.3945361326332204, 'tonic': 0.3877788494100969, 'chord': 0.10414952160499524, 'before': 2.728106127213568e-05, 'exist': 0.15104835503734648}
+torch.Size([1, 12])
+5
+torch.Size([3, 12])
+-5
+torch.Size([4, 12])
+2
+torch.Size([10, 12])
+-1
+torch.Size([5, 12])
+-2
+torch.Size([5, 12])
+-4
+torch.Size([7, 12])
+2
+torch.Size([4, 12])
+4
+torch.Size([2, 12])
+-5
+torch.Size([1, 12])
+5
+torch.Size([2, 12])
+-3
+torch.Size([4, 12])
+-3
+torch.Size([9, 12])
+-3
+torch.Size([4, 12])
+3
+torch.Size([9, 12])
+-5
+torch.Size([3, 12])
+1
+torch.Size([5, 12])
+-3
+torch.Size([2, 12])
+-3
+torch.Size([5, 12])
+5
+torch.Size([6, 12])
+5
+torch.Size([1, 12])
+4
+[Epoch 4396] step 10 loss: 2.7269
+{'start': 0.06467869412153959, 'sustain': 0.06634072868791918, 'root': 0.5433635436347686, 'tonic': 0.5330223910423229, 'chord': 0.15693121025105938, 'before': 7.227673477416905e-06, 'exist': 0.1547616483294405}
+torch.Size([4, 12])
+1
+torch.Size([3, 12])
+-4
+torch.Size([3, 12])
+4
+torch.Size([3, 12])
+-3
+torch.Size([4, 12])
+-5
+torch.Size([3, 12])
+3
+torch.Size([6, 12])
+-1
+torch.Size([6, 12])
+3
+torch.Size([4, 12])
+-4
+torch.Size([3, 12])
+-4
+torch.Size([3, 12])
+5
+torch.Size([6, 12])
+-4
+torch.Size([4, 12])
+3
+torch.Size([3, 12])
+-5
+torch.Size([8, 12])
+3
+torch.Size([3, 12])
+2
+torch.Size([6, 12])
+4
+torch.Size([3, 12])
+-4
+torch.Size([4, 12])
+-2
+[Epoch 4396] step 20 loss: 3.0658
+{'start': 0.04548695543780923, 'sustain': 0.0459913577651605, 'root': 0.5829927069717087, 'tonic': 0.8355888494988903, 'chord': 0.18931500360486098, 'before': 8.589887037691035e-05, 'exist': 0.10779228736646473}
+==== Epoch 4396 avg loss: 3.5076 ====
+torch.Size([3, 12])
+4
+torch.Size([5, 12])
+-1
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             

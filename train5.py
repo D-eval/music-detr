@@ -27,7 +27,7 @@ dataset = AudioDataset(root_dir=cfg.dataset_data_path)
 
 loader = DataLoader(
     dataset,
-    batch_size=8,
+    batch_size=4,
     shuffle=True,
     # num_workers=4,
     collate_fn=collate_fn,
@@ -55,13 +55,13 @@ model = PitchTransformer().to(device)
 
 # teacher = Teacher()
 
-# checkpoint_path = "../params/detr5/ckpt_epoch.pt"
-# state_dict = torch.load(checkpoint_path)
-# model.load_state_dict(state_dict=state_dict)
+checkpoint_path = "../params/detr5/ckpt_epoch.pt"
+state_dict = torch.load(checkpoint_path)
+model.load_state_dict(state_dict=state_dict)
 
 # -------- optimizer --------
 optimizer = optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=1e-4)
-recorder = TrainingRecorder()
+recorder = TrainingRecorder(cfg)
 recorder.load()
 # -------- 混合精度（强烈建议）--------
 scaler = torch.cuda.amp.GradScaler()
@@ -80,11 +80,10 @@ for epoch in range(start_epoch+1, num_epochs):
         audio, target = batch
         target = to_device(target, device)
         audio = audio.to(device)
-        assert 0
         # ---------- forward + loss（AMP）----------
         with torch.amp.autocast("cuda"):
             output = model(audio)
-            loss, loss_dict = model.get_loss(output, target)
+            loss = model.get_loss(output, target)
             assert ~torch.isnan(loss)
         # ---------- backward ----------
         optimizer.zero_grad()
@@ -102,7 +101,6 @@ for epoch in range(start_epoch+1, num_epochs):
         # ---------- log ----------
         if step % 10 == 0:
             print(f"[Epoch {epoch}] step {step} loss: {loss.item():.4f}")
-            print(loss_dict)
             with torch.no_grad():
                 audio = audio[0,...][None,...]
                 model.eval()
@@ -119,6 +117,7 @@ for epoch in range(start_epoch+1, num_epochs):
             # }
             target = to_device(target, torch.device("cpu"))
             infer_output = to_device(infer_output, torch.device("cpu"))
+            assert 0
             # plot_pianoroll_event(infer_output, target[0])
             # assert 0
     print(f"==== Epoch {epoch} avg loss: {total_loss / (step+1):.4f} ====")
@@ -135,3 +134,5 @@ for epoch in range(start_epoch+1, num_epochs):
 #     loss = model.get_loss(audio, target)
 # with torch.amp.autocast("cuda"):
 #     loss = model.get_loss(audio, target)
+
+

@@ -4,12 +4,11 @@ from configs.config import get_config22 as get_config
 import os
 
 class TrainingRecorder:
-    def __init__(self):
+    def __init__(self, cfg):
         self.history = {
             "loss": [],
             "lr": [],
         }
-        cfg = get_config()
         
         save_dir = cfg.save_dir
         name = cfg.large_save_dir.split("/")[-1]

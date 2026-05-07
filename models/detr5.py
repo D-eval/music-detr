@@ -820,6 +820,14 @@ class PitchTransformer(nn.Module):
 
             if "sustain" in result:
                 result['sustain'] = torch.exp(result['sustain']) * CellCls.sustain_ref
+            
+            if "root" in result:
+                result['root'] = torch.argmax(result['root'], dim=-1)
+            if "tonic" in result:
+                result['tonic'] = torch.argmax(result['tonic'], dim=-1)
+            if "chord" in result:
+                result['chord'] = (result['chord'] > 0).float()
+
         else:
             result['exist'] = exist_prob
 
@@ -834,6 +842,13 @@ class PitchTransformer(nn.Module):
         for token_name, output in output_dict.items():
             result[token_name] = self._process_token(token_name, output, choice)
 
+        if "root" in result:
+            result['root'] = torch.argmax(result['root'], dim=-1)
+        if "tonic" in result:
+            result['tonic'] = torch.argmax(result['tonic'], dim=-1)
+        if "chord" in result:
+            result['chord'] = (result['chord'] > 0).float()
+
         result["exist"] = exist_prob[choice]
 
         return result
@@ -841,11 +856,6 @@ class PitchTransformer(nn.Module):
     def _process_token(self, token_name, output, choice):
         if token_name == "sustain":
             return torch.exp(output[choice, :]) * CellCls.sustain_ref
-
-        if token_name == "anchor":
-            temp_out = output[choice, :].clone()
-            temp_out[:, 1] = torch.exp(temp_out[:, 1]) * CellCls.sustain_ref
-            return temp_out
 
         return output[choice, :]
         

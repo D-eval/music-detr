@@ -8,26 +8,26 @@ cls_token_cost_dict["beat"] = {}
 not_need_match_cls = ["chord_before", "metronome"]
 not_need_match_cls_token_loss_dict = {
     "chord_before": {
-        "sustain": lambda out, tar: (((torch.log(tar + 1e-6) - math.log(sustain_ref))) - out) ** 2,
-        "exist": lambda out, tar: F.binary_cross_entropy_with_logits(out, tar, reduction="none"),
-        "root": lambda out, tar: F.cross_entropy(out, tar),
-        "chord": lambda out, tar: F.binary_cross_entropy_with_logits(out, tar, reduction="none").mean(),
-        "tonic": lambda out, tar: F.cross_entropy(out, tar),
+        "sustain": lambda out, tar: ((((torch.log(tar + 1e-6) - math.log(sustain_ref))) - out) ** 2).mean(),
+        "exist": lambda out, tar: F.binary_cross_entropy_with_logits(out[:,0], tar, reduction="none").mean(),
+        "root": lambda out, tar: F.cross_entropy(out, tar).mean(),
+        "chord": lambda out, tar: F.binary_cross_entropy_with_logits(out[:,:], tar, reduction="none").mean(),
+        "tonic": lambda out, tar: F.cross_entropy(out, tar).mean(),
     },
     "metronome": {
-        "exist": lambda out, tar: F.binary_cross_entropy_with_logits(out, tar, reduction="none"),
-        "bpm": lambda out, tar: F.l1_loss(out, tar),
-        "offset": lambda out, tar: F.l1_loss(out, tar),
-        "is_4beat": lambda out, tar: F.binary_cross_entropy_with_logits(out, tar, reduction="none"),
+        "exist": lambda out, tar: F.binary_cross_entropy_with_logits(out[:,0], tar, reduction="none").mean(),
+        "bpm": lambda out, tar: F.l1_loss(out[:,0], tar).mean(),
+        "offset": lambda out, tar: F.l1_loss(out[:,0], tar).mean(),
+        "is_4beat": lambda out, tar: F.binary_cross_entropy_with_logits(out[:,0], tar, reduction="none").mean(),
     }
 }
 
-def exist_loss(out, gt_idx):
+def exist_loss(out, pred_idx):
     """
     out: (Q,)
     """
     tar = torch.zeros_like(out, device=out.device)
-    tar[gt_idx] = 1.0
+    tar[pred_idx] = 1.0
     loss = F.binary_cross_entropy_with_logits(
         out,
         tar,
@@ -82,7 +82,7 @@ def exist_cost(out):
     )
     return cost[None, :]
 cls_token_cost_dict["chord"]["exist"] = exist_cost
-
+cls_token_cost_dict['beat']['exist'] = exist_cost
 
 def root_cost(out, tar):
     """

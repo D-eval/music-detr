@@ -148,26 +148,48 @@ def get_config():
     cfg.detr_pos_weight_event = 1
     
     cfg.detr2_loss_weight = {
-        "start": 3,
-        "sustain": 0.5,
-        "root": 1,
-        "tonic": 0.3,
-        "chord": 10,
-        "exist": 1,
-        "before": 2,
-        
-        "bpm": 0.3,
-        "bpm_offset": 0.5,
+        "chord": {
+            "start": 1,
+            "sustain": 0.5,
+            "exist": 1,
+            "root": 1,
+            "chord": 1,
+            "tonic": 1,
+        },
+        "beat": {
+            "beat": 1,
+            "is_downbeat": 1,
+            "exist": 1,
+        },
+        "metronome": {
+            "bpm": 1,
+            "offset": 1,
+            "is_4beat": 1,
+            "exist": 0,
+        },
+        "chord_before": {
+            "sustain": 0.3,
+            "exist": 1,
+            "root": 1,
+            "chord": 1,
+            "tonic": 1,
+        }
     }
     
     cfg.detr2_cost_weight = {
-        "start": 3,
-        "sustain": 1,
-        "root": 0,
-        "tonic": 0,
-        "chord": 0,
-        "exist": 1,
-        "before": 1,
+        "chord": {
+            "start": 1,
+            "sustain": 0.2,
+            "exist": 1,
+            "root": 0.1,
+            "chord": 0.1,
+            "tonic": 0.1,
+        },
+        "beat": {
+            "beat": 1,
+            "is_downbeat": 0.1,
+            "exist": 1,
+        }
     }
     
     cfg.sustain_ref = 0.1

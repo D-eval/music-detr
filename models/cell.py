@@ -16,7 +16,7 @@ from torch import nn
 from typing import List, Dict, Tuple
 from scipy.optimize import linear_sum_assignment
 
-
+from configs.costoss import posterior_cls_token_loss_dict
 from configs.cell_cls import CellCls
 class Cells(nn.Module):
     """
@@ -116,9 +116,9 @@ class Cells(nn.Module):
             
             token_range_dim_dict = CellCls.cls_token_output_dim_dict[cls_name]
             state_i = state[i]
-            for token_name, range, dim in token_range_dim_dict:
+            for token_name, (arrange, dim) in token_range_dim_dict.items():
                 token_head = self.head_dict[cls_name][token_name]
-                token_output = token_head(state_i[:, :, range[0]:range[1], :]) # (B, N, L, dim)
+                token_output = token_head(state_i[:, :, arrange[0]:arrange[1], :]) # (B, N, L, dim)
                 assert token_output.shape[2] == 1
                 output_dict[cls_name][token_name] = token_output[:,:,0,:] # (B, N, dim)
 
@@ -128,6 +128,7 @@ class Cells(nn.Module):
         for b in range(B):
             temp_dict = {}
             for cls_name, v1 in output_dict.items():
+                temp_dict[cls_name] = {}
                 for token_name, v2 in v1.items():
                     temp_dict[cls_name][token_name] = v2[b, :, :]
             output_list.append(temp_dict)
@@ -212,25 +213,28 @@ class Cells(nn.Module):
         target_dict_dict: Dict Dict [ token_name, (1, fea_dim) ]
         """
         loss = 0
-        exist = target_dict_dict[cls_name]['exist'][0,0] == 1
-        if not exist:
-            loss_func = CellCls.posterior_cls_token_loss_dict[cls_name]["exist"]
-            out = output_dict_dict[cls_name]['exist'][0,0]
-            tar = target_dict_dict[cls_name]['exist'][0,0]
+        exist = target_dict_dict[cls_name]['exist'].item() == 1
+        if not exist: # 这种情况只训练 exist
+            loss_func = CellCls.not_need_match_cls_token_loss_dict[cls_name]["exist"]
+            out = output_dict_dict[cls_name]['exist']
+            tar = target_dict_dict[cls_name]['exist']
             loss = loss_func(out, tar)
             return loss
         for token_name in target_dict_dict[cls_name].keys():
-            loss_func = CellCls.posterior_cls_token_loss_dict[cls_name][token_name]
+            loss_func = CellCls.not_need_match_cls_token_loss_dict[cls_name][token_name]
             out = output_dict_dict[cls_name][token_name]
             assert out.shape[0]==1
             assert out.dim()==2
-            out = out[0, :]
+            
+            # begin 混乱逻辑
             tar = target_dict_dict[cls_name][token_name]
-            assert tar.shape[0]==1
-            assert tar.dim()==2
-            tar = tar[0, :]
+            assert tar.dim() in [1, 2], print(tar)
+            
+            # end 混乱逻辑
             temp_loss = loss_func(out, tar)
+            
             loss += loss_weight[cls_name][token_name] * temp_loss
+            
         return loss
 
     def get_sample_clsName_loss(self,
@@ -240,17 +244,18 @@ class Cells(nn.Module):
                                 cost_weight,
                                 loss_weight):
 
-        if list(output_dict_dict[cls_name].values())[0].shape[0] == 0:
+        if list(target_dict_dict[cls_name].values())[0].shape[0] == 0:
             loss_func = CellCls.posterior_cls_token_loss_dict[cls_name]["exist"]
             loss = loss_func(output_dict_dict[cls_name]['exist'], [])
             return loss
         gt_idx, pred_idx, cost_dict = self.match_event(output_dict_dict, target_dict_dict, cls_name, cost_weight)
         loss = 0
-        for token_name in cost_dict.keys():
-            if token_name not in CellCls.posterior_cls_token_loss_dict[cls_name][token_name].keys():
+        assert "exist" in cost_dict
+        for token_name in output_dict_dict[cls_name].keys():
+            if token_name in CellCls.posterior_cls_token_loss_dict[cls_name].keys():
                 loss_func = CellCls.posterior_cls_token_loss_dict[cls_name][token_name]
                 if token_name == "exist":
-                    temp_loss = loss_func(output_dict_dict[cls_name][token_name], gt_idx)
+                    temp_loss = loss_func(output_dict_dict[cls_name][token_name], pred_idx)
                     loss += loss_weight[cls_name][token_name] * temp_loss
                 else:
                     raise NotImplementedError("wtf")
@@ -278,8 +283,12 @@ class Cells(nn.Module):
         
         cost = 0
         for fea_name in output.keys():
-            assert fea_name in target.keys(), f"{fea_name} not in target"
-            assert output[fea_name].shape[1] == target[fea_name].shape[1], f"{fea_name} dim not match"
+            if fea_name=="exist":
+                # 我之前这里写的是continue
+                pass
+            else:
+                assert fea_name in target.keys(), f"{fea_name} not in target"
+            # assert output[fea_name].shape[1] == target[fea_name].shape[1], f"{fea_name} dim not match"
             cost_func = CellCls.cls_token_cost_dict[cls_name][fea_name]
             if fea_name == "exist":
                 temp_cost = cost_func(output[fea_name])
@@ -287,9 +296,8 @@ class Cells(nn.Module):
                 temp_cost = cost_func(output[fea_name], target[fea_name]) # (N, Q)
             cost += cost_weight[cls_name][fea_name] * temp_cost
             cost_dict[fea_name] = temp_cost
-
         cost_np = cost.detach().cpu().numpy()
-        assert cost_np.shape[1] >= cost_np.shape[0], f"too less of query, got {cost_np.shape[1]}, but have {cost_np.shape[0]} event"
+        # assert cost_np.shape[1] >= cost_np.shape[0], f"too less of query, got {output[fea_name].shape}, but have {target[fea_name].shape} event"
         gt_idx, pred_idx = linear_sum_assignment(cost_np)
         return gt_idx, pred_idx, cost_dict
 

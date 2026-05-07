@@ -1,0 +1,111 @@
+nohup: ignoring input
+device: cuda
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+没有训练记录
+/home/vipuser/wby/proj_params/my/train5.py:67: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  scaler = torch.cuda.amp.GradScaler()
+[Epoch 1] step 0 loss: 190.4098
+[Epoch 1] step 10 loss: 151.8975
+[Epoch 1] step 20 loss: 156.1422
+[Epoch 1] step 30 loss: 79.2743
+[Epoch 1] step 40 loss: 27.5451
+==== Epoch 1 avg loss: 121.4610 ====
+[Epoch 2] step 0 loss: 44.8137
+[Epoch 2] step 10 loss: 41.1913
+[Epoch 2] step 20 loss: 31.4529
+[Epoch 2] step 30 loss: 38.3715
+[Epoch 2] step 40 loss: 44.6820
+==== Epoch 2 avg loss: 40.4117 ====
+[Epoch 3] step 0 loss: 36.8143
+[Epoch 3] step 10 loss: 35.5361
+[Epoch 3] step 20 loss: 32.5665
+[Epoch 3] step 30 loss: 26.2286
+[Epoch 3] step 40 loss: 39.0595
+==== Epoch 3 avg loss: 38.3985 ====
+[Epoch 4] step 0 loss: 24.5489
+[Epoch 4] step 10 loss: 17.4398
+[Epoch 4] step 20 loss: 31.5078
+[Epoch 4] step 30 loss: 42.3176
+[Epoch 4] step 40 loss: 34.5456
+==== Epoch 4 avg loss: 38.7282 ====
+[Epoch 5] step 0 loss: 31.9725
+[Epoch 5] step 10 loss: 34.8557
+[Epoch 5] step 20 loss: 30.9429
+[Epoch 5] step 30 loss: 29.5473
+[Epoch 5] step 40 loss: 33.1716
+==== Epoch 5 avg loss: 37.4391 ====
+[Epoch 6] step 0 loss: 31.9212
+[Epoch 6] step 10 loss: 52.0370
+[Epoch 6] step 20 loss: 33.2845
+[Epoch 6] step 30 loss: 40.3003
+[Epoch 6] step 40 loss: 27.5075
+==== Epoch 6 avg loss: 37.2190 ====
+[Epoch 7] step 0 loss: 30.1198
+[Epoch 7] step 10 loss: 23.3152
+[Epoch 7] step 20 loss: 37.0619
+[Epoch 7] step 30 loss: 36.5800
+[Epoch 7] step 40 loss: 27.6464
+==== Epoch 7 avg loss: 37.5510 ====
+[Epoch 8] step 0 loss: 62.0594
+[Epoch 8] step 10 loss: 41.0038
+[Epoch 8] step 20 loss: 35.2391
+[Epoch 8] step 30 loss: 37.6870
+[Epoch 8] step 40 loss: 29.7320
+==== Epoch 8 avg loss: 37.2325 ====
+[Epoch 9] step 0 loss: 42.7318
+[Epoch 9] step 10 loss: 60.3187
+[Epoch 9] step 20 loss: 34.4215
+[Epoch 9] step 30 loss: 32.1303
+[Epoch 9] step 40 loss: 24.1266
+==== Epoch 9 avg loss: 37.0046 ====
+[Epoch 10] step 0 loss: 51.1768
+[Epoch 10] step 10 loss: 34.9891
+[Epoch 10] step 20 loss: 34.5744
+[Epoch 10] step 30 loss: 45.0343
+[Epoch 10] step 40 loss: 54.6180
+==== Epoch 10 avg loss: 35.7843 ====
+[Epoch 11] step 0 loss: 42.0056
+[Epoch 11] step 10 loss: 42.6702
+[Epoch 11] step 20 loss: 26.6405
+[Epoch 11] step 30 loss: 18.7776
+[Epoch 11] step 40 loss: 65.9410
+==== Epoch 11 avg loss: 36.4135 ====
+[Epoch 12] step 0 loss: 38.7494
+[Epoch 12] step 10 loss: 35.6331
+[Epoch 12] step 20 loss: 36.0952
+[Epoch 12] step 30 loss: 26.3043
