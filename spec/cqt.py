@@ -26,6 +26,8 @@ def wav2cqt_2C(wav, shift=0):
     return spec, pos, freqs
 
 
+    
+
 def wav2cqt(wav, shift=0):
     """
     wav: (B, L)
@@ -186,3 +188,186 @@ def cqt1(audio, temp_freq = 440):
     sin_proj = F.conv1d(audio, sin, padding=L//2)
     freq_E = cos_proj **2 + sin_proj **2
     return freq_E[0,0,:]
+
+
+import math
+import torch
+from torch import nn
+import torch.nn.functional as F
+
+
+class MultiWindowCQT(nn.Module):
+    """
+    Multi-window learnable CQT-like frontend
+
+    输入:
+        wav: (B, L)
+
+    输出:
+        energy: (B, T, F, W)
+
+    其中:
+        B: batch
+        T: time
+        F: frequency bins
+        W: multi-window count
+    """
+
+    def __init__(
+        self,
+        freqs,
+        sr=44100,
+        window_num=8,
+        min_cycle=2,
+        trainable=False,
+        stride=0.1,
+    ):
+        super().__init__()
+
+        self.sr = sr
+        self.stride = int(stride * sr)
+        self.window_num = window_num
+        self.min_cycle = min_cycle
+
+        freqs = torch.as_tensor(freqs).float()
+
+        self.register_buffer("freqs", freqs)
+
+        Freq = len(freqs)
+        W = window_num
+
+        meta = []
+        max_len = 0
+
+        # =========================================================
+        # kernel meta
+        # =========================================================
+
+        for f_idx, freq in enumerate(freqs):
+
+            base_cycle = sr / freq
+
+            for w_idx in range(W):
+
+                n_cycle = min_cycle + w_idx
+
+                win_len = int(base_cycle * n_cycle)
+
+                if win_len % 2 == 0:
+                    win_len += 1
+
+                max_len = max(max_len, win_len)
+
+                meta.append((f_idx, w_idx, win_len))
+
+        self.max_len = max_len
+        self.Freq = Freq
+        self.W = W
+
+        kernels_cos = []
+        kernels_sin = []
+
+        # =========================================================
+        # build kernels
+        # =========================================================
+
+        for f_idx, w_idx, win_len in meta:
+
+            freq = freqs[f_idx]
+
+            t = torch.arange(win_len).float() / sr
+
+            phase = 2 * math.pi * freq * t
+
+            window = torch.hann_window(win_len)
+
+            cos_kernel = torch.cos(phase) * window
+            sin_kernel = torch.sin(phase) * window
+
+            # normalize
+            norm = torch.sqrt(
+                cos_kernel.pow(2).sum() +
+                sin_kernel.pow(2).sum()
+            )
+
+            cos_kernel = cos_kernel / (norm + 1e-8)
+            sin_kernel = sin_kernel / (norm + 1e-8)
+
+            # center pad
+            pad_left = (max_len - win_len) // 2
+            pad_right = max_len - win_len - pad_left
+
+            cos_kernel = F.pad(cos_kernel, (pad_left, pad_right))
+            sin_kernel = F.pad(sin_kernel, (pad_left, pad_right))
+
+            kernels_cos.append(cos_kernel)
+            kernels_sin.append(sin_kernel)
+
+        kernels_cos = torch.stack(kernels_cos).unsqueeze(1)
+        kernels_sin = torch.stack(kernels_sin).unsqueeze(1)
+
+        if trainable:
+            self.kernels_cos = nn.Parameter(kernels_cos)
+            self.kernels_sin = nn.Parameter(kernels_sin)
+        else:
+            self.register_buffer("kernels_cos", kernels_cos)
+            self.register_buffer("kernels_sin", kernels_sin)
+
+    def forward(self, wav):
+        """
+            (B, L, 2)
+        """
+        wav = wav.permute(0,2,1) # (B, 2, L)
+        B, C, L = wav.shape
+        assert C == 2, "输入必须是双声道"
+        wav = wav.flatten(0,1) # (B*2, L)
+        out = self._forward(wav) # (B*2, T, F, W)
+        out = out.view(B, 2, *out.shape[1:]) # (B, 2, T, F, W)
+        out = out.permute(0,2,3,4,1) # (B, T, F, W, 2)
+        out = out.flatten(-2, -1) # (B, T, F, W*2)
+        return out
+
+    def _forward(self, wav):
+        """
+        wav:
+            (B, L)
+
+        return:
+            energy:
+                (B, T, F, W)
+        """
+
+        B, L = wav.shape
+
+        wav = wav.unsqueeze(1)  # (B,1,L)
+
+        cos_proj = F.conv1d(
+            wav,
+            self.kernels_cos,
+            padding=self.max_len // 2,
+            stride=self.stride,
+        )
+
+        sin_proj = F.conv1d(
+            wav,
+            self.kernels_sin,
+            padding=self.max_len // 2,
+            stride=self.stride,
+        )
+
+        energy = cos_proj.pow(2) + sin_proj.pow(2)
+
+        # (B, F*W, T)
+        T = energy.shape[-1]
+
+        energy = energy.view(
+            B,
+            self.Freq,
+            self.W,
+            T
+        )
+
+        # (B,T,F,W)
+        energy = energy.permute(0, 3, 1, 2)
+
+        return energy
