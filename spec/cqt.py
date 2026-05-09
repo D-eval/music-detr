@@ -316,16 +316,18 @@ class MultiWindowCQT(nn.Module):
     def forward(self, wav):
         """
             (B, L, 2)
+            return:
+            (B, T, F, W*2), (T,)
         """
         wav = wav.permute(0,2,1) # (B, 2, L)
         B, C, L = wav.shape
         assert C == 2, "输入必须是双声道"
         wav = wav.flatten(0,1) # (B*2, L)
-        out = self._forward(wav) # (B*2, T, F, W)
+        out, times = self._forward(wav) # (B*2, T, F, W)
         out = out.view(B, 2, *out.shape[1:]) # (B, 2, T, F, W)
         out = out.permute(0,2,3,4,1) # (B, T, F, W, 2)
         out = out.flatten(-2, -1) # (B, T, F, W*2)
-        return out
+        return out, times
 
     def _forward(self, wav):
         """
@@ -338,7 +340,7 @@ class MultiWindowCQT(nn.Module):
         """
 
         B, L = wav.shape
-
+        
         wav = wav.unsqueeze(1)  # (B,1,L)
 
         cos_proj = F.conv1d(
@@ -370,4 +372,13 @@ class MultiWindowCQT(nn.Module):
         # (B,T,F,W)
         energy = energy.permute(0, 3, 1, 2)
 
-        return energy
+        # (B, F*W, T)
+        T = energy.shape[-1]
+
+        times = (
+            torch.arange(T, device=wav.device)
+            * self.stride
+            / self.sr
+        )
+
+        return energy, times

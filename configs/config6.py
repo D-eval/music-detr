@@ -43,15 +43,17 @@ def get_config():
     
     cfg.harmony_conv = argparse.Namespace()
     cfg.harmony_conv.kernel_size = 60
-    cfg.harmony_conv.cycles = [5,7,12]
+    cfg.harmony_conv.cycles = [5,7,12, 5,7,12, 5,7,12]
     cfg.harmony_conv.trainable = False
+    cfg.harmony_conv.taus = [7,7,7, 12,12,12, 19,19,19]
+    cfg.harmony_conv.num_layers = 4
     
     cfg.backbone_intermediate_dim = 4
-    cfg.backbone_output_dim = 2048
+    cfg.backbone_output_dim = 512
     
     cfg.pitch_vocab_size = cfg.max_midi - cfg.min_midi + 1
     cfg.music_scale = "12tone"
-        
+
     # augmentation switches
     cfg.aug_noise = True
     cfg.aug_distortion = True
@@ -63,22 +65,6 @@ def get_config():
     cfg.aug_distortion_gain = 5.0
     cfg.aug_reverb_decay = 0.3
 
-    cfg.min_freq = 50
-    cfg.max_freq = 16000
-    cfg.freq_scale = "mel" # mel, linear, log
-    cfg.num_freqs = 128
-    
-    cfg.dataset_read_py_path = Path("../musicNotebook/web")
-    cfg.dataset_data_path = Path("../musicNotebook/preprocess0")
-    
-    cfg.batch_size = 1
-    
-    cfg.text_encoder_name = "BAAI/bge-small-zh-v1.5"
-    cfg.audio_encoder_name = "facebook/wav2vec2-base-960h"
-    
-    cfg.text_input_dim = 512 # 参考你使用的文本编码器
-    cfg.audio_input_dim = 512 # 参考你使用的音频编码器
-    
     # 模型设置
     cfg.d_model = 64
     cfg.intermediate_size = 128
@@ -104,35 +90,13 @@ def get_config():
     cfg.abs_pos_encoding.sigma = 1
     
     cfg.save_dir = "./tiny_save"
-    cfg.large_save_dir = "../params/detr5"
+    cfg.large_save_dir = "../params/detr6"
     
         
     cfg.use_diff_input = True
     cfg.output_mode = "sustain_only" # "Exclusion_MuteTriggerSustain"
-    cfg.output_dim_dict = {
-            "TriggerBool_ConditionalSustain": 2,
-            "Exclusion_MuteSustain": 2,
-            "sustain_only": 1
-        }
-    
-    cfg.use_diff_input = False
-    
-    cfg.distinguish_pitch_freq = True
-    
-    cfg.pos_weight = 10.0
-    cfg.map_type = "sustain_map"
 
     cfg.time_mask_len = 5 # None
-    
-    # detr
-    cfg.num_cell = 1
-    cfg.cell = argparse.Namespace()
-    cfg.cell.num_receptor_tokens = 5 # 细胞膜受体，和外部信息做注意力
-    cfg.cell.num_distillation_tokens = 1 # 蒸馏token，用于接近 text_emb
-    cfg.cell.num_prompt_tokens = 16 # 用于输入 llm，预测 文本描述
-    cfg.cell.num_event_tokens = 20 # 用于预测事件
-    cfg.cell.num_global_tokens = 1 # 预测 bpm 和 offset
-    cfg.cell.share_params = True # 共享细胞内的参数，只有细胞膜不同
     
     cfg.num_prompt_querys = 9
     
@@ -142,18 +106,13 @@ def get_config():
     cfg.input_dim = cfg.window_num * 2 # 双声道
     cfg.min_cycle = 2
     
-    cfg.detr_output_dim_dict = {"event": 3, # [start, log sustain, before]
-                                "pitch": 36,
-                                "exist": 1,
-                                "meta": 2} # bpm, offset
-
     cfg.detr_num_decoder_layers = 12
-    cfg.detr_d_model_list = [64] * 3 + [128] * 3 + [256] * 3 + [512] * 2 + [1024]
-    cfg.pool_stride = [None, None, 4, None, None, 3, None, None, 2, None, None, 5]
-    cfg.head_dim_list = [16] * 3 + [32] * 3 + [64] * 3 + [128] * 2 + [256]
+    cfg.detr_d_model_list = [512] * 3 + [1024] * 3 + [1024] * 3 + [2048] * 2 + [2048]
+    cfg.pool_stride = [None, None, 2, None, None, 3, None, None, 2, None, None, 5]
+    cfg.head_dim_list = [128] * 3 + [512] * 3 + [512] * 3 + [512] * 2 + [512]
     assert len(cfg.detr_d_model_list) == cfg.detr_num_decoder_layers
-    cfg.ffn_dim_up = [1,1,2, 1,1,2, 1,1,2, 1,2,1]
-    cfg.ffn_intermediate_up_list = [2,2,4, 2,2,4, 2,2,2, 2,2,2]
+    cfg.ffn_dim_up = [1,1,2, 1,1,1, 1,1,2, 1,1,1]
+    cfg.ffn_intermediate_up_list = [2,2,4, 2,2,2, 2,2,4, 2,2,2]
     
     
     cfg.detr_pos_weight_text = 1

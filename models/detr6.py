@@ -395,11 +395,9 @@ class TFDecoderLayer(nn.Module):
         cfg = get_config()
         
         self.layer_idx = layer_idx
-        self.self_attn_F = Qwen2Attention(layer_idx=layer_idx)
-        self.self_attn_T = Qwen2Attention(layer_idx=layer_idx)
+        self.self_attn = Qwen2Attention(layer_idx=layer_idx)
         self.mlp = Qwen2MLP(layer_idx=layer_idx)
-        self.input_layernorm_F = Qwen2RMSNorm(cfg.detr_d_model_list[layer_idx])
-        self.input_layernorm_T = Qwen2RMSNorm(cfg.detr_d_model_list[layer_idx])
+        self.input_layernorm = Qwen2RMSNorm(cfg.detr_d_model_list[layer_idx])
         self.post_attention_layernorm = Qwen2RMSNorm(cfg.detr_d_model_list[layer_idx])
         
         self.time_mask_len = cfg.time_mask_len
@@ -417,68 +415,27 @@ class TFDecoderLayer(nn.Module):
         # position_embeddings: Optional[tuple[torch.Tensor, torch.Tensor]] = None,  # necessary, but kept here for BC
         # **kwargs: Unpack[TransformersKwargs],
     ) -> torch.Tensor:
-        pitch = modal_dict['object'] # (B, T, P, C)
+        pitch = modal_dict['object'] # (B, T, C)
         text = modal_dict['subject'] # (B, Q, C)
         
-        B = text.shape[0]
-        P = pitch.shape[2]
-        Q = text.shape[1]
-
-        QT = Q * T
-        FaP = F + P
-        FaPaQ = FaP + Q
+        B, T, C = pitch.shape
+        _B, Q, _C = text.shape
+        assert _C==C
         
-        BF = B * F
-        BP = B * P
         TaQ = T + Q
         
-        # Freq Attn
-        _text = text.unsqueeze(1).expand(-1, T, -1, -1) # (N, T, L, C)
-        _freq = torch.flatten(freq, 0, 1) # (NT, F, C)
-        _pitch = torch.flatten(pitch, 0, 1) # (NT, P, C)
-        _text = torch.flatten(_text, 0, 1) # (NT, L, C)
+        hidden = torch.concat([pitch, text], dim=1) # (B, TaQ, C)
+        residual = hidden
         
-        hidden_states_F = torch.concat([_pitch, _freq, _text], dim=1) # (NT, FaPaL, C)
+        hidden = self.input_layernorm(hidden)
         
-        hidden_states_F = self.input_layernorm_F(hidden_states_F)
-        # Self Attention
-        
-
-        hidden_states_F = self.self_attn_F(
-            hidden_states=hidden_states_F,
-            attention_mask=None,
-            # position_ids=position_ids,
-            # past_key_values=past_key_values,
-            # use_cache=use_cache,
-            # cache_position=cache_position,
-            # position_embeddings=position_embeddings,
-            # **kwargs,
-        )
-        
-        _freq = freq.permute(0,2,1,3) # (N, F, T, C)
-        _freq = torch.flatten(_freq, 0, 1) # (NF, T, C)
-        _text = text.unsqueeze(1).expand(-1, F, -1, -1) # (N, F, L, C)
-        _text = torch.flatten(_text, 0, 1) # (NF, L, C)
-        _freq = torch.concat([_freq, _text], dim=1) # (NF, TaL, C)
-        
-        _pitch = pitch.permute(0,2,1,3) # (N, P, T, C)
-        _pitch = torch.flatten(_pitch, 0, 1) # (NP, T, C)
-        _text = text.unsqueeze(1).expand(-1, P, -1, -1) # (N, P, L, C)
-        _text = torch.flatten(_text, 0, 1) # (NP, L, C)
-        _pitch = torch.concat([_pitch, _text], dim=1) # (NP, TaL, C)
-        
-        hidden_states_T = torch.concat([_freq, _pitch], dim=0) # (NF+NP, TaL, C)
-        
-        hidden_states_T = self.input_layernorm_T(hidden_states_T)
-        
-
         if self.time_mask_len is None:
             attention_mask = None
         else:
-            attention_mask = torch.ones((TaQ, TaQ), device=freq.device) * float("-inf")
+            attention_mask = torch.ones((TaQ, TaQ), device=pitch.device) * float("-inf")
             # 1. 每个 T 都能看见 L 和前后 self.time_mask_len 的 T
             # 2. 每个 L 都能看见所有
-            text_idx = torch.arange(T, T+Q)
+            text_idx = torch.arange(T, TaQ)
             time_idx = torch.arange(T)
             # 每个 time token 能看到自身 ± time_mask_len + 所有文本
             for t in time_idx:
@@ -489,85 +446,33 @@ class TFDecoderLayer(nn.Module):
             # 文本 token 全可见
             attention_mask[text_idx[:, None], :] = 0
 
-        hidden_states_T = self.self_attn_T(
-            hidden_states=hidden_states_T,
+        hidden = self.self_attn(
+            hidden_states=hidden,
             attention_mask=attention_mask,
         )
+        hidden = hidden + residual
         
-        # hidden_states_F (NT, FaPaL, C)
-        # hidden_states_T (NF+NP, TaL, C)
+        pitch = hidden[:, :T, :]
+        text = hidden[:, T:, :]
         
-        # == 解析 F 输出
-        pitch_F = hidden_states_F[:, :P, :] # (NT, P, C)
-        freq_F = hidden_states_F[:, P:FaP, :] # (NT, F, C)
-        text_F = hidden_states_F[:, FaP:FaPaQ, :] # (NT, L, C)
-        
-        text_F = text_F.reshape(B, T, Q, C) # 要聚合 T 维度为 (B, Q, C)
-        freq_F = freq_F.reshape(B, T, F, C)
-        pitch_F = pitch_F.reshape(B, T, P, C)
-        
-        # == 解析 T 输出
-        text_T_and_freq_T = hidden_states_T[:BF, :, :] # (NF, TaL, C)
-        text_T_and_pitch_T = hidden_states_T[BF:BF+BP, :, :] # (NP, TaL, C)
-        
-        freq_T = text_T_and_freq_T[:, :T, :] # (NF, T, C)
-        text_T_from_freq = text_T_and_freq_T[:, T:TaQ, :] # (NF, L, C)
-        
-        pitch_T = text_T_and_pitch_T[:, :T, :] # (NP, T, C)
-        text_T_from_pitch = text_T_and_pitch_T[:, T:TaQ, :] # (NP, L, C)
-        
-        text_T_from_freq = text_T_from_freq.reshape(B, F, Q, C) # 聚合 F 维度
-        text_T_from_pitch = text_T_from_pitch.reshape(B, P, Q, C) # 聚合 P 维度
-        freq_T = freq_T.reshape(B, F, T, C)
-        pitch_T = pitch_T.reshape(B, P, T, C)
-        
-        freq_T = freq_T.permute(0,2,1,3)
-        pitch_T = pitch_T.permute(0,2,1,3)
-        
-        # query_F = text_F
-        # query_T_from_freq = text_T_from_freq
-        # query_T_from_pitch = text_T_from_pitch
-        
-        # query_F # (B, T, Q, C) # 要聚合 T 维度为 (B, Q, C)
-        # query_T_from_freq # (B, F, Q, C) # 聚合 F 维度 (B, Q, C)
-        # query_T_from_pitch # (B, P, Q, C) # 聚合 P 维度 (B, Q, C)
-        
-        # == 残差连接
-        text = text + text_F.mean(1) + text_T_from_freq.mean(1) + text_T_from_pitch.mean(1) # (N, L, C)
-        freq = freq + freq_F + freq_T # (N, T, F, C)
-        pitch = pitch + pitch_F + pitch_T # (N, T, P, C)
-        
-        # 先池化，再升维
-        if self.pool_stride is not None:
-            freq = temporal_pool(freq, stride=self.pool_stride)
-            pitch = temporal_pool(pitch, stride=self.pool_stride)
-            
+        # 先升维，再池化
+
         ffn_dim_up = self.ffn_dim_up
+
+        text = text # text 不走 mlp升维 因为它接下来要去 Cell 里面做 inner，保证信息不编造
         
-        # 升维残差连接
-        # _text = self.post_attention_layernorm(text)
-        # _text = self.mlp(_text)
-        # text_repeated = text.unsqueeze(-1).expand(-1,-1,-1,ffn_dim_up)
-        # text_repeated = torch.flatten(text_repeated, -2, -1)
-        # text = text_repeated + _text
-        text = text # text 不走 mlp升维
-        
-        _freq = self.post_attention_layernorm(freq)
-        _freq = self.mlp(_freq)
-        freq_repeated = freq.unsqueeze(-1).expand(-1,-1,-1,-1,ffn_dim_up)
-        freq_repeated = torch.flatten(freq_repeated, -2, -1)
-        freq = freq_repeated + _freq
-        
-        _pitch = self.post_attention_layernorm(pitch)
+        _pitch = self.post_attention_layernorm(pitch) # (B, T, C)
         _pitch = self.mlp(_pitch)
-        pitch_repeated = pitch.unsqueeze(-1).expand(-1,-1,-1,-1,ffn_dim_up)
+        pitch_repeated = pitch.unsqueeze(-1).expand(-1,-1,-1,ffn_dim_up)
         pitch_repeated = torch.flatten(pitch_repeated, -2, -1)
         pitch = pitch_repeated + _pitch
         
+        if self.pool_stride is not None:
+            pitch = temporal_pool(pitch, stride=self.pool_stride)
+            
         modal_dict = {
-            "text": text,
-            "pitch": pitch,
-            "freq": freq
+            "subject": text,
+            "object": pitch,
         }
         
         return modal_dict
@@ -642,74 +547,137 @@ def build_harmony_kernel(kernel_size=36,
                        cycle=7,
                        tau=12):
     """
-    return: (kernel_size,)
+    return: (kernel_size,), (kernel_size,)
     """
     ts = torch.arange(kernel_size)
     harmony = torch.cos(2 * math.pi / cycle * ts)
     harmony = harmony ** 8 # 瘦，但是偶数
-    harmony = harmony * torch.exp(- ts / tau)
-    return harmony
+    envelope = torch.exp(- ts / tau)
+    return harmony, envelope
 
 class HarmonyConv(nn.Module):
-    def __init__(self, cfg):
+    def __init__(self,
+                 cycles,
+                 kernel_size,
+                 trainable,
+                 taus):
         super().__init__()
-        cycles = cfg.harmony_conv.cycles # list
-        kernel_sizes = cfg.harmony_conv.kernel_size
-        trainable = cfg.harmony_conv.trainable
-        
+
         kernels = []
-        for cycle in cycles:
-            kernel = build_harmony_kernel(kernel_sizes, cycle)
+        envelopes = []
+        for cycle, tau in zip(cycles, taus):
+            kernel, envelope = build_harmony_kernel(kernel_size, cycle, tau)
             kernels.append(kernel)
+            envelopes.append(envelope)
+
         kernels = torch.stack(kernels, dim=0) # (C_out, kernel_size)
         kernels = kernels[:,None,:] # (C_out, 1, kernel_size) 方便后续卷积
         if trainable:
             self.kernels = nn.Parameter(kernels)
         else:
             self.register_buffer("kernels", kernels)
+        self.register_buffer("envelopes", torch.stack(envelopes, dim=0)[:,None,:]) # (C_out, 1, kernel_size)
     def forward(self, cqt):
         """
-            cqt: (B*T, 1, P)
+            cqt: (B, 1, P)
+            return: (B, H, P)
         """
         kernel_size = self.kernels.shape[2]
         padding_len = kernel_size - 1
         
-        kernels = self.kernels # (harmony, kernel_size)
+        kernels = self.kernels * self.envelopes # (harmony, kernel_size)
 
         x = F.pad(cqt, (0, padding_len))
         y = F.conv1d(x, kernels, padding=0) # (B*T, harmony, P)
-        y = torch.concat([y, cqt], dim=1) # (B*T, harmony+1, P)
         return y
 
+
+class MLP(nn.Module):
+    def __init__(self, d_input, d_output, intermediate_size):
+        super().__init__()
+        cfg = get_config()
+        
+        self.d_input = d_input
+        self.d_output = d_output
+        self.intermediate_size = intermediate_size
+        
+        self.gate_proj = nn.Linear(self.d_input, self.intermediate_size, bias=False)
+        self.up_proj = nn.Linear(self.d_input, self.intermediate_size, bias=False)
+        self.down_proj = nn.Linear(self.intermediate_size, self.d_output, bias=False)
+        self.act_fn = nn.GELU()
+
+    def forward(self, x):
+        # 用gate, 可以表达条件计算
+        down_proj = self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
+        return down_proj
+
+
+class HarmonyBlock(nn.Module):
+    def __init__(self, D, cycles, taus, kernel_size):
+        super().__init__()
+        H = len(cycles)
+        self.before_conv_layernorm = Qwen2RMSNorm(D)
+        self.harmony_conv = HarmonyConv(
+            cycles = cycles,
+            kernel_size=kernel_size,
+            trainable=True,
+            taus = taus
+        )
+        self.mix_proj = nn.Linear(D*H, D) # inductive bias
+        self.before_mlp_layernorm = Qwen2RMSNorm(D)
+        
+        self.mlp = MLP(D, D, D*4)
+    def forward(self, x):
+        """
+        x: (B, T, P, D)
+        """
+        B, T, P, D = x.shape
+        
+        residual = x
+        x = self.before_conv_layernorm(x)
+        
+        x = x.permute(0,1,3,2) # (B, T, D, P)
+        x = x.flatten(0,2)
+        x = x[:,None,:] # (B*T*D, 1, P)
+        x = self.harmony_conv(x) # (B*T*D, H, P)
+        x = x.reshape(B,T,D,-1,P) # (B, T, D, H, P)
+        x = x.permute(0,1,4,2,3) # (B, T, P, D, H)
+        x = x.flatten(-2,-1) # (B, T, P, D*H)
+        x = self.mix_proj(x) # (B, T, P, D)
+        x = x + residual # inductive bias by conv
+        
+        residual = x
+        x = self.before_mlp_layernorm(x)
+        x = self.mlp(x) # (B, T, P, D)
+        x = x + residual # inductive bias by mlp
+        return x
 
 
 class CQTEncoder(nn.Module):
     def __init__(self, cfg):
         super().__init__()
                 
-        self.Waffine = nn.Linear(cfg.input_dim, cfg.backbone_intermediate_dim)
-        self.harmony_conv = HarmonyConv(cfg)
+        self.prior_affine = nn.Linear(cfg.input_dim, cfg.backbone_intermediate_dim)
+        self.layers = nn.ModuleList([
+            HarmonyBlock(
+                D=cfg.backbone_intermediate_dim,
+                cycles=cfg.harmony_conv.cycles,
+                taus=cfg.harmony_conv.taus,
+                kernel_size=cfg.harmony_conv.kernel_size
+            )
+            for _ in range(cfg.harmony_conv.num_layers)
+        ])
         
-        post_input_dim = cfg.backbone_intermediate_dim * cfg.num_P * (len(cfg.harmony_conv.cycles) + 1)
-        self.PostAffine = nn.Linear(post_input_dim, cfg.backbone_output_dim)
     def forward(self, x):
         """
             x: (B, T, P, C)
             return: (B, T, D)
         """
         B, T, P, C = x.shape
-        x = self.Waffine(x) # (B, T, P, D)
-        D = x.shape[-1]
-        x = x.permute(0,1,3,2) # (B, T, D, P)
-        x = x.flatten(0,2) # (B*T*D, P)
-        x = x[:,None,:] # (B*T*D, 1, P)
-        
-        x = self.harmony_conv(x) # (B*T*D, H, P)
-        x = x.reshape(B,T,D,-1,P) # (B, T, D, H, P)
-        
-        x = x.flatten(2,4) # (B, T, D*H*P)
-        x = self.PostAffine(x) # (B, T, D_out)
-        
+        x = self.prior_affine(x) # (B, T, P, D)
+        for layer in self.layers:
+            x = layer(x) # (B, T, P, D)
+        x = x.mean(dim=2) # (B, T, D)
         return x
 
 
@@ -727,15 +695,6 @@ class PitchTransformer(nn.Module):
         
         input_dim = cfg.input_dim
 
-        self.distinguish_pitch_freq = cfg.distinguish_pitch_freq
-        if self.distinguish_pitch_freq:
-            self.pitch_token_embedding = nn.Parameter(torch.randn((self.d_model_list[0])))
-            self.freq_token_embedding = nn.Parameter(torch.randn((self.d_model_list[0])))
-        
-        self.use_abs_pos_encoding = cfg.use_abs_pos_encoding
-        if self.use_abs_pos_encoding:
-            self.freq_time_encoding = apply_freq_time_encoding
-         
         self.num_layers = cfg.detr_num_decoder_layers
         self.inter_decoder_layers = nn.ModuleList([
             TFDecoderLayer(i)
@@ -766,12 +725,15 @@ class PitchTransformer(nn.Module):
         
         assert cfg.backbone_output_dim == self.d_model_list[0], "backbone输出维度必须等于decoder输入维度"
         
+        self.pretrain_head = nn.Linear(cfg.backbone_output_dim, 5 + 1) # maj,min,dom,dim,arg + None
+        
     def forward(self,
-                audio):
+                audio,
+                only_pretrain=False):
         """
         audio: (B, T, 2)
         """
-        pitch_spec = self.preprocessor(audio)
+        pitch_spec, times = self.preprocessor(audio)
         """
         inputs
             pitch_spec: (B, T, P, C)
@@ -781,13 +743,15 @@ class PitchTransformer(nn.Module):
         B, T, P, C = pitch_spec.shape
 
         pitch_embedding = self.backbone(pitch_spec) # (B, T, C)
+        if only_pretrain:
+            return pitch_embedding, times
 
         cell_state = self.cells.build_state(B)
         cell_inter_state = self.cells.get_flatten_inter(cell_state) # (B, L_inter_all, C)
         
         modal_dict = {
             "subject": cell_inter_state, # (B, Q, C)
-            "object": pitch_embedding, # (B, T, P+1, C)
+            "object": pitch_embedding, # (B, T, C)
         }
         
         for i in range(self.num_layers):
@@ -814,6 +778,22 @@ class PitchTransformer(nn.Module):
         """
         
         return output_list
+    
+    def pretrain_chord(self, audio, target):
+        """
+        target: Dict{
+            start: (N), second
+            root: (N), 0~11
+            cls: (N), 0~4 maj,min,dom,dim,aug
+            ...
+        }
+        """
+        fea, times = self.forward(audio, only_pretrain=True)
+        # fea: (B, T, C)
+        # times: (T,)
+        
+        
+    
 
     def infer(self, output_dict_dict):
         """
