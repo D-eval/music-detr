@@ -6,6 +6,8 @@ detr6
 
 nohup python3 train6_stage1.py > train6_stage1.log 2>&1 &
 """
+import warnings
+warnings.simplefilter("ignore")
 
 def to_device(batch, device):
     if torch.is_tensor(batch):
@@ -35,7 +37,7 @@ cfg = get_config()
 import sys
 sys.path.append(str(cfg.dataset_read_py_path_stage1))
 
-from read import RandomChordSynthDataset, chord_collate_fn
+from read1 import RandomChordSynthDataset, chord_collate_fn
 from torch.utils.data import DataLoader
 dataset = RandomChordSynthDataset(prototype_dir=cfg.dataset_read_py_path_stage1 / "prototype",
                                   soundfont_dir=cfg.dataset_read_py_path_stage1 / "soundfonts",
@@ -45,9 +47,9 @@ dataset = RandomChordSynthDataset(prototype_dir=cfg.dataset_read_py_path_stage1 
 
 loader = DataLoader(
     dataset,
-    batch_size=4,
+    batch_size=32,
     shuffle=True,
-    # num_workers=4,
+    num_workers=2,
     collate_fn=chord_collate_fn,
     pin_memory=True
 )
@@ -59,11 +61,11 @@ from models.teacher import Teacher
 from utils.equipTarget import get_target_map, get_sustain_map, get_sustain_map_textwise, normalize_targets_pitch, render_pred_pitch_map, render_pred_group_pitch_map, embed_text
 
 freqs = get_freqs(cfg.min_midi, cfg.max_midi)
-preprocessor = MultiWindowCQT(freqs, cfg.sr, cfg.window_num, cfg.min_cycle)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("device:",device)
 
+preprocessor = MultiWindowCQT(freqs, cfg.sr, cfg.window_num, cfg.min_cycle).to(device)
 model = CQTEncoder(cfg).to(device)
 
 # for audio, target in loader:
@@ -97,7 +99,7 @@ for epoch in range(start_epoch+1, num_epochs):
     for step, batch in enumerate(loader):
         audio, target = batch
         audio = audio.to(device)
-        
+        target = to_device(target, device)
         # ---------- forward + loss（AMP）----------
         with torch.amp.autocast("cuda"):
             x, _, freqs = preprocessor(audio.to(device))
@@ -146,8 +148,6 @@ for epoch in range(start_epoch+1, num_epochs):
 
                 f.write("infer:\n")
                 f.write(str(infer_output)+"\n")
-
-            assert 0
     print(f"==== Epoch {epoch} avg loss: {total_loss / (step+1):.4f} ====")
     # ---------- 保存 ----------
     if epoch % cfg.save_epoch == 0:
