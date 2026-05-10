@@ -1,11 +1,16 @@
 """
+patience and love for our baby model
+from simple task to complex
+establish a simple dataset for baby model (CQTEncoder)
+
+
 用原始的 maj, min, N, dom, dim, aug 和弦表示，适配主流数据集
 而且 model 的 modal 输出要能预测和弦，作为pretrain
 detr作为finetune
 """
-
+from einops import rearrange
 import torch
-from configs.config5 import get_config
+from configs.config6 import get_config
 from torch import nn
 import math
 import torch.nn.functional as F
@@ -653,14 +658,27 @@ class HarmonyBlock(nn.Module):
         return x
 
 
+def dilation_pool(x, dilation):
+    # x: (B, P, C) -> (B, dilation, C)
+    assert x.dim()==3
+    P = x.shape[1]
+    arange = torch.arange(P, device=x.device)
+    res = []
+    for d in range(dilation):
+        choice = (arange % dilation)==d
+        res.append(x[:,choice,:].mean(1))
+    return torch.stack(res, dim=1)
+
+
 class CQTEncoder(nn.Module):
     def __init__(self, cfg):
         super().__init__()
-                
-        self.prior_affine = nn.Linear(cfg.input_dim, cfg.backbone_intermediate_dim)
+        D = cfg.harmony_conv.backbone_output_dim
+        
+        self.prior_affine = nn.Linear(cfg.input_dim, D)
         self.layers = nn.ModuleList([
             HarmonyBlock(
-                D=cfg.backbone_intermediate_dim,
+                D=D,
                 cycles=cfg.harmony_conv.cycles,
                 taus=cfg.harmony_conv.taus,
                 kernel_size=cfg.harmony_conv.kernel_size
@@ -668,6 +686,31 @@ class CQTEncoder(nn.Module):
             for _ in range(cfg.harmony_conv.num_layers)
         ])
         
+        freqs = get_freqs(cfg.min_midi, cfg.max_midi)
+        self.register_buffer("freqs", freqs)
+        num_freqs = freqs.shape[0]
+
+        self.head_root = nn.Sequential(
+            nn.Linear(D, D),
+            nn.GELU(),
+            nn.Linear(D, 1)
+        )
+        
+        self.head_midi = nn.Sequential(
+            nn.Linear(D, D),
+            nn.GELU(),
+            nn.Linear(D, 1)
+        )
+        
+        self.head_chord = nn.Sequential(
+            nn.Linear(D, D),
+            nn.GELU(),
+            nn.Linear(D, 1)
+        )
+        
+        self.loss_weight = cfg.harmony_conv.loss_weight
+        self.threshold = cfg.harmony_conv.infer_threshold
+
     def forward(self, x):
         """
             x: (B, T, P, C)
@@ -677,17 +720,115 @@ class CQTEncoder(nn.Module):
         x = self.prior_affine(x) # (B, T, P, D)
         for layer in self.layers:
             x = layer(x) # (B, T, P, D)
-        x = x.mean(dim=2) # (B, T, D)
+        # 这样混合真的好吗？
+        # x = x.mean(dim=2) # (B, T, D)
         return x
+    
+    @torch.no_grad()
+    def infer(self, x):
+        """
+        x: (B, T, P, D)
+        """
+
+        # midi
+        midi = self.head_midi(x) # (B, T, P, 1)
+        midi = midi.squeeze(-1) # (B, T, P)
+        midi = midi.mean(1) # (B, P)
+        
+        # root
+        B, T, P, D = x.shape
+        assert B==1
+        
+        x_dilated = dilation_pool(x.flatten(0,1), dilation=12) # (B*T, 12, D)
+        x_dilated = x_dilated.reshape(B,T,12,D)
+        
+        root = self.head_root(x_dilated) # (B, T, 12, 1)
+        root = root.squeeze(-1) # (B, T, 12)
+        root = root.mean(1) # (B, 12)
+        
+        # chord
+        chord = self.head_chord(x_dilated) # (B, T, 12, 1)
+        chord = chord.squeeze(-1) # (B, T, 12)
+        chord = chord.mean(1) # (B, 12)
+        
+        midi = torch.sigmoid(midi) # (B, P)
+        # root = F.softmax(root, dim=-1) # (B,12)
+        chord = torch.sigmoid(chord) # (B, 12)
+        
+        midi = midi > self.threshold # (B, 12)
+        root_idx = root.argmax(-1) # (B,)
+        chord = chord > self.threshold # (B,12)
+        
+        midi = midi.squeeze(0) # (P,)
+        root_idx = root_idx.squeeze(0) # int
+        chord = chord.squeeze(0) # (12,)
+        
+        midi_idx = torch.where(midi)[0] # (num_note)
+        chord_idx = torch.where(chord)[0] # (num_cls_note)
+                
+        result = {
+            "midi": midi_idx.tolist(),
+            "root": int(root_idx.item()),
+            "chord": chord_idx.tolist(),
+        }
+        return result
+
+    def get_loss(self, x, target):
+        """
+        target: List Dict{
+            "all": (P,), # 0~1,all midi bool, 用于BCE
+            "root": (1,), # 0~11
+            "chord": (12,), # 0~1
+            "midi": (N,), # midi
+        }
+        x: (B, T, P, D)
+        """
+        midi_tar = [temp['all'] for temp in target]
+        midi_tar = torch.stack(midi_tar, dim=0) # (B, P)
+        root_tar = [temp['root'] for temp in target]
+        root_tar = torch.stack(root_tar, dim=0) # (B, 1)
+        root_tar = root_tar.squeeze(-1) # (B,)
+        
+        chord_tar = [temp['chord'] for temp in target]
+        chord_tar = torch.stack(chord_tar, dim=0) # (B,12)
+        
+        # midi
+        y = self.head_midi(x) # (B, T, P, 1)
+        y = y.squeeze(-1) # (B, T, P)
+        y = y.mean(1) # (B, P)
+        
+        loss_midi = F.binary_cross_entropy_with_logits(y, midi_tar)
+        
+        # root
+        B, T, P, D = x.shape
+        x_dilated = dilation_pool(x.flatten(0,1), dilation=12) # (B*T, 12, D)
+        x_dilated = x_dilated.reshape(B,T,12,D)
+        
+        y = self.head_root(x_dilated) # (B, T, 12, 1)
+        y = y.squeeze(-1) # (B, T, 12)
+        y = y.mean(1) # (B, 12)
+        
+        loss_root = F.cross_entropy(y, root_tar)
+        
+        y = self.head_chord(x_dilated) # (B, T, 12, 1)
+        y = y.squeeze(-1) # (B, T, 12)
+        y = y.mean(1) # (B, 12)
+        
+        loss_chord = F.binary_cross_entropy_with_logits(y, chord_tar)
+        
+        loss = self.loss_weight['midi'] * loss_midi + \
+                self.loss_weight['root'] * loss_root + \
+                self.loss_weight['chord'] * loss_chord
+        
+        return loss
+
 
 
 from spec import wav2cqt_2C, wav2spec_2C
 from configs.cell_cls import CellCls
 class PitchTransformer(nn.Module):
-    def __init__(self):
-        super().__init__()
-        cfg = get_config()
-        
+    def __init__(self, cfg):
+        super().__init__()        
         self.d_model_list = cfg.detr_d_model_list
         self.dim_up = cfg.ffn_dim_up
         
@@ -726,6 +867,21 @@ class PitchTransformer(nn.Module):
         assert cfg.backbone_output_dim == self.d_model_list[0], "backbone输出维度必须等于decoder输入维度"
         
         self.pretrain_head = nn.Linear(cfg.backbone_output_dim, 5 + 1) # maj,min,dom,dim,arg + None
+        
+    def load_pretrain(self, pretrained_path):
+        state_dict = torch.load(pretrained_path, map_location="cpu")
+        self.backbone.load_state_dict(state_dict)
+        print(f"成功加载预训练权重: {pretrained_path}")
+       
+    def freeze_backbone(self):
+        for param in self.backbone.parameters():
+            param.requires_grad = False
+        print("已冻结backbone参数")
+        
+    def unfreeze_backbone(self):
+        for param in self.backbone.parameters():
+            param.requires_grad = True
+        print("已解冻backbone参数")
         
     def forward(self,
                 audio,
@@ -778,22 +934,6 @@ class PitchTransformer(nn.Module):
         """
         
         return output_list
-    
-    def pretrain_chord(self, audio, target):
-        """
-        target: Dict{
-            start: (N), second
-            root: (N), 0~11
-            cls: (N), 0~4 maj,min,dom,dim,aug
-            ...
-        }
-        """
-        fea, times = self.forward(audio, only_pretrain=True)
-        # fea: (B, T, C)
-        # times: (T,)
-        
-        
-    
 
     def infer(self, output_dict_dict):
         """

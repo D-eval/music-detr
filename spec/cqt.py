@@ -317,7 +317,7 @@ class MultiWindowCQT(nn.Module):
         """
             (B, L, 2)
             return:
-            (B, T, F, W*2), (T,)
+            (B, T, F, W*2), (T,) (F,)
         """
         wav = wav.permute(0,2,1) # (B, 2, L)
         B, C, L = wav.shape
@@ -327,7 +327,7 @@ class MultiWindowCQT(nn.Module):
         out = out.view(B, 2, *out.shape[1:]) # (B, 2, T, F, W)
         out = out.permute(0,2,3,4,1) # (B, T, F, W, 2)
         out = out.flatten(-2, -1) # (B, T, F, W*2)
-        return out, times
+        return out, times, self.freqs
 
     def _forward(self, wav):
         """

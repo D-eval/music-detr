@@ -24,6 +24,11 @@ def get_config():
     cfg = argparse.Namespace()
 
     cfg.sr = 44100
+
+    cfg.dataset_read_py_path = Path("../musicNotebook/web")
+    cfg.dataset_data_path = Path("../musicNotebook/preprocess0")
+
+    cfg.dataset_read_py_path_stage1 = Path("../dataset/baby")
     
     # cfg.min_len = int(cfg.sr * 0.5)
     # cfg.max_len = int(cfg.sr * 1)
@@ -48,8 +53,14 @@ def get_config():
     cfg.harmony_conv.taus = [7,7,7, 12,12,12, 19,19,19]
     cfg.harmony_conv.num_layers = 4
     
-    cfg.backbone_intermediate_dim = 4
-    cfg.backbone_output_dim = 512
+    cfg.harmony_conv.backbone_output_dim = 512
+    
+    cfg.harmony_conv.loss_weight = {
+        "midi":1,
+        "chord":1,
+        "root":1,
+    }
+    cfg.harmony_conv.infer_threshold = 0.3
     
     cfg.pitch_vocab_size = cfg.max_midi - cfg.min_midi + 1
     cfg.music_scale = "12tone"
