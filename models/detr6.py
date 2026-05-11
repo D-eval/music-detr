@@ -670,6 +670,13 @@ def dilation_pool(x, dilation):
     return torch.stack(res, dim=1)
 
 
+# def build_pitch_encoding(D, N):
+#     freqs = 2**(torch.arange(12)/12)
+#     phase = 2*math.pi * torch.arange(D)[None,:]/D * freqs[:,None]
+#     cosine = torch.cos(phase) # (12, D)
+#     return cosine
+ 
+
 class CQTEncoder(nn.Module):
     def __init__(self, cfg):
         super().__init__()
@@ -685,27 +692,33 @@ class CQTEncoder(nn.Module):
             )
             for _ in range(cfg.harmony_conv.num_layers)
         ])
+
+
+        # pitch pooling
+        self.pitch_attn = nn.Sequential(
+            nn.Linear(D, D),
+            nn.GELU(),
+            nn.Linear(D, 1)
+        )
         
         freqs = get_freqs(cfg.min_midi, cfg.max_midi)
         self.register_buffer("freqs", freqs)
         num_freqs = freqs.shape[0]
 
+        num_octave = math.ceil(num_freqs / 12)
+        self.pitch_class_emb = nn.Embedding(12, D)
+        self.octave_emb = nn.Embedding(num_octave, D)
+        
         self.head_root = nn.Sequential(
             nn.Linear(D, D),
             nn.GELU(),
-            nn.Linear(D, 1)
-        )
-        
-        self.head_midi = nn.Sequential(
-            nn.Linear(D, D),
-            nn.GELU(),
-            nn.Linear(D, 1)
+            nn.Linear(D, 12)
         )
         
         self.head_chord = nn.Sequential(
             nn.Linear(D, D),
             nn.GELU(),
-            nn.Linear(D, 1)
+            nn.Linear(D, 5)
         )
         
         self.loss_weight = cfg.harmony_conv.loss_weight
@@ -718,106 +731,105 @@ class CQTEncoder(nn.Module):
         """
         B, T, P, C = x.shape
         x = self.prior_affine(x) # (B, T, P, D)
+ 
+        # pitch embedding
+        midi = torch.arange(P, device=x.device)
+        pitch_class = midi % 12
+        octave = midi // 12
+        pc_emb = self.pitch_class_emb(pitch_class) # (P,D)
+        oct_emb = self.octave_emb(octave) # (P,D)
+        pitch_emb = pc_emb + oct_emb
+        x = x + pitch_emb[None,None,:,:]
+        
+        # layer
         for layer in self.layers:
             x = layer(x) # (B, T, P, D)
-        # 这样混合真的好吗？
-        # x = x.mean(dim=2) # (B, T, D)
-        return x
+        
+        # attention pooling
+        attn = self.pitch_attn(x)  # (B,T,P,1)
+        attn = torch.softmax(attn, dim=2) # (B, T, P, 1)
+        z = (x * attn).sum(2) # (B, T, D)
+        
+        return z
     
     @torch.no_grad()
     def infer(self, x):
         """
-        x: (B, T, P, D)
+        x: (B, T, D)
+
+        return:
+            List[Dict]
         """
 
-        # midi
-        midi = self.head_midi(x) # (B, T, P, 1)
-        midi = midi.squeeze(-1) # (B, T, P)
-        midi = midi.mean(1) # (B, P)
-        
-        # root
-        B, T, P, D = x.shape
-        assert B==1
-        
-        x_dilated = dilation_pool(x.flatten(0,1), dilation=12) # (B*T, 12, D)
-        x_dilated = x_dilated.reshape(B,T,12,D)
-        
-        root = self.head_root(x_dilated) # (B, T, 12, 1)
-        root = root.squeeze(-1) # (B, T, 12)
-        root = root.mean(1) # (B, 12)
-        
-        # chord
-        chord = self.head_chord(x_dilated) # (B, T, 12, 1)
-        chord = chord.squeeze(-1) # (B, T, 12)
-        chord = chord.mean(1) # (B, 12)
-        
-        midi = torch.sigmoid(midi) # (B, P)
-        # root = F.softmax(root, dim=-1) # (B,12)
-        chord = torch.sigmoid(chord) # (B, 12)
-        
-        midi = midi > self.threshold # (B, 12)
-        root_idx = root.argmax(-1) # (B,)
-        chord = chord > self.threshold # (B,12)
-        
-        midi = midi.squeeze(0) # (P,)
-        root_idx = root_idx.squeeze(0) # int
-        chord = chord.squeeze(0) # (12,)
-        
-        midi_idx = torch.where(midi)[0] # (num_note)
-        chord_idx = torch.where(chord)[0] # (num_cls_note)
-                
-        result = {
-            "midi": midi_idx.tolist(),
-            "root": int(root_idx.item()),
-            "chord": chord_idx.tolist(),
+        # ===== root =====
+
+        root_logits = self.head_root(x)   # (B,T,12)
+        root_logits = root_logits.mean(1) # (B,12)
+
+        root_prob = torch.softmax(root_logits, dim=-1)
+        root_idx = root_prob.argmax(-1)   # (B,)
+
+        # ===== chord =====
+
+        chord_logits = self.head_chord(x)   # (B,T,5)
+        chord_logits = chord_logits.mean(1) # (B,5)
+
+        chord_prob = torch.softmax(chord_logits, dim=-1)
+        chord_idx = chord_prob.argmax(-1)
+
+        # ===== build result =====
+
+        chord_names = [
+            "maj",
+            "min",
+            "dom",
+            "dim",
+            "aug"
+        ]
+
+        assert x.shape[0]==1
+        b = 0
+    
+        results = {
+            "root": int(root_idx[b].item()),
+            "root_conf": float(root_prob[b, root_idx[b]].item()),
+
+            "chord_cls": int(chord_idx[b].item()),
+            "chord_name": chord_names[chord_idx[b]],
+
+            "chord_conf": float(
+                chord_prob[b, chord_idx[b]].item()
+            )
         }
-        return result
+
+        return results
 
     def get_loss(self, x, target):
         """
         target: List Dict{
-            "all": (P,), # 0~1,all midi bool, 用于BCE
             "root": (1,), # 0~11
-            "chord": (12,), # 0~1
-            "midi": (N,), # midi
+            "chord_cls": (1,), # 0~4, maj,min,dom,dim,aug
         }
-        x: (B, T, P, D)
+        x: (B, T, D)
         """
-        midi_tar = [temp['all'] for temp in target]
-        midi_tar = torch.stack(midi_tar, dim=0) # (B, P)
+        
         root_tar = [temp['root'] for temp in target]
-        root_tar = torch.stack(root_tar, dim=0) # (B, 1)
-        root_tar = root_tar.squeeze(-1) # (B,)
+        root_tar = torch.concat(root_tar, dim=-1) # (B,)
         
-        chord_tar = [temp['chord'] for temp in target]
-        chord_tar = torch.stack(chord_tar, dim=0) # (B,12)
-        
-        # midi
-        y = self.head_midi(x) # (B, T, P, 1)
-        y = y.squeeze(-1) # (B, T, P)
-        y = y.mean(1) # (B, P)
-        
-        loss_midi = F.binary_cross_entropy_with_logits(y, midi_tar)
+        chord_tar = [temp['chord_cls'] for temp in target]
+        chord_tar = torch.concat(chord_tar, dim=-1) # (B,)
         
         # root
-        B, T, P, D = x.shape
-        x_dilated = dilation_pool(x.flatten(0,1), dilation=12) # (B*T, 12, D)
-        x_dilated = x_dilated.reshape(B,T,12,D)
-        
-        y = self.head_root(x_dilated) # (B, T, 12, 1)
-        y = y.squeeze(-1) # (B, T, 12)
+        y = self.head_root(x) # (B, T, 12)
         y = y.mean(1) # (B, 12)
+        loss_root = F.binary_cross_entropy_with_logits(y, root_tar)
         
-        loss_root = F.cross_entropy(y, root_tar)
-        
-        y = self.head_chord(x_dilated) # (B, T, 12, 1)
-        y = y.squeeze(-1) # (B, T, 12)
-        y = y.mean(1) # (B, 12)
-        
+        # chord
+        y = self.head_chord(x) # (B, T, 5)
+        y = y.mean(1) # (B, 5)
         loss_chord = F.binary_cross_entropy_with_logits(y, chord_tar)
         
-        loss = self.loss_weight['midi'] * loss_midi + \
-                self.loss_weight['root'] * loss_root + \
+        loss = self.loss_weight['root'] * loss_root + \
                 self.loss_weight['chord'] * loss_chord
         
         return loss

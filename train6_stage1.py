@@ -75,9 +75,9 @@ model = CQTEncoder(cfg).to(device)
 
 # teacher = Teacher()
 
-checkpoint_path = "../params/detr6/baby.pt"
-state_dict = torch.load(checkpoint_path)
-model.load_state_dict(state_dict=state_dict)
+# checkpoint_path = "../params/detr6/baby.pt"
+# state_dict = torch.load(checkpoint_path)
+# model.load_state_dict(state_dict=state_dict)
 
 # -------- optimizer --------
 optimizer = optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=1e-4)

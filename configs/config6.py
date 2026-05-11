@@ -56,7 +56,6 @@ def get_config():
     cfg.harmony_conv.backbone_output_dim = 512
     
     cfg.harmony_conv.loss_weight = {
-        "midi":0,
         "chord":1,
         "root":1,
     }
