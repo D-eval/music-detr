@@ -37,7 +37,7 @@ cfg = get_config()
 import sys
 sys.path.append(str(cfg.dataset_read_py_path_stage1))
 
-from read1 import RandomChordSynthDataset, chord_collate_fn
+from read0 import RandomChordSynthDataset, chord_collate_fn
 from torch.utils.data import DataLoader
 dataset = RandomChordSynthDataset(prototype_dir=cfg.dataset_read_py_path_stage1 / "prototype",
                                   soundfont_dir=cfg.dataset_read_py_path_stage1 / "soundfonts",
@@ -47,9 +47,9 @@ dataset = RandomChordSynthDataset(prototype_dir=cfg.dataset_read_py_path_stage1 
 
 loader = DataLoader(
     dataset,
-    batch_size=32,
+    batch_size=2,
     shuffle=True,
-    num_workers=2,
+    num_workers=0,
     collate_fn=chord_collate_fn,
     pin_memory=True
 )

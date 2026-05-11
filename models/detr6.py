@@ -814,20 +814,20 @@ class CQTEncoder(nn.Module):
         """
         
         root_tar = [temp['root'] for temp in target]
-        root_tar = torch.concat(root_tar, dim=-1) # (B,)
+        root_tar = torch.stack(root_tar, dim=-1).squeeze(-1) # (B,)
         
         chord_tar = [temp['chord_cls'] for temp in target]
-        chord_tar = torch.concat(chord_tar, dim=-1) # (B,)
+        chord_tar = torch.stack(chord_tar, dim=-1).squeeze(-1) # (B,)
         
         # root
         y = self.head_root(x) # (B, T, 12)
         y = y.mean(1) # (B, 12)
-        loss_root = F.binary_cross_entropy_with_logits(y, root_tar)
+        loss_root = F.cross_entropy(y, root_tar)
         
         # chord
         y = self.head_chord(x) # (B, T, 5)
         y = y.mean(1) # (B, 5)
-        loss_chord = F.binary_cross_entropy_with_logits(y, chord_tar)
+        loss_chord = F.cross_entropy(y, chord_tar)
         
         loss = self.loss_weight['root'] * loss_root + \
                 self.loss_weight['chord'] * loss_chord
