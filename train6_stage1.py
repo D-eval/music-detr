@@ -75,9 +75,9 @@ model = CQTEncoder(cfg).to(device)
 
 # teacher = Teacher()
 
-# checkpoint_path = "../params/detr5/baby.pt"
-# state_dict = torch.load(checkpoint_path)
-# model.load_state_dict(state_dict=state_dict)
+checkpoint_path = "../params/detr6/baby.pt"
+state_dict = torch.load(checkpoint_path)
+model.load_state_dict(state_dict=state_dict)
 
 # -------- optimizer --------
 optimizer = optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=1e-4)
@@ -151,6 +151,7 @@ for epoch in range(start_epoch+1, num_epochs):
     print(f"==== Epoch {epoch} avg loss: {total_loss / (step+1):.4f} ====")
     # ---------- 保存 ----------
     if epoch % cfg.save_epoch == 0:
+        os.makedir(cfg.large_save_dir, exist_ok=True)
         torch.save(model.state_dict(), os.path.join(cfg.large_save_dir, f"baby.pt"))
         recorder.update(total_loss / (step+1), cfg.lr)
         recorder.save()
