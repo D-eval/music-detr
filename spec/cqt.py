@@ -216,9 +216,9 @@ class MultiWindowCQT(nn.Module):
     def __init__(
         self,
         freqs,
-        sr=44100,
-        window_num=8,
-        min_cycle=2,
+        sr,
+        window_num,
+        min_cycle,
         trainable=False,
         stride=0.1,
     ):

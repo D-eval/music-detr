@@ -46,6 +46,8 @@ def get_config():
     cfg.max_midi = 131 # freq2midi(cfg.max_midi_freq)
     cfg.num_P = cfg.max_midi - cfg.min_midi + 1
     
+    cfg.cqt_stride = 0.1
+    
     cfg.harmony_conv = argparse.Namespace()
     cfg.harmony_conv.kernel_size = 60
     cfg.harmony_conv.cycles = [5,7,12, 5,7,12, 5,7,12]
@@ -60,6 +62,10 @@ def get_config():
         "root":1,
     }
     cfg.harmony_conv.infer_threshold = 0.3
+    
+    cfg.envelope_conv = argparse.Namespace()
+    cfg.envelope_conv.receptive_field = 0.5
+    cfg.envelope_conv.rep_dim = 512
     
     cfg.pitch_vocab_size = cfg.max_midi - cfg.min_midi + 1
     cfg.music_scale = "12tone"
@@ -222,7 +228,7 @@ def get_config():
     cfg.llm.rope_base = 20
     
     cfg.lr = 1e-4
-    cfg.save_epoch = 10
+    cfg.save_epoch = 1
     
     cfg.cell_structure = [
         ("chord", 10),

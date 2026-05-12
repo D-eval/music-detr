@@ -675,12 +675,32 @@ def dilation_pool(x, dilation):
 #     phase = 2*math.pi * torch.arange(D)[None,:]/D * freqs[:,None]
 #     cosine = torch.cos(phase) # (12, D)
 #     return cosine
- 
 
+def pitch_encoding_init(N, D):
+    """
+    return:
+        (12, D)
+    """
+    pitch = torch.arange(N).float()  # (12,)
+    theta = 2 * math.pi * pitch / N  # (12,)
+    emb = []
+    num_freq = D // 2
+    for k in range(1, num_freq + 1):
+        emb.append(torch.cos(k * theta))
+        emb.append(torch.sin(k * theta))
+    emb = torch.stack(emb, dim=-1)  # (12, 2*num_freq)
+    # trim
+    emb = emb[:, :D]
+    # normalize
+    emb = emb / emb.std()
+    return emb
+
+# baby model
 class CQTEncoder(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         D = cfg.harmony_conv.backbone_output_dim
+        self.D = D
         
         self.prior_affine = nn.Linear(cfg.input_dim, D)
         self.layers = nn.ModuleList([
@@ -691,34 +711,65 @@ class CQTEncoder(nn.Module):
                 kernel_size=cfg.harmony_conv.kernel_size
             )
             for _ in range(cfg.harmony_conv.num_layers)
-        ])
-
+        ]) # 不同乐器的泛音列归纳音符，预测 pitch_cls
 
         # pitch pooling
-        self.pitch_attn = nn.Sequential(
-            nn.Linear(D, D),
-            nn.GELU(),
-            nn.Linear(D, 1)
-        )
+        # self.pitch_head = nn.Sequential(
+        #     nn.Linear(D, D),
+        #     nn.GELU(),
+        #     nn.Linear(D, 1)
+        # )
+        # self.chord_attn = nn.Sequential(
+        #     nn.Linear(D, D),
+        #     nn.GELU(),
+        #     nn.Linear(D, 1)
+        # )
+
+        # self.out_proj = nn.Sequential(
+        #     nn.Linear(2*D, 2*D),
+        #     nn.GELU(),
+        #     nn.Linear(2*D, D)
+        # )
         
         freqs = get_freqs(cfg.min_midi, cfg.max_midi)
         self.register_buffer("freqs", freqs)
         num_freqs = freqs.shape[0]
-
+        self.num_freqs=num_freqs
+        
         num_octave = math.ceil(num_freqs / 12)
-        self.pitch_class_emb = nn.Embedding(12, D)
-        self.octave_emb = nn.Embedding(num_octave, D)
+        self.num_octave = num_octave
+        # assert D % num_octave == 0
         
-        self.head_root = nn.Sequential(
+        self.register_buffer("pitchs",torch.arange(cfg.min_midi, cfg.max_midi+1)-cfg.min_midi)
+        self.register_buffer("octave_affines_choice",self.pitchs // 12)
+
+        out_dim_each_octave = D//num_octave
+        out_dim = out_dim_each_octave * num_octave
+        
+        self.octave_affines = nn.ModuleList([nn.Linear(D, D//num_octave) for _ in range(num_octave)])
+        self.post_affine = nn.Linear(out_dim, D) # 初始值需要近似恒等映射
+        
+        # self.pitch_class_emb = nn.Embedding(12, D)
+        # self.octave_emb = nn.Embedding(num_octave, D)
+        # self.pitch_embedding = nn.Parameter(pitch_encoding_init(12, D))
+        # self.register_buffer("pitch_embedding", pitch_encoding_init(12, D))
+        
+        # self.head_root = nn.Sequential(
+        #     nn.Linear(D, D),
+        #     nn.GELU(),
+        #     nn.Linear(D, 1) # 0~11, N
+        # )
+        
+        # self.chord_head = nn.Sequential(
+        #     nn.Linear(D, D),
+        #     nn.GELU(),
+        #     nn.Linear(D, 5) # maj,min,dom,dim,aug,N
+        # )
+        
+        self.pitch_head = nn.Sequential(
             nn.Linear(D, D),
             nn.GELU(),
-            nn.Linear(D, 12)
-        )
-        
-        self.head_chord = nn.Sequential(
-            nn.Linear(D, D),
-            nn.GELU(),
-            nn.Linear(D, 5)
+            nn.Linear(D, 1)
         )
         
         self.loss_weight = cfg.harmony_conv.loss_weight
@@ -730,111 +781,311 @@ class CQTEncoder(nn.Module):
             return: (B, T, D)
         """
         B, T, P, C = x.shape
+        assert P==self.num_freqs
         x = self.prior_affine(x) # (B, T, P, D)
  
-        # pitch embedding
-        midi = torch.arange(P, device=x.device)
-        pitch_class = midi % 12
-        octave = midi // 12
-        pc_emb = self.pitch_class_emb(pitch_class) # (P,D)
-        oct_emb = self.octave_emb(octave) # (P,D)
-        pitch_emb = pc_emb + oct_emb
-        x = x + pitch_emb[None,None,:,:]
+        # # pitch embedding
+        # midi = torch.arange(P, device=x.device)
+        # pitch_class = midi % 12
+        # octave = midi // 12
+        # pc_emb = self.pitch_class_emb(pitch_class) # (P,D)
+        # oct_emb = self.octave_emb(octave) # (P,D)
+        # pitch_emb = pc_emb + oct_emb
+        # x = x + pitch_emb[None,None,:,:]
         
         # layer
         for layer in self.layers:
             x = layer(x) # (B, T, P, D)
         
-        # attention pooling
-        attn = self.pitch_attn(x)  # (B,T,P,1)
-        attn = torch.softmax(attn, dim=2) # (B, T, P, 1)
-        z = (x * attn).sum(2) # (B, T, D)
+        # x12 = dilation_pool(x.flatten(0,1), 12) # (B*T, 12, D)
+        # x12 = x12.reshape(B,T,12,self.D) # (B, T, 12, D)
         
-        return z
-    
-    @torch.no_grad()
-    def infer(self, x):
-        """
-        x: (B, T, D)
+        # # attention pooling
+        # attn = self.root_attn(x12)  # (B,T,12,1)
+        # attn = torch.softmax(attn, dim=2) # (B,T,12,1)
+        # root_identity = attn.squeeze(-1) @ self.pitch_embedding # (B, T, D)
+        # root_content = (attn * x12).sum(2) # (B, T, D)
+        # root_rep = root_identity + root_content
 
-        return:
-            List[Dict]
-        """
+        # attn = self.chord_attn(x) # (B,T,P,1)
+        # attn = torch.softmax(attn, dim=2) # (B,T,P,1)
+        # chord_rep = (x * attn).sum(2) # (B, T, D)
+        
+        # rep = torch.concat([root_rep, chord_rep], dim=2) # (B,T,2*D)
+        # rep = self.out_proj(rep) # (B, T, D)
+        # rep = chord_rep
+        y = []
+        for octave in range(self.num_octave):
+            start_p = 12*octave
+            end_p = min(12*(octave+1), P)
+            xp = x[:,:,start_p:end_p,:] # (B,T,12,D)
+            yp = self.octave_affines[octave](xp) # (B,T,12,d)
+            y.append(yp)
+        y = torch.concat(y, dim=-1)
+        y = self.post_affine(y) # (B,T,12,D)
 
-        # ===== root =====
-
-        root_logits = self.head_root(x)   # (B,T,12)
-        root_logits = root_logits.mean(1) # (B,12)
-
-        root_prob = torch.softmax(root_logits, dim=-1)
-        root_idx = root_prob.argmax(-1)   # (B,)
-
-        # ===== chord =====
-
-        chord_logits = self.head_chord(x)   # (B,T,5)
-        chord_logits = chord_logits.mean(1) # (B,5)
-
-        chord_prob = torch.softmax(chord_logits, dim=-1)
-        chord_idx = chord_prob.argmax(-1)
-
-        # ===== build result =====
-
-        chord_names = [
-            "maj",
-            "min",
-            "dom",
-            "dim",
-            "aug"
-        ]
-
-        assert x.shape[0]==1
-        b = 0
-    
-        results = {
-            "root": int(root_idx[b].item()),
-            "root_conf": float(root_prob[b, root_idx[b]].item()),
-
-            "chord_cls": int(chord_idx[b].item()),
-            "chord_name": chord_names[chord_idx[b]],
-
-            "chord_conf": float(
-                chord_prob[b, chord_idx[b]].item()
-            )
-        }
-
-        return results
+        return y
 
     def get_loss(self, x, target):
         """
         target: List Dict{
             "root": (1,), # 0~11
+            "pitch_cls_vec": (12,), # 0~1
             "chord_cls": (1,), # 0~4, maj,min,dom,dim,aug
         }
-        x: (B, T, D)
+        x: (B, T, P, D)
         """
+        B, T, P, D = x.shape
+        x_dilated = x
+        assert P==12
+        # x_dilated = dilation_pool(x.flatten(0,1), 12) # (B, T, 12, D)
+        # x_dilated = x_dilated.reshape(B, T, 12, D)
         
-        root_tar = [temp['root'] for temp in target]
-        root_tar = torch.stack(root_tar, dim=-1).squeeze(-1) # (B,)
+        pitch_tar = [temp['pitch_cls_vec'] for temp in target]
+        pitch_tar = torch.stack(pitch_tar, dim=0) # (B, 12)
         
-        chord_tar = [temp['chord_cls'] for temp in target]
-        chord_tar = torch.stack(chord_tar, dim=-1).squeeze(-1) # (B,)
+        pitch_logits = self.pitch_head(x_dilated).squeeze(-1) # (B, T, 12)
+        pitch_logits = pitch_logits.mean(1) # (B, 12)
         
-        # root
-        y = self.head_root(x) # (B, T, 12)
-        y = y.mean(1) # (B, 12)
-        loss_root = F.cross_entropy(y, root_tar)
+        loss_pitch = F.binary_cross_entropy_with_logits(pitch_logits, pitch_tar)
+        return loss_pitch
+
+        # root_tar = [temp['root'] for temp in target]
+        # root_tar = torch.stack(root_tar, dim=-1).squeeze(-1) # (B,)
+        # chord_tar = [temp['chord_cls'] for temp in target]
+        # chord_tar = torch.stack(chord_tar, dim=-1).squeeze(-1) # (B,)
         
-        # chord
-        y = self.head_chord(x) # (B, T, 5)
-        y = y.mean(1) # (B, 5)
-        loss_chord = F.cross_entropy(y, chord_tar)
+        # # root
+        # root_logits = self.head_root(x).squeeze(-1) # (B, T, 12)
+        # root_logits = root_logits.mean(1) # (B, 12)
+        # loss_root = F.cross_entropy(root_logits, root_tar)
         
-        loss = self.loss_weight['root'] * loss_root + \
-                self.loss_weight['chord'] * loss_chord
+        # # chord
+        # chord_logits = self.head_chord(x) # (B, T, 12, 5)
+        # B, T, _, C = chord_logits.shape
+        # root_idx = root_tar[:, None, None, None]
+        # root_idx = root_idx.expand(B, T, 1, C)
+
+        # chord_logits = torch.gather(
+        #     chord_logits,
+        #     dim=2,
+        #     index=root_idx
+        # ) # (B, T, 1, 5)
+        # chord_logits = chord_logits.squeeze(2) # (B,T,5)
+        # chord_logits = chord_logits.mean(1) # (B, 5)
+        # loss_chord = F.cross_entropy(chord_logits, chord_tar)
         
-        return loss
+        # loss = self.loss_weight['root'] * loss_root + \
+        #         self.loss_weight['chord'] * loss_chord
+        
+        # return loss
+
+    @torch.no_grad()
+    def infer(self, x):
+        """
+        x: (B, T, P, D)
+
+        return:
+            List[Dict]
+        """
+
+        B, T, P, D = x.shape
+        assert B==1
+        
+        # =====================================
+        # pitch collapse
+        # =====================================
+
+        # x12 = dilation_pool(
+        #     x.flatten(0, 1),
+        #     12
+        # )  # (B*T, 12, D)
+
+        # x12 = x12.reshape(B, T, 12, D)
+        x12 = x
+
+        # =====================================
+        # pitch prediction
+        # =====================================
+
+        pitch_logits = self.pitch_head(
+            x12
+        ).squeeze(-1)  # (B,T,12)
+
+        pitch_logits = pitch_logits.mean(1)  # (B,12)
+
+        pitch_prob = torch.sigmoid(
+            pitch_logits
+        )  # (B,12)
+
+        pitch_pred = (
+            pitch_prob > self.threshold
+        ).float()
+        
 
 
+        # =====================================
+        # chord template matching
+        # =====================================
+
+        chord_templates = {
+
+            "maj": [0,4,7],
+            "min": [0,3,7],
+            "dim": [0,3,6],
+            "aug": [0,4,8],
+            "dom": [0,4,7,10],
+
+        }
+
+        root_names = [
+            "C","C#","D","D#","E","F",
+            "F#","G","G#","A","A#","B"
+        ]
+
+        results = []
+
+        # for b in range(B):
+        b = 0
+        pitch_cls = torch.where(
+            pitch_pred[b]
+        )[0]
+        
+        pred_vec = pitch_prob[b]  # (12,)
+
+        best_score = -1e9
+        best_root = 0
+        best_chord = "N"
+
+        # exhaustive search
+        for root in range(12):
+
+            for chord_name, intervals in chord_templates.items():
+
+                template = torch.zeros(
+                    12,
+                    device=x.device
+                )
+
+                for i in intervals:
+                    template[(root + i) % 12] = 1.0
+
+                # score:
+                # inside high
+                # outside low
+
+                score = (
+                    pred_vec * template
+                ).sum()
+
+                score -= (
+                    pred_vec * (1-template)
+                ).sum() * 0.5
+
+                score = score.item()
+
+                if score > best_score:
+                    best_score = score
+                    best_root = root
+                    best_chord = chord_name
+
+        symbol = f"{root_names[best_root]}:{best_chord}"
+
+        results = {
+
+            "pitch_prob":
+                pitch_prob[b].detach().cpu(),
+
+            "pitch_cls_vec":
+                pitch_pred[b].detach().cpu(),
+
+            "pitch_cls":
+                pitch_cls.detach().cpu(),
+
+            "root_idx":
+                best_root,
+
+            "root_name":
+                root_names[best_root],
+
+            "chord_name":
+                best_chord,
+
+            "score":
+                float(best_score),
+
+            "symbol":
+                symbol,
+        }
+
+        return results
+
+
+# 归纳不同包络特质的音色
+# 另外，提升frame wise任务的时间分辨率
+class EnvelopeConv(nn.Module):
+    def __init__(self, cfg):
+        super().__init__()
+        # P 个独立的卷积
+        # kernel长度取波形的3个周期
+        sr = cfg.sr
+        freqs = get_freqs(cfg.min_midi, cfg.max_midi)
+        self.register_buffer("freqs", freqs)
+        
+        stride = int(cfg.cqt_stride * sr)
+        kernel_size = int(cfg.envelope_conv.receptive_field / cfg.cqt_stride)
+        # 保证奇数
+        kernel_size = kernel_size+1 if kernel_size%2==0 else kernel_size
+        
+        C = cfg.envelope_conv.rep_dim
+        
+        # 分 P 卷积
+        kernels = torch.randn(12, C, C, kernel_size)
+        self.kernels = nn.Parameter(kernels)
+        
+    def forward(self, x):
+        """
+        x: (B, T, P, C)
+        """
+        B,T,P,C = x.shape
+        assert P==12
+        result = []
+        for p in range(12):
+            result_p = []
+            for c in range(C):
+                xpc = x[:,:,p,c] # (B,T)
+                xpc = xpc.unsqueeze(1) # (B,1,T)
+                kernel = self.kernels[p,c,:,:] # (C,T)
+                kernel = kernel[None,:,:] # (1,C,T)
+                ypc = F.conv1d(xpc, kernel) # (B,C,T)
+                result_p.append(ypc)
+            result_p = torch.stack(result_p, dim=-1)
+        result = torch.stack(result, dim=-1) # (B,C,T,P)
+        result = result.permute(0,2,3,1) # (B,T,P,C)
+        return result
+
+
+class T0p5(nn.Module):
+    """
+    induction through 0.5 s time
+    """
+    def __init__(self, cfg):
+        super().__init__()
+        self.backbone = CQTEncoder(cfg)
+        
+    def forward(self, x):
+        """
+        x: (B, T, P, 2*W)
+        """
+        fea = self.backbone(x) # (B, T, P, C)
+        B, T, P, C = fea.shape
+        
+        fea = dilation_pool(fea.flatten(0,1), 12).reshape(B,T,12,C)
+        
+        # 决定性的时刻寻找
+        
+        
+        
 
 from spec import wav2cqt_2C, wav2spec_2C
 from configs.cell_cls import CellCls
@@ -871,7 +1122,8 @@ class PitchTransformer(nn.Module):
         min_midi, max_midi = cfg.min_midi, cfg.max_midi
         
         freqs = get_freqs(min_midi, max_midi)
-        self.preprocessor = MultiWindowCQT(freqs, cfg.sr, cfg.window_num, cfg.min_cycle)
+        self.preprocessor = MultiWindowCQT(freqs, cfg.sr, cfg.window_num, cfg.min_cycle,
+                                           trainable=False, stride=cfg.cqt_stride)
         self.register_buffer("freqs", freqs)
         
         self.backbone = CQTEncoder(cfg)

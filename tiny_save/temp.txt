@@ -1,6 +1,4 @@
 target:
-tensor(4)
-tensor(3)
-[63, 67, 71, 75]
+pitch:tensor([0, 4, 9])
 infer:
-{'root': 3, 'root_conf': 0.9984326958656311, 'chord_cls': 0, 'chord_name': 'maj', 'chord_conf': 0.5662111043930054}
+pitch:tensor([0, 4, 9])

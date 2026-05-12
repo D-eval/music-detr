@@ -47,9 +47,9 @@ dataset = RandomChordSynthDataset(prototype_dir=cfg.dataset_read_py_path_stage1 
 
 loader = DataLoader(
     dataset,
-    batch_size=2,
+    batch_size=16,
     shuffle=True,
-    num_workers=0,
+    num_workers=4,
     collate_fn=chord_collate_fn,
     pin_memory=True
 )
@@ -65,7 +65,7 @@ freqs = get_freqs(cfg.min_midi, cfg.max_midi)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("device:",device)
 
-preprocessor = MultiWindowCQT(freqs, cfg.sr, cfg.window_num, cfg.min_cycle).to(device)
+preprocessor = MultiWindowCQT(freqs, cfg.sr, cfg.window_num, cfg.min_cycle, stride=cfg.cqt_stride).to(device)
 model = CQTEncoder(cfg).to(device)
 
 # for audio, target in loader:
@@ -75,9 +75,9 @@ model = CQTEncoder(cfg).to(device)
 
 # teacher = Teacher()
 
-# checkpoint_path = "../params/detr6/baby.pt"
-# state_dict = torch.load(checkpoint_path)
-# model.load_state_dict(state_dict=state_dict)
+checkpoint_path = "../params/detr6/baby1.pt"
+state_dict = torch.load(checkpoint_path)
+model.load_state_dict(state_dict=state_dict, strict=False)
 
 # -------- optimizer --------
 optimizer = optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=1e-4)
@@ -142,17 +142,20 @@ for epoch in range(start_epoch+1, num_epochs):
             # plot_pianoroll_event(infer_output, target[0])
             with open("./tiny_save/temp.txt", "w") as f:
                 f.write("target:\n")
-                f.write(str(target[0]['chord_cls'])+"\n")
-                f.write(str(target[0]['root'])+"\n")
-                f.write(str(target[0]['midi'])+"\n")
+                # f.write("chord_cls:"+str(target[0]['chord_cls'])+"\n")
+                # f.write("root:"+str(target[0]['root'])+"\n")
+                # f.write("cls:"+str(target[0]['chord_cls_name'])+"\n")
+                f.write("pitch:"+str(target[0]['pitch_cls'])+"\n")
 
                 f.write("infer:\n")
-                f.write(str(infer_output)+"\n")
+                # f.write("root:"+str(infer_output['root_idx'])+"\n")
+                # f.write("cls:"+str(infer_output['chord_name'])+"\n")
+                f.write("pitch:"+str(infer_output['pitch_cls'])+"\n")
     print(f"==== Epoch {epoch} avg loss: {total_loss / (step+1):.4f} ====")
     # ---------- 保存 ----------
     if epoch % cfg.save_epoch == 0:
-        os.makedir(cfg.large_save_dir, exist_ok=True)
-        torch.save(model.state_dict(), os.path.join(cfg.large_save_dir, f"baby.pt"))
+        os.makedirs(cfg.large_save_dir, exist_ok=True)
+        torch.save(model.state_dict(), os.path.join(cfg.large_save_dir, f"baby2.pt"))
         recorder.update(total_loss / (step+1), cfg.lr)
         recorder.save()
 
