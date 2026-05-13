@@ -4,7 +4,7 @@ python3.9 test_model.py
 
 https://homes.cs.washington.edu/~ranjay/visualgenome/api.html
 
-nohup python3 -u train6_stage1.py > train6_stage1.log 2>&1 &
+nohup python3 -u train6_stage1_tiny.py > train6_stage1_tiny.log 2>&1 &
 
 CUDA_LAUNCH_BLOCKING=1 python train5.py
 

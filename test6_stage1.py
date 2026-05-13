@@ -47,7 +47,7 @@ loader = DataLoader(
     pin_memory=True
 )
 
-from models.detr6 import CQTEncoder, dilation_pool
+from models.detr6 import Tiny, dilation_pool
 from spec import wav2cqt_2C, wav2spec_2C
 from spec.cqt import MultiWindowCQT, get_freqs
 from models.teacher import Teacher
@@ -59,7 +59,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("device:",device)
 
 preprocessor = MultiWindowCQT(freqs, cfg.sr, cfg.window_num, cfg.min_cycle).to(device)
-model = CQTEncoder(cfg).to(device)
+model = Tiny(cfg).to(device)
 
 # for audio, target in loader:
 #     x, _, freqs = preprocessor(audio.to(device))
@@ -67,7 +67,7 @@ model = CQTEncoder(cfg).to(device)
 
 
 # teacher = Teacher()
-checkpoint_path = "../params/detr6/baby3.pt"
+checkpoint_path = "../params/detr6/tiny3.pt"
 state_dict = torch.load(checkpoint_path)
 model.load_state_dict(state_dict=state_dict)
 
