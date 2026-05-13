@@ -1,4 +1,4 @@
 target:
-chord:G#:min
+chord:C:dim
 infer:
-chord:G#:min
+chord:C:dim

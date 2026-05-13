@@ -67,46 +67,45 @@ model = CQTEncoder(cfg).to(device)
 
 
 # teacher = Teacher()
-checkpoint_path = "../params/detr6/baby.pt"
+checkpoint_path = "../params/detr6/baby3.pt"
 state_dict = torch.load(checkpoint_path)
 model.load_state_dict(state_dict=state_dict)
 
-# (K, 1, N)
-a = model.layers[0].harmony_conv.kernels[2,0,:].cpu().detach().numpy()
-plt.plot(a)
-plt.savefig("./tiny_save/wtf.pdf")
-# plt.close()
+loader = DataLoader(
+    dataset,
+    batch_size=1,
+    shuffle=True,
+)
 
 all_fea = []
 all_label = []
-for i in range(200):
-    audio, target = dataset.getitem(i)
+for i, (audio, target) in enumerate(loader):
+    if i >= 200:
+        break
     audio = audio.to(device)
     with torch.no_grad():
-        x, _, _ = preprocessor(audio.unsqueeze(0))
-        fea = model(x)
-        fea = fea.mean(1)
-        fea = dilation_pool(fea, 12)  # (1, 12, 512)
+        x, _, _ = preprocessor(audio)
+        fea = model(x) # (1, T, D)
+        fea = fea.mean(1) # (1, D)
     fea = fea[0]  # (12, 512)
     root = target["root"].item()
-    for pc in range(12):
-        all_fea.append(
-            fea[pc].detach().cpu()
-        )
-        # label:
-        # 当前 sample 的真实 root
-        # 以及 feature 属于哪个 pitch class
-        all_label.append(
-            (root, pc)
-        )
+    chord = target["chord_cls"].item()
+
+    all_fea.append(
+        fea.detach().cpu()
+    )
+    all_label.append(
+        (root, chord)
+    )
 
 
 import torch
 import numpy as np
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 
-X = torch.stack(all_fea).numpy()  # (N, 512)
+X = torch.stack(all_fea,dim=0).numpy()  # (N, 512)
 
 tsne = TSNE(
     n_components=2,
@@ -116,27 +115,94 @@ tsne = TSNE(
     random_state=0,
 )
 
-X_2d = tsne.fit_transform(X)
+X_2d = tsne.fit_transform(X) # (N,2)
 
+# 两个subplot，root和chord
+# root和chord用不同的color map
+root_names = [
+    "C","C#","D","D#","E","F",
+    "F#","G","G#","A","A#","B"
+]
 
+chord_names = [
+    "maj",
+    "min",
+    "dom",
+    "dim",
+    "aug"
+]
 
-plt.figure(figsize=(10, 10))
+# color maps
+root_cmap = cm.get_cmap("tab20", 12)
+chord_cmap = cm.get_cmap("Set1", 5)
 
-for i, (root, pc) in enumerate(all_label):
+fig, axes = plt.subplots(
+    1,
+    2,
+    figsize=(18, 8)
+)
+
+# =========================================
+# root
+# =========================================
+
+ax = axes[0]
+
+for i, (root, chord) in enumerate(all_label):
 
     x = X_2d[i, 0]
     y = X_2d[i, 1]
 
-    color = "red" if root==pc else "blue"
+    color = root_cmap(root)
 
-    plt.scatter(x, y, color=color)
-
-    plt.text(
+    ax.scatter(
         x,
         y,
-        f"{pc}",
-        fontsize=8,
+        color=color,
+        s=40,
+        alpha=0.8,
     )
 
-plt.title("Pitch-class feature t-SNE")
+    ax.text(
+        x,
+        y,
+        root_names[root],
+        fontsize=7,
+    )
+
+ax.set_title("t-SNE colored by ROOT")
+
+# =========================================
+# chord
+# =========================================
+
+ax = axes[1]
+
+for i, (root, chord) in enumerate(all_label):
+
+    x = X_2d[i, 0]
+    y = X_2d[i, 1]
+
+    color = chord_cmap(chord)
+
+    ax.scatter(
+        x,
+        y,
+        color=color,
+        s=40,
+        alpha=0.8,
+    )
+
+    ax.text(
+        x,
+        y,
+        chord_names[chord],
+        fontsize=7,
+    )
+
+ax.set_title("t-SNE colored by CHORD")
+
+plt.tight_layout()
+
 plt.savefig("./tiny_save/wtf.pdf")
+plt.close()
