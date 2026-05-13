@@ -61,6 +61,8 @@ def get_config():
         "chord":1,
         "root":1,
     }
+    cfg.harmony_conv.share_pitch_affine = True
+    
     cfg.harmony_conv.infer_threshold = 0.3
     
     cfg.envelope_conv = argparse.Namespace()

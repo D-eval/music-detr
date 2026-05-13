@@ -7,3 +7,8 @@ https://homes.cs.washington.edu/~ranjay/visualgenome/api.html
 nohup python3 -u train6_stage1.py > train6_stage1.log 2>&1 &
 
 CUDA_LAUNCH_BLOCKING=1 python train5.py
+
+baby: 简单样本
+baby1: 加入了更多样本
+baby2: merge了octave
+baby3: merge了pitch, (B,T,D)

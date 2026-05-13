@@ -1,4 +1,4 @@
 target:
-pitch:tensor([0, 4, 9])
+chord:G#:min
 infer:
-pitch:tensor([0, 4, 9])
+chord:G#:min

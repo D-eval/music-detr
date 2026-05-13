@@ -746,31 +746,42 @@ class CQTEncoder(nn.Module):
         out_dim_each_octave = D//num_octave
         out_dim = out_dim_each_octave * num_octave
         
-        self.octave_affines = nn.ModuleList([nn.Linear(D, D//num_octave) for _ in range(num_octave)])
+        self.octave_affines = nn.ModuleList([nn.Linear(D, out_dim_each_octave) for _ in range(num_octave)])
         self.post_affine = nn.Linear(out_dim, D) # 初始值需要近似恒等映射
         
+        out_dim_each_pitch = D//12
+        out_dim_pitch = out_dim_each_pitch * 12
+        
+        self.share_pitch_affine = cfg.harmony_conv.share_pitch_affine
+        
+        if not self.share_pitch_affine:
+            self.pitch_affines = nn.ModuleList([nn.Linear(D, out_dim_each_pitch) for _ in range(12)])
+        else:
+            self.pitch_affines = nn.Linear(D, out_dim_each_pitch)
+
+        self.post_pitch_affine = nn.Linear(out_dim_pitch, D)
         # self.pitch_class_emb = nn.Embedding(12, D)
         # self.octave_emb = nn.Embedding(num_octave, D)
         # self.pitch_embedding = nn.Parameter(pitch_encoding_init(12, D))
         # self.register_buffer("pitch_embedding", pitch_encoding_init(12, D))
         
-        # self.head_root = nn.Sequential(
-        #     nn.Linear(D, D),
-        #     nn.GELU(),
-        #     nn.Linear(D, 1) # 0~11, N
-        # )
-        
-        # self.chord_head = nn.Sequential(
-        #     nn.Linear(D, D),
-        #     nn.GELU(),
-        #     nn.Linear(D, 5) # maj,min,dom,dim,aug,N
-        # )
-        
-        self.pitch_head = nn.Sequential(
+        self.head_root = nn.Sequential(
             nn.Linear(D, D),
             nn.GELU(),
-            nn.Linear(D, 1)
+            nn.Linear(D, 12) # 0~11, N
         )
+        
+        self.head_chord = nn.Sequential(
+            nn.Linear(D, D),
+            nn.GELU(),
+            nn.Linear(D, 5) # maj,min,dom,dim,aug,N
+        )
+        
+        # self.pitch_head = nn.Sequential(
+        #     nn.Linear(D, D),
+        #     nn.GELU(),
+        #     nn.Linear(D, 1)
+        # )
         
         self.loss_weight = cfg.harmony_conv.loss_weight
         self.threshold = cfg.harmony_conv.infer_threshold
@@ -814,6 +825,8 @@ class CQTEncoder(nn.Module):
         # rep = torch.concat([root_rep, chord_rep], dim=2) # (B,T,2*D)
         # rep = self.out_proj(rep) # (B, T, D)
         # rep = chord_rep
+        
+        # merge octave
         y = []
         for octave in range(self.num_octave):
             start_p = 12*octave
@@ -823,8 +836,20 @@ class CQTEncoder(nn.Module):
             y.append(yp)
         y = torch.concat(y, dim=-1)
         y = self.post_affine(y) # (B,T,12,D)
-
-        return y
+        
+        if self.share_pitch_affine:
+            z = self.pitch_affines(y) # (B,T,12,d)
+        else:
+            # merge pitch cls
+            z = []
+            for p in range(12):
+                yp = y[:,:,p,:] # (B,T,D)
+                zp = self.pitch_affines[p](yp) # (B,T,d)
+                z.append(zp)
+            z = torch.stack(z, dim=-2) # (B,T,12,d)
+        z = z.flatten(-2,-1)
+        z = self.post_pitch_affine(z) # (B,T,D)
+        return z
 
     def get_loss(self, x, target):
         """
@@ -833,192 +858,242 @@ class CQTEncoder(nn.Module):
             "pitch_cls_vec": (12,), # 0~1
             "chord_cls": (1,), # 0~4, maj,min,dom,dim,aug
         }
-        x: (B, T, P, D)
+        x: (B, T, D)
         """
-        B, T, P, D = x.shape
-        x_dilated = x
-        assert P==12
-        # x_dilated = dilation_pool(x.flatten(0,1), 12) # (B, T, 12, D)
-        # x_dilated = x_dilated.reshape(B, T, 12, D)
+        B, T, D = x.shape
         
-        pitch_tar = [temp['pitch_cls_vec'] for temp in target]
-        pitch_tar = torch.stack(pitch_tar, dim=0) # (B, 12)
+        # B, T, P, D = x.shape
+        # x_dilated = x
+        # assert P==12
+        # # x_dilated = dilation_pool(x.flatten(0,1), 12) # (B, T, 12, D)
+        # # x_dilated = x_dilated.reshape(B, T, 12, D)
         
-        pitch_logits = self.pitch_head(x_dilated).squeeze(-1) # (B, T, 12)
-        pitch_logits = pitch_logits.mean(1) # (B, 12)
+        # pitch_tar = [temp['pitch_cls_vec'] for temp in target]
+        # pitch_tar = torch.stack(pitch_tar, dim=0) # (B, 12)
         
-        loss_pitch = F.binary_cross_entropy_with_logits(pitch_logits, pitch_tar)
-        return loss_pitch
+        # pitch_logits = self.pitch_head(x_dilated).squeeze(-1) # (B, T, 12)
+        # pitch_logits = pitch_logits.mean(1) # (B, 12)
+        
+        # loss_pitch = F.binary_cross_entropy_with_logits(pitch_logits, pitch_tar)
+        # return loss_pitch
 
-        # root_tar = [temp['root'] for temp in target]
-        # root_tar = torch.stack(root_tar, dim=-1).squeeze(-1) # (B,)
-        # chord_tar = [temp['chord_cls'] for temp in target]
-        # chord_tar = torch.stack(chord_tar, dim=-1).squeeze(-1) # (B,)
+        root_tar = [temp['root'] for temp in target]
+        root_tar = torch.stack(root_tar, dim=-1).squeeze(-1) # (B,)
+        chord_tar = [temp['chord_cls'] for temp in target]
+        chord_tar = torch.stack(chord_tar, dim=-1).squeeze(-1) # (B,)
         
-        # # root
-        # root_logits = self.head_root(x).squeeze(-1) # (B, T, 12)
-        # root_logits = root_logits.mean(1) # (B, 12)
-        # loss_root = F.cross_entropy(root_logits, root_tar)
+        # root
+        root_logits = self.head_root(x) # (B, T, 12)
+        root_logits = root_logits.mean(1) # (B, 12)
+        loss_root = F.cross_entropy(root_logits, root_tar)
         
-        # # chord
-        # chord_logits = self.head_chord(x) # (B, T, 12, 5)
-        # B, T, _, C = chord_logits.shape
-        # root_idx = root_tar[:, None, None, None]
-        # root_idx = root_idx.expand(B, T, 1, C)
-
-        # chord_logits = torch.gather(
-        #     chord_logits,
-        #     dim=2,
-        #     index=root_idx
-        # ) # (B, T, 1, 5)
-        # chord_logits = chord_logits.squeeze(2) # (B,T,5)
-        # chord_logits = chord_logits.mean(1) # (B, 5)
-        # loss_chord = F.cross_entropy(chord_logits, chord_tar)
+        # chord
+        chord_logits = self.head_chord(x) # (B, T, 5)
+        B, T, C = chord_logits.shape
+        chord_logits = chord_logits.mean(1) # (B, 5)
+        loss_chord = F.cross_entropy(chord_logits, chord_tar)
         
-        # loss = self.loss_weight['root'] * loss_root + \
-        #         self.loss_weight['chord'] * loss_chord
+        loss = self.loss_weight['root'] * loss_root + \
+                self.loss_weight['chord'] * loss_chord
         
-        # return loss
+        return loss
 
     @torch.no_grad()
     def infer(self, x):
         """
-        x: (B, T, P, D)
-
-        return:
-            List[Dict]
+        x: (B, T, D)
         """
 
-        B, T, P, D = x.shape
-        assert B==1
-        
-        # =====================================
-        # pitch collapse
-        # =====================================
-
-        # x12 = dilation_pool(
-        #     x.flatten(0, 1),
-        #     12
-        # )  # (B*T, 12, D)
-
-        # x12 = x12.reshape(B, T, 12, D)
-        x12 = x
-
-        # =====================================
-        # pitch prediction
-        # =====================================
-
-        pitch_logits = self.pitch_head(
-            x12
-        ).squeeze(-1)  # (B,T,12)
-
-        pitch_logits = pitch_logits.mean(1)  # (B,12)
-
-        pitch_prob = torch.sigmoid(
-            pitch_logits
-        )  # (B,12)
-
-        pitch_pred = (
-            pitch_prob > self.threshold
-        ).float()
-        
-
-
-        # =====================================
-        # chord template matching
-        # =====================================
-
-        chord_templates = {
-
-            "maj": [0,4,7],
-            "min": [0,3,7],
-            "dim": [0,3,6],
-            "aug": [0,4,8],
-            "dom": [0,4,7,10],
-
-        }
+        B, T, D = x.shape
 
         root_names = [
-            "C","C#","D","D#","E","F",
-            "F#","G","G#","A","A#","B"
+            "C", "C#", "D", "D#", "E", "F",
+            "F#", "G", "G#", "A", "A#", "B"
         ]
+
+        chord_names = [
+            "maj",
+            "min",
+            "dom",
+            "dim",
+            "aug",
+        ]
+
+        root_logits = self.head_root(x)      # (B,T,12)
+        root_logits = root_logits.mean(1)    # (B,12)
+        root_prob = torch.softmax(root_logits, dim=-1)
+        root_idx = root_prob.argmax(dim=-1)  # (B,)
+
+        chord_logits = self.head_chord(x)    # (B,T,5)
+        chord_logits = chord_logits.mean(1)  # (B,5)
+        chord_prob = torch.softmax(chord_logits, dim=-1)
+        chord_idx = chord_prob.argmax(dim=-1)  # (B,)
 
         results = []
 
-        # for b in range(B):
-        b = 0
-        pitch_cls = torch.where(
-            pitch_pred[b]
-        )[0]
-        
-        pred_vec = pitch_prob[b]  # (12,)
+        for b in range(B):
+            r = int(root_idx[b].item())
+            c = int(chord_idx[b].item())
 
-        best_score = -1e9
-        best_root = 0
-        best_chord = "N"
+            results.append({
+                "root_idx": r,
+                "root_name": root_names[r],
+                "root_conf": float(root_prob[b, r].item()),
 
-        # exhaustive search
-        for root in range(12):
+                "chord_idx": c,
+                "chord_name": chord_names[c],
+                "chord_conf": float(chord_prob[b, c].item()),
 
-            for chord_name, intervals in chord_templates.items():
+                "root_prob": root_prob[b].detach().cpu(),
+                "chord_prob": chord_prob[b].detach().cpu(),
 
-                template = torch.zeros(
-                    12,
-                    device=x.device
-                )
+                "symbol": f"{root_names[r]}:{chord_names[c]}",
+            })
 
-                for i in intervals:
-                    template[(root + i) % 12] = 1.0
-
-                # score:
-                # inside high
-                # outside low
-
-                score = (
-                    pred_vec * template
-                ).sum()
-
-                score -= (
-                    pred_vec * (1-template)
-                ).sum() * 0.5
-
-                score = score.item()
-
-                if score > best_score:
-                    best_score = score
-                    best_root = root
-                    best_chord = chord_name
-
-        symbol = f"{root_names[best_root]}:{best_chord}"
-
-        results = {
-
-            "pitch_prob":
-                pitch_prob[b].detach().cpu(),
-
-            "pitch_cls_vec":
-                pitch_pred[b].detach().cpu(),
-
-            "pitch_cls":
-                pitch_cls.detach().cpu(),
-
-            "root_idx":
-                best_root,
-
-            "root_name":
-                root_names[best_root],
-
-            "chord_name":
-                best_chord,
-
-            "score":
-                float(best_score),
-
-            "symbol":
-                symbol,
-        }
+        if B == 1:
+            return results[0]
 
         return results
+
+    # @torch.no_grad()
+    # def infer(self, x):
+    #     """
+    #     x: (B, T, P, D)
+
+    #     return:
+    #         List[Dict]
+    #     """
+
+    #     B, T, P, D = x.shape
+    #     assert B==1
+        
+    #     # =====================================
+    #     # pitch collapse
+    #     # =====================================
+
+    #     # x12 = dilation_pool(
+    #     #     x.flatten(0, 1),
+    #     #     12
+    #     # )  # (B*T, 12, D)
+
+    #     # x12 = x12.reshape(B, T, 12, D)
+    #     x12 = x
+
+    #     # =====================================
+    #     # pitch prediction
+    #     # =====================================
+
+    #     pitch_logits = self.pitch_head(
+    #         x12
+    #     ).squeeze(-1)  # (B,T,12)
+
+    #     pitch_logits = pitch_logits.mean(1)  # (B,12)
+
+    #     pitch_prob = torch.sigmoid(
+    #         pitch_logits
+    #     )  # (B,12)
+
+    #     pitch_pred = (
+    #         pitch_prob > self.threshold
+    #     ).float()
+        
+
+
+    #     # =====================================
+    #     # chord template matching
+    #     # =====================================
+
+    #     chord_templates = {
+
+    #         "maj": [0,4,7],
+    #         "min": [0,3,7],
+    #         "dim": [0,3,6],
+    #         "aug": [0,4,8],
+    #         "dom": [0,4,7,10],
+
+    #     }
+
+    #     root_names = [
+    #         "C","C#","D","D#","E","F",
+    #         "F#","G","G#","A","A#","B"
+    #     ]
+
+    #     results = []
+
+    #     # for b in range(B):
+    #     b = 0
+    #     pitch_cls = torch.where(
+    #         pitch_pred[b]
+    #     )[0]
+        
+    #     pred_vec = pitch_prob[b]  # (12,)
+
+    #     best_score = -1e9
+    #     best_root = 0
+    #     best_chord = "N"
+
+    #     # exhaustive search
+    #     for root in range(12):
+
+    #         for chord_name, intervals in chord_templates.items():
+
+    #             template = torch.zeros(
+    #                 12,
+    #                 device=x.device
+    #             )
+
+    #             for i in intervals:
+    #                 template[(root + i) % 12] = 1.0
+
+    #             # score:
+    #             # inside high
+    #             # outside low
+
+    #             score = (
+    #                 pred_vec * template
+    #             ).sum()
+
+    #             score -= (
+    #                 pred_vec * (1-template)
+    #             ).sum() * 0.5
+
+    #             score = score.item()
+
+    #             if score > best_score:
+    #                 best_score = score
+    #                 best_root = root
+    #                 best_chord = chord_name
+
+    #     symbol = f"{root_names[best_root]}:{best_chord}"
+
+    #     results = {
+
+    #         "pitch_prob":
+    #             pitch_prob[b].detach().cpu(),
+
+    #         "pitch_cls_vec":
+    #             pitch_pred[b].detach().cpu(),
+
+    #         "pitch_cls":
+    #             pitch_cls.detach().cpu(),
+
+    #         "root_idx":
+    #             best_root,
+
+    #         "root_name":
+    #             root_names[best_root],
+
+    #         "chord_name":
+    #             best_chord,
+
+    #         "score":
+    #             float(best_score),
+
+    #         "symbol":
+    #             symbol,
+    #     }
+
+    #     return results
 
 
 # 归纳不同包络特质的音色
