@@ -29,6 +29,7 @@ def get_config():
     cfg.dataset_data_path = Path("../musicNotebook/preprocess0")
 
     cfg.dataset_read_py_path_stage1 = Path("../dataset/baby")
+    cfg.dataset_read_py_path_stage1_ytb = Path("../dataset/ytbRand")
     
     # cfg.min_len = int(cfg.sr * 0.5)
     # cfg.max_len = int(cfg.sr * 1)
@@ -60,6 +61,7 @@ def get_config():
     cfg.harmony_conv.loss_weight = {
         "chord":1,
         "root":1,
+        "exist":1,
     }
     cfg.harmony_conv.share_pitch_affine = True
     

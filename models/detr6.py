@@ -702,15 +702,24 @@ class ChordClassifierMixin:
         target: List Dict{
             "root": (1,), # 0~11
             "pitch_cls_vec": (12,), # 0~1
-            "chord_cls": (1,), # 0~4, maj,min,dom,dim,aug
+            "chord_idx": (1,), # 0~4, maj,min,dom,dim,aug
         }
         x: (B, T, D)
         """
+        exists = [temp['exist'] for temp in target]
+        exists = torch.stack(exists, dim=-1) # (B,)
+        
+        exist_tar = exists.unsqueeze(-1) # (B,1)
+        exist_logits = self.head_exist(x) # (B, T, 1)
+        exist_logits = exist_logits.mean(1) # (B,1)
+        loss_exist = F.binary_cross_entropy(exist_logits, exist_tar)
+        
+        target = target[exists]
         B, T, D = x.shape
         
-        root_tar = [temp['root'] for temp in target]
+        root_tar = [temp['root_idx'] for temp in target]
         root_tar = torch.stack(root_tar, dim=-1).squeeze(-1) # (B,)
-        chord_tar = [temp['chord_cls'] for temp in target]
+        chord_tar = [temp['chord_idx'] for temp in target]
         chord_tar = torch.stack(chord_tar, dim=-1).squeeze(-1) # (B,)
         
         # root
@@ -725,7 +734,8 @@ class ChordClassifierMixin:
         loss_chord = F.cross_entropy(chord_logits, chord_tar)
         
         loss = self.loss_weight['root'] * loss_root + \
-                self.loss_weight['chord'] * loss_chord
+                self.loss_weight['chord'] * loss_chord + \
+                self.loss_weight['exist'] * loss_exist
         
         return loss
 
@@ -748,6 +758,7 @@ class ChordClassifierMixin:
             "dom",
             "dim",
             "aug",
+            "N",
         ]
 
         root_logits = self.head_root(x)      # (B,T,12)
@@ -866,7 +877,13 @@ class CQTEncoder(ChordClassifierMixin, nn.Module):
         self.head_chord = nn.Sequential(
             nn.Linear(D, D),
             nn.GELU(),
-            nn.Linear(D, 5) # maj,min,dom,dim,aug,N
+            nn.Linear(D, 6) # maj,min,dom,dim,aug,N
+        )
+        
+        self.head_exist = nn.Sequential(
+            nn.Linear(D, D),
+            nn.GELU(),
+            nn.Linear(D, 1) # N, chord
         )
         
         # self.pitch_head = nn.Sequential(
@@ -1117,7 +1134,13 @@ class Tiny(ChordClassifierMixin, nn.Module):
         self.head_chord = nn.Sequential(
             nn.Linear(D, D),
             nn.GELU(),
-            nn.Linear(D, 5) # maj,min,dom,dim,aug,N
+            nn.Linear(D, 6) # maj,min,dom,dim,aug,N
+        )
+        
+        self.head_exist = nn.Sequential(
+            nn.Linear(D, D),
+            nn.GELU(),
+            nn.Linear(D, 1) # N, chord
         )
         
         self.loss_weight = cfg.harmony_conv.loss_weight

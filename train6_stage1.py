@@ -35,22 +35,23 @@ from configs.config6 import get_config
 cfg = get_config()
 
 import sys
-sys.path.append(str(cfg.dataset_read_py_path_stage1))
+sys.path.append(str(cfg.dataset_read_py_path_stage1_ytb))
 
-from read0 import RandomChordSynthDataset, chord_collate_fn
+from read0 import StackDataset, collate_fn
 from torch.utils.data import DataLoader
-dataset = RandomChordSynthDataset(prototype_dir=cfg.dataset_read_py_path_stage1 / "prototype",
-                                  soundfont_dir=cfg.dataset_read_py_path_stage1 / "soundfonts",
-                                  sample_rate=cfg.sr,
-                                  min_midi=cfg.min_midi,
-                                  max_midi=cfg.max_midi)
+# dataset = RandomChordSynthDataset(prototype_dir=cfg.dataset_read_py_path_stage1 / "prototype",
+#                                   soundfont_dir=cfg.dataset_read_py_path_stage1 / "soundfonts",
+#                                   sample_rate=cfg.sr,
+#                                   min_midi=cfg.min_midi,
+#                                   max_midi=cfg.max_midi)
 
+dataset = StackDataset()
 loader = DataLoader(
     dataset,
     batch_size=16,
     shuffle=True,
     num_workers=4,
-    collate_fn=chord_collate_fn,
+    collate_fn=collate_fn,
     pin_memory=True
 )
 
