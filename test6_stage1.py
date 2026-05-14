@@ -1,4 +1,11 @@
-import matplotlib.pyplot as plt
+"""
+baby
+detr6
+
+多类别事件
+
+nohup python3 train6_stage1.py > train6_stage1.log 2>&1 &
+"""
 import warnings
 warnings.simplefilter("ignore")
 
@@ -28,26 +35,28 @@ from configs.config6 import get_config
 cfg = get_config()
 
 import sys
-sys.path.append(str(cfg.dataset_read_py_path_stage1))
+sys.path.append(str(cfg.dataset_read_py_path_stage1_ytb))
 
-from read0 import RandomChordSynthDataset, chord_collate_fn
+from read import StackDataset, collate_fn
 from torch.utils.data import DataLoader
-dataset = RandomChordSynthDataset(prototype_dir=cfg.dataset_read_py_path_stage1 / "prototype",
-                                  soundfont_dir=cfg.dataset_read_py_path_stage1 / "soundfonts",
-                                  sample_rate=cfg.sr,
-                                  min_midi=cfg.min_midi,
-                                  max_midi=cfg.max_midi)
+# dataset = RandomChordSynthDataset(prototype_dir=cfg.dataset_read_py_path_stage1 / "prototype",
+#                                   soundfont_dir=cfg.dataset_read_py_path_stage1 / "soundfonts",
+#                                   sample_rate=cfg.sr,
+#                                   min_midi=cfg.min_midi,
+#                                   max_midi=cfg.max_midi)
 
+dataset = StackDataset(cfg.sr)
+assert 0
 loader = DataLoader(
     dataset,
-    batch_size=32,
+    batch_size=1,
     shuffle=True,
     num_workers=4,
-    collate_fn=chord_collate_fn,
+    collate_fn=collate_fn,
     pin_memory=True
 )
 
-from models.detr6 import Tiny, dilation_pool
+from models.detr6 import CQTEncoder
 from spec import wav2cqt_2C, wav2spec_2C
 from spec.cqt import MultiWindowCQT, get_freqs
 from models.teacher import Teacher
@@ -58,151 +67,250 @@ freqs = get_freqs(cfg.min_midi, cfg.max_midi)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("device:",device)
 
-preprocessor = MultiWindowCQT(freqs, cfg.sr, cfg.window_num, cfg.min_cycle).to(device)
-model = Tiny(cfg).to(device)
+preprocessor = MultiWindowCQT(freqs, cfg.sr, cfg.window_num, cfg.min_cycle, stride=cfg.cqt_stride).to(device)
+model = CQTEncoder(cfg).to(device)
 
-# for audio, target in loader:
-#     x, _, freqs = preprocessor(audio.to(device))
-#     assert 0
-
-
-# teacher = Teacher()
-checkpoint_path = "../params/detr6/tiny3.pt"
+checkpoint_path = "../params/detr6/baby4.pt"
 state_dict = torch.load(checkpoint_path)
-model.load_state_dict(state_dict=state_dict)
-
-loader = DataLoader(
-    dataset,
-    batch_size=1,
-    shuffle=True,
-)
-
-all_fea = []
-all_label = []
-for i, (audio, target) in enumerate(loader):
-    if i >= 200:
-        break
-    audio = audio.to(device)
-    with torch.no_grad():
-        x, _, _ = preprocessor(audio)
-        fea = model(x) # (1, T, D)
-        fea = fea.mean(1) # (1, D)
-    fea = fea[0]  # (12, 512)
-    root = target["root"].item()
-    chord = target["chord_cls"].item()
-
-    all_fea.append(
-        fea.detach().cpu()
-    )
-    all_label.append(
-        (root, chord)
-    )
+model.load_state_dict(state_dict=state_dict, strict=False)
 
 
+# for step, batch in enumerate(loader):
+#     audio, target = batch
+#     audio = audio.to(device)
+#     target = to_device(target, device)
+#     with torch.no_grad():
+#         audio = audio[0,...][None,...]
+#         x, _, freqs = preprocessor(audio.to(device))
+#         model.eval()
+#         output = model(x)
+#         infer_output = model.infer(output)
+#         model.train()
+#         # infer_output, target : Dict{
+#         #     "root": root_pred, # (M) 0~11
+#         #     "chord": chord_pred, # (M, 12)
+#         #     "tonic": tonic_pred, # (M) 0~11
+#         #     "start": start_pred, # (M)
+#         #     "sustain": sustain_pred, # (M)
+#         #     "exist": exist_pred, # (M)
+#         # }
+#         target = to_device(target, torch.device("cpu"))
+#         infer_output = to_device(infer_output, torch.device("cpu"))
+#         # plot_pianoroll_event(infer_output, target[0])
+        
+#         symbol_gt = str(target[0]['symbol']) # eg: C:maj...
+#         symbol_pred = str(infer_output['symbol'])
+        
+#         if ":" in symbol_gt: # 不是 N
+#             root_gt = target[0]['root_idx']
+#             root_pred = infer_output['root_name']
+            
+#             quality_gt = target[0]['chord_idx']
+#             quality_pred = infer_output['chord_name']
+
+from collections import Counter, defaultdict
+import csv
+import os
 import torch
-import numpy as np
-from sklearn.manifold import TSNE
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 
-X = torch.stack(all_fea,dim=0).numpy()  # (N, 512)
+def norm_scalar(x):
+    if torch.is_tensor(x):
+        return x.detach().cpu().view(-1)[0].item()
+    return x
 
-tsne = TSNE(
-    n_components=2,
-    perplexity=30,
-    learning_rate="auto",
-    init="pca",
-    random_state=0,
-)
+def parse_symbol(symbol):
+    """
+    return:
+    {
+        "exist": 0/1,
+        "root": str or None,
+        "quality": str or None,
+        "bass": str or None,
+        "symbol": str
+    }
+    """
+    symbol = str(symbol)
 
-X_2d = tsne.fit_transform(X) # (N,2)
+    if ":" not in symbol:
+        return {
+            "exist": 0,
+            "root": None,
+            "quality": None,
+            "bass": None,
+            "symbol": symbol,
+        }
 
-# 两个subplot，root和chord
-# root和chord用不同的color map
-root_names = [
-    "C","C#","D","D#","E","F",
-    "F#","G","G#","A","A#","B"
-]
+    if "/" in symbol:
+        chord_part, bass = symbol.split("/")
+    else:
+        chord_part = symbol
+        bass = None
 
-chord_names = [
-    "maj",
-    "min",
-    "dom",
-    "dim",
-    "aug"
-]
+    root, quality = chord_part.split(":")
 
-# color maps
-root_cmap = cm.get_cmap("tab20", 12)
-chord_cmap = cm.get_cmap("Set1", 5)
+    if bass is None:
+        bass = root
 
-fig, axes = plt.subplots(
-    1,
-    2,
-    figsize=(18, 8)
-)
+    return {
+        "exist": 1,
+        "root": root,
+        "quality": quality,
+        "bass": bass,
+        "symbol": symbol,
+    }
 
-# =========================================
-# root
-# =========================================
 
-ax = axes[0]
+stats = Counter()
+errors = []
 
-for i, (root, chord) in enumerate(all_label):
+model.eval()
 
-    x = X_2d[i, 0]
-    y = X_2d[i, 1]
+for step, batch in enumerate(loader):
+    audio, target = batch
+    audio = audio.to(device)
+    target = to_device(target, device)
 
-    color = root_cmap(root)
+    with torch.no_grad():
+        audio = audio[0, ...][None, ...]
+        x, _, freqs = preprocessor(audio)
 
-    ax.scatter(
-        x,
-        y,
-        color=color,
-        s=40,
-        alpha=0.8,
+        output = model(x)
+        infer_output = model.infer(output)
+
+    target_cpu = to_device(target, torch.device("cpu"))
+    infer_cpu = to_device(infer_output, torch.device("cpu"))
+
+    symbol_gt = str(target_cpu[0]["symbol"])
+    symbol_pred = str(infer_cpu["symbol"])
+
+    gt = parse_symbol(symbol_gt)
+    pred = parse_symbol(symbol_pred)
+
+    stats["total"] += 1
+
+    # exist / N 判断
+    if gt["exist"] == pred["exist"]:
+        stats["exist_correct"] += 1
+    else:
+        stats["exist_wrong"] += 1
+
+    # symbol 完全匹配
+    if symbol_gt == symbol_pred:
+        stats["symbol_correct"] += 1
+    else:
+        stats["symbol_wrong"] += 1
+
+    # 只在 GT 是和弦时评估 root / quality / bass
+    if gt["exist"] == 1:
+        stats["chord_total"] += 1
+
+        if pred["exist"] == 1:
+            stats["pred_chord_when_gt_chord"] += 1
+
+            if gt["root"] == pred["root"]:
+                stats["root_correct"] += 1
+            else:
+                stats["root_wrong"] += 1
+
+            if gt["quality"] == pred["quality"]:
+                stats["quality_correct"] += 1
+            else:
+                stats["quality_wrong"] += 1
+
+            if gt["bass"] == pred["bass"]:
+                stats["bass_correct"] += 1
+            else:
+                stats["bass_wrong"] += 1
+
+            if gt["root"] == pred["root"] and gt["quality"] == pred["quality"]:
+                stats["root_quality_correct"] += 1
+            else:
+                stats["root_quality_wrong"] += 1
+
+        else:
+            stats["miss_chord"] += 1
+
+    # 只在 GT 是 N 时评估 N
+    else:
+        stats["N_total"] += 1
+
+        if pred["exist"] == 0:
+            stats["N_correct"] += 1
+        else:
+            stats["N_wrong"] += 1
+
+    # 记录错误样本
+    if symbol_gt != symbol_pred:
+        errors.append({
+            "step": step,
+            "symbol_gt": symbol_gt,
+            "symbol_pred": symbol_pred,
+            "root_gt": gt["root"],
+            "root_pred": pred["root"],
+            "quality_gt": gt["quality"],
+            "quality_pred": pred["quality"],
+            "bass_gt": gt["bass"],
+            "bass_pred": pred["bass"],
+        })
+
+
+def safe_acc(correct, total):
+    if total == 0:
+        return 0.0
+    return correct / total
+
+
+print()
+print("========== Evaluation ==========")
+print("total:", stats["total"])
+
+print()
+print("[Exist / N]")
+print("exist acc:", safe_acc(stats["exist_correct"], stats["total"]))
+print("N acc:", safe_acc(stats["N_correct"], stats["N_total"]))
+print("N total:", stats["N_total"])
+print("chord total:", stats["chord_total"])
+print("miss chord:", stats["miss_chord"])
+
+print()
+print("[Symbol]")
+print("symbol acc:", safe_acc(stats["symbol_correct"], stats["total"]))
+
+print()
+print("[Chord only]")
+print("root acc:", safe_acc(stats["root_correct"], stats["pred_chord_when_gt_chord"]))
+print("quality acc:", safe_acc(stats["quality_correct"], stats["pred_chord_when_gt_chord"]))
+print("bass acc:", safe_acc(stats["bass_correct"], stats["pred_chord_when_gt_chord"]))
+print("root+quality acc:", safe_acc(stats["root_quality_correct"], stats["pred_chord_when_gt_chord"]))
+
+print()
+print("[Counts]")
+for k, v in stats.items():
+    print(k, v)
+
+
+# 保存错误样本
+error_file = "./tiny_save/eval_errors.csv"
+
+with open(error_file, "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(
+        f,
+        fieldnames=[
+            "step",
+            "symbol_gt",
+            "symbol_pred",
+            "root_gt",
+            "root_pred",
+            "quality_gt",
+            "quality_pred",
+            "bass_gt",
+            "bass_pred",
+        ]
     )
+    writer.writeheader()
+    writer.writerows(errors)
 
-    ax.text(
-        x,
-        y,
-        root_names[root],
-        fontsize=7,
-    )
+print()
+print("saved error file:", error_file)
 
-ax.set_title("t-SNE colored by ROOT")
-
-# =========================================
-# chord
-# =========================================
-
-ax = axes[1]
-
-for i, (root, chord) in enumerate(all_label):
-
-    x = X_2d[i, 0]
-    y = X_2d[i, 1]
-
-    color = chord_cmap(chord)
-
-    ax.scatter(
-        x,
-        y,
-        color=color,
-        s=40,
-        alpha=0.8,
-    )
-
-    ax.text(
-        x,
-        y,
-        chord_names[chord],
-        fontsize=7,
-    )
-
-ax.set_title("t-SNE colored by CHORD")
-
-plt.tight_layout()
-
-plt.savefig("./tiny_save/wtf.pdf")
-plt.close()
+# python3 test6_stage1.py > ./tiny_save/baby4_eval.txt

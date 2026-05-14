@@ -1,4 +1,4 @@
 target:
-chord:G:dim
+chord:D:maj/E
 infer:
-chord:G:dom
+chord:D:maj

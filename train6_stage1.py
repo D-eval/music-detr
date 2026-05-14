@@ -37,7 +37,7 @@ cfg = get_config()
 import sys
 sys.path.append(str(cfg.dataset_read_py_path_stage1_ytb))
 
-from read0 import StackDataset, collate_fn
+from read import StackDataset, collate_fn
 from torch.utils.data import DataLoader
 # dataset = RandomChordSynthDataset(prototype_dir=cfg.dataset_read_py_path_stage1 / "prototype",
 #                                   soundfont_dir=cfg.dataset_read_py_path_stage1 / "soundfonts",
@@ -45,7 +45,7 @@ from torch.utils.data import DataLoader
 #                                   min_midi=cfg.min_midi,
 #                                   max_midi=cfg.max_midi)
 
-dataset = StackDataset()
+dataset = StackDataset(cfg.sr)
 loader = DataLoader(
     dataset,
     batch_size=16,
@@ -75,10 +75,22 @@ model = CQTEncoder(cfg).to(device)
 
 
 # teacher = Teacher()
+current_state = model.state_dict()
 
 checkpoint_path = "../params/detr6/baby3.pt"
 state_dict = torch.load(checkpoint_path)
-model.load_state_dict(state_dict=state_dict, strict=False)
+
+# 过滤不匹配的参数
+filtered_state = {}
+for k, v in state_dict.items():
+    if k not in current_state:
+        continue
+    if v.shape != current_state[k].shape:
+        print("skip shape mismatch:", k)
+        continue
+    filtered_state[k] = v
+# 装载
+model.load_state_dict(state_dict=filtered_state, strict=False)
 
 # -------- optimizer --------
 optimizer = optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=1e-4)
@@ -159,7 +171,7 @@ for epoch in range(start_epoch+1, num_epochs):
     # ---------- 保存 ----------
     if epoch % cfg.save_epoch == 0:
         os.makedirs(cfg.large_save_dir, exist_ok=True)
-        torch.save(model.state_dict(), os.path.join(cfg.large_save_dir, f"baby3.pt"))
+        torch.save(model.state_dict(), os.path.join(cfg.large_save_dir, f"baby4.pt"))
         recorder.update(total_loss / (step+1), cfg.lr)
         recorder.save()
 

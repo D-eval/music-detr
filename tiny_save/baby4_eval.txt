@@ -1,0 +1,43 @@
+device: cuda
+
+========== Evaluation ==========
+total: 1386
+
+[Exist / N]
+exist acc: 0.9790764790764791
+N acc: 0.9849624060150376
+N total: 266
+chord total: 1120
+miss chord: 25
+
+[Symbol]
+symbol acc: 0.8484848484848485
+
+[Chord only]
+root acc: 0.9616438356164384
+quality acc: 0.9753424657534246
+bass acc: 0.8730593607305936
+root+quality acc: 0.9488584474885845
+
+[Counts]
+total 1386
+exist_correct 1357
+symbol_correct 1176
+chord_total 1120
+pred_chord_when_gt_chord 1095
+root_correct 1053
+quality_correct 1068
+bass_correct 956
+root_quality_correct 1039
+symbol_wrong 210
+bass_wrong 139
+N_total 266
+N_correct 262
+root_wrong 42
+quality_wrong 27
+root_quality_wrong 56
+exist_wrong 29
+N_wrong 4
+miss_chord 25
+
+saved error file: ./tiny_save/eval_errors.csv

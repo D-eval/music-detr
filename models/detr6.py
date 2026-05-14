@@ -707,20 +707,27 @@ class ChordClassifierMixin:
         x: (B, T, D)
         """
         exists = [temp['exist'] for temp in target]
-        exists = torch.stack(exists, dim=-1) # (B,)
+        exists = torch.stack(exists, dim=0).squeeze(-1).long() # (B,)
         
-        exist_tar = exists.unsqueeze(-1) # (B,1)
+        exist_tar = exists.unsqueeze(-1).float() # (B,1)
         exist_logits = self.head_exist(x) # (B, T, 1)
         exist_logits = exist_logits.mean(1) # (B,1)
-        loss_exist = F.binary_cross_entropy(exist_logits, exist_tar)
         
-        target = target[exists]
+        loss_exist = F.binary_cross_entropy_with_logits(exist_logits, exist_tar)
+        
+        target = [
+            t for t, e in zip(target, exists)
+            if e == 1
+        ]
+        
+        x = x[exists.bool(), :, :]
+        
         B, T, D = x.shape
         
         root_tar = [temp['root_idx'] for temp in target]
-        root_tar = torch.stack(root_tar, dim=-1).squeeze(-1) # (B,)
+        root_tar = torch.stack(root_tar, dim=0).squeeze(-1) # (B,)
         chord_tar = [temp['chord_idx'] for temp in target]
-        chord_tar = torch.stack(chord_tar, dim=-1).squeeze(-1) # (B,)
+        chord_tar = torch.stack(chord_tar, dim=0).squeeze(-1) # (B,)
         
         # root
         root_logits = self.head_root(x) # (B, T, 12)
@@ -740,7 +747,7 @@ class ChordClassifierMixin:
         return loss
 
     @torch.no_grad()
-    def infer(self, x):
+    def infer(self, x, exist_threshold=0.5):
         """
         x: (B, T, D)
         """
@@ -771,13 +778,22 @@ class ChordClassifierMixin:
         chord_prob = torch.softmax(chord_logits, dim=-1)
         chord_idx = chord_prob.argmax(dim=-1)  # (B,)
 
+        exist_logits = self.head_exist(x) # (B,T,1)
+        exist_logits = exist_logits.mean(1).squeeze(-1) # (B) # 如果 < threshold, 返回 N
+        exist = exist_logits > exist_threshold # (B)
+
         results = []
 
         for b in range(B):
             r = int(root_idx[b].item())
             c = int(chord_idx[b].item())
+            e = exist[b]
+            
+            symbol = f"{root_names[r]}:{chord_names[c]}" if e else "N"
 
             results.append({
+                "exist": exist,
+                
                 "root_idx": r,
                 "root_name": root_names[r],
                 "root_conf": float(root_prob[b, r].item()),
@@ -789,7 +805,7 @@ class ChordClassifierMixin:
                 "root_prob": root_prob[b].detach().cpu(),
                 "chord_prob": chord_prob[b].detach().cpu(),
 
-                "symbol": f"{root_names[r]}:{chord_names[c]}",
+                "symbol": symbol,
             })
 
         if B == 1:
