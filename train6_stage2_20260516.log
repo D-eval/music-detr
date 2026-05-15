@@ -1,0 +1,7 @@
+nohup: ignoring input
+device: cuda
+初始化注意力模块
+初始化注意力模块
+初始化注意力模块
+成功加载预训练权重: ../params/detr6/baby4.pt
+[Epoch 5] step 0 loss: 3.9473

@@ -1387,12 +1387,12 @@ class PitchDetr(nn.Module):
             nn.Linear(D, P)
         )
         
-        harmony_prior = build_euler_cost_matrix(freqs) # (P,P)
+        harmony_prior = build_euler_cost_matrix(freqs.numpy()) # (P,P)
         self.register_buffer("harmony_prior", harmony_prior)
         # pitch_vec (B, P), harmony_prior (P, P), pitch_tar, (B, P) one hot
         # cost // loss (pitch_vec, pitch_tar) = pitch_vec @ harmony_prior @ pitch_tar.T
 
-        self.pitch_pos_embedding = nn.Parameter(apply_freq_time_encoding(P, 1, D)) # (1, P, D)
+        self.pitch_pos_embedding = nn.Parameter(apply_freq_time_encoding(freqs, torch.tensor([1]), D)) # (1, P, D)
 
         self.loss_weights = cfg.pitchDetr.loss_weights
         self.cost_weights = cfg.pitchDetr.cost_weights
@@ -1401,18 +1401,20 @@ class PitchDetr(nn.Module):
         self.D = D
         self.P = P
         
+        self.min_midi = min_midi
+        
     def forward(self, audio):
         """
         audio: (B, T1, 2)
         """
-        cqt = self.preprocessor(audio) # (B, T, P, 2*W)
+        cqt, _, _ = self.preprocessor(audio) # (B, T, P, 2*W)
         fea = self.backbone(cqt, retain_P=True) # (B, T, P, D)
         fea = fea.mean(1) # (B, P, D)
         B, P, D = fea.shape
         assert P==self.P
         
         fea = fea + self.pitch_pos_embedding # (B, P, D)
-        query = self.querys.expand(B,1,1) # (B, Q, D)
+        query = self.querys.expand(B,-1,-1) # (B, Q, D)
         
         modal_dict = {
             "subject": query, # (B, Q, C)
@@ -1441,7 +1443,7 @@ class PitchDetr(nn.Module):
             N: int
         """
         exist_neg_log_prob = - F.logsigmoid(exist_logits) # (Q, 1)
-        return exist_neg_log_prob.expand(1,N).T # (N, Q)
+        return exist_neg_log_prob.expand(-1,N).T # (N, Q)
     
     def get_sample_loss(self, x, target):
         """
@@ -1457,8 +1459,8 @@ class PitchDetr(nn.Module):
         exist_gt = target['exist']
         if not exist_gt.item():
             # 所有 query 预测 0
-            exist_gt = exist_gt[None,:].expand(self.Q, 1)
-            loss = F.binary_cross_entropy_with_logits(exist_logits, exist_gt)
+            exist_gt = exist_gt[None,:].expand(self.Q, -1)
+            loss = F.binary_cross_entropy_with_logits(exist_logits, exist_gt.float())
             return loss
         
         pitch_logits = self.pitch_head(x) # (Q, P)
@@ -1525,7 +1527,7 @@ class PitchDetr(nn.Module):
         pitch_idx = pitch_idx[0,:]
         pitch_exist = pitch_idx[exist] # (M)
         result = {
-            "midi": pitch_exist.detach().cpu(),
+            "midi": pitch_exist.detach().cpu() + self.min_midi,
             "exist_prob": exist_prob.detach().cpu(),
             "pitch_prob": pitch_idx.detach().cpu(),
         }

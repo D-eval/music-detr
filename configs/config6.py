@@ -88,13 +88,13 @@ def get_config():
     cfg.pitchDetr.head_dim = 64
     cfg.pitchDetr.rms_norm_eps = 1e-6
     cfg.pitchDetr.attn_type = "flash"
-    
+    cfg.pitchDetr.time_mask_len = 13
     cfg.pitchDetr.cost_weights = {
-        "exist":0,
+        "exist":0.1,
         "pitch":1,
     }
     cfg.pitchDetr.loss_weights = {
-        "exist":1,
+        "exist":0.5,
         "pitch":1,
     }
     

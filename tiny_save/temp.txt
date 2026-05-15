@@ -1,4 +1,4 @@
 target:
-chord:D:maj/E
+midi:N
 infer:
-chord:D:maj
+midi:tensor([124,  72,  37,  66,  62,  91, 108,  41,  59])

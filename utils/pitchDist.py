@@ -33,7 +33,7 @@ def pitch_dist_euler(p1, p2, max_den=12):
     r = 2 ** (dp / 12)
 
     # 2️⃣ 有理逼近
-    frac = Fraction(r).limit_denominator(max_den)
+    frac = Fraction(float(r)).limit_denominator(max_den)
     a, b = frac.numerator, frac.denominator
 
     # 3️⃣ Euler 不和谐度

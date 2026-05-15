@@ -118,7 +118,7 @@ for epoch in range(start_epoch+1, num_epochs):
         # ---------- forward + loss（AMP）----------
         with torch.amp.autocast("cuda"):
             # x, _, freqs = preprocessor(audio.to(device))
-            output = model(x)
+            output = model(audio)
             loss = model.get_loss(output, target)
             assert ~torch.isnan(loss)
         # ---------- backward ----------
@@ -142,7 +142,7 @@ for epoch in range(start_epoch+1, num_epochs):
                 # x, _, freqs = preprocessor(audio.to(device))
                 model.eval()
                 output = model(audio.to(device))
-                infer_output = model.infer(output)
+                infer_output = model.infer(output, 0.5)
                 model.train()
             # infer_output, target : Dict{
             #     "root": root_pred, # (M) 0~11
