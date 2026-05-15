@@ -320,6 +320,10 @@ class MultiWindowCQT(nn.Module):
             (B, T, F, W*2), (T,) (F,)
         """
         wav = wav.permute(0,2,1) # (B, 2, L)
+        # mid, side divide
+        wav_middle = (wav[:, 0, :] + wav[:, 1, :]) / 2
+        wav_side = (wav[:, 0, :] - wav[:, 1, :]) / 2 # (B, L)
+        wav = torch.stack([wav_middle, wav_side], dim=1) # (B, 2, L)
         
         # begin norm
         wav_mid = wav.mean(1) # (B,L)

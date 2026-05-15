@@ -78,9 +78,8 @@ def cal_text_cost(gt, pred):
     return cost
 
 class Qwen2MLP(nn.Module):
-    def __init__(self, layer_idx):
+    def __init__(self, layer_idx, cfg):
         super().__init__()
-        cfg = get_config()
         
         d_input = cfg.detr_d_model_list[layer_idx]
         d_up = cfg.ffn_dim_up[layer_idx]
@@ -243,10 +242,9 @@ AttentionType = {
 class Qwen2Attention(nn.Module):
     """Multi-headed attention from 'Attention Is All You Need' paper"""
 
-    def __init__(self, layer_idx: int):
+    def __init__(self, layer_idx, cfg):
         super().__init__()
         self.layer_idx = layer_idx
-        cfg = get_config()
         self.attn_type = cfg.attn_type
         
         d_model = cfg.detr_d_model_list[layer_idx]
@@ -395,13 +393,11 @@ class Qwen2DecoderLayer(nn.Module):
 
 
 class TFDecoderLayer(nn.Module):
-    def __init__(self, layer_idx: int):
+    def __init__(self, layer_idx, cfg):
         super().__init__()
-        cfg = get_config()
-        
         self.layer_idx = layer_idx
-        self.self_attn = Qwen2Attention(layer_idx=layer_idx)
-        self.mlp = Qwen2MLP(layer_idx=layer_idx)
+        self.self_attn = Qwen2Attention(layer_idx=layer_idx, cfg=cfg)
+        self.mlp = Qwen2MLP(layer_idx=layer_idx, cfg=cfg)
         self.input_layernorm = Qwen2RMSNorm(cfg.detr_d_model_list[layer_idx])
         self.post_attention_layernorm = Qwen2RMSNorm(cfg.detr_d_model_list[layer_idx])
         
@@ -1038,7 +1034,7 @@ class CQTEncoder(ChordClassifierMixin, nn.Module):
         self.loss_weight = cfg.harmony_conv.loss_weight
         self.threshold = cfg.harmony_conv.infer_threshold
 
-    def forward(self, x):
+    def forward(self, x, retain_P=False):
         """
             x: (B, T, P, C)
             return: (B, T, D)
@@ -1060,6 +1056,8 @@ class CQTEncoder(ChordClassifierMixin, nn.Module):
         for layer in self.layers:
             x = layer(x) # (B, T, P, D)
         
+        if retain_P:
+            return x
         # x12 = dilation_pool(x.flatten(0,1), 12) # (B*T, 12, D)
         # x12 = x12.reshape(B,T,12,self.D) # (B, T, 12, D)
         
@@ -1308,13 +1306,13 @@ class Tiny(ChordClassifierMixin, nn.Module):
 class EnvelopeConv(nn.Module):
     def __init__(self, cfg):
         super().__init__()
+        # mlp + pitch wise conv + ffn residual + time pool -> (B, P, D)
         # P 个独立的卷积
         # kernel长度取波形的3个周期
         sr = cfg.sr
         freqs = get_freqs(cfg.min_midi, cfg.max_midi)
         self.register_buffer("freqs", freqs)
         
-        stride = int(cfg.cqt_stride * sr)
         kernel_size = int(cfg.envelope_conv.receptive_field / cfg.cqt_stride)
         # 保证奇数
         kernel_size = kernel_size+1 if kernel_size%2==0 else kernel_size
@@ -1347,29 +1345,192 @@ class EnvelopeConv(nn.Module):
         return result
 
 
+from utils.pitchDist import build_euler_cost_matrix
+
 class PitchDetr(nn.Module):
     """
     induction through 0.5 s time
     """
     def __init__(self, cfg):
         super().__init__()
+        # preprocessor
+        min_midi, max_midi = cfg.min_midi, cfg.max_midi
+        freqs = get_freqs(min_midi, max_midi)
+        self.preprocessor = MultiWindowCQT(freqs, cfg.sr, cfg.window_num, cfg.min_cycle,
+                                           trainable=False, stride=cfg.cqt_stride)
+        
+        # backbone
         self.backbone = CQTEncoder(cfg)
-        self.query_num = cfg.pitchDetr.query_num
+        Q = cfg.pitchDetr.query_num
+        D = cfg.harmony_conv.backbone_output_dim
+
+        # detr
+        self.querys = nn.Parameter(torch.randn(1, Q, D))
+        self.num_layers = cfg.pitchDetr.num_layers
+        self.inter_decoder_layers = nn.ModuleList([
+            TFDecoderLayer(i, cfg.pitchDetr)
+            for i in range(self.num_layers)
+        ])
         
+        P = cfg.max_midi - cfg.min_midi + 1
         
-    def forward(self, x):
+        # num_octave = math.ceil(num_pitch / 12)
+        # octave + pitch_cls
+        self.exist_head = nn.Sequential(
+            nn.Linear(D, D),
+            nn.GELU(),
+            nn.Linear(D, 1)
+        )
+        self.pitch_head = nn.Sequential(
+            nn.Linear(D, D),
+            nn.GELU(),
+            nn.Linear(D, P)
+        )
+        
+        harmony_prior = build_euler_cost_matrix(freqs) # (P,P)
+        self.register_buffer("harmony_prior", harmony_prior)
+        # pitch_vec (B, P), harmony_prior (P, P), pitch_tar, (B, P) one hot
+        # cost // loss (pitch_vec, pitch_tar) = pitch_vec @ harmony_prior @ pitch_tar.T
+
+        self.pitch_pos_embedding = nn.Parameter(apply_freq_time_encoding(P, 1, D)) # (1, P, D)
+
+        self.loss_weights = cfg.pitchDetr.loss_weights
+        self.cost_weights = cfg.pitchDetr.cost_weights
+
+        self.Q = Q
+        self.D = D
+        self.P = P
+        
+    def forward(self, audio):
         """
-        x: (B, T, P, 2*W)
+        audio: (B, T1, 2)
         """
-        fea = self.backbone(x) # (B, T, P, C)
-        B, T, P, C = fea.shape
+        cqt = self.preprocessor(audio) # (B, T, P, 2*W)
+        fea = self.backbone(cqt, retain_P=True) # (B, T, P, D)
+        fea = fea.mean(1) # (B, P, D)
+        B, P, D = fea.shape
+        assert P==self.P
         
-        fea = dilation_pool(fea.flatten(0,1), 12).reshape(B,T,12,C)
+        fea = fea + self.pitch_pos_embedding # (B, P, D)
+        query = self.querys.expand(B,1,1) # (B, Q, D)
         
-        # 决定性的时刻寻找
+        modal_dict = {
+            "subject": query, # (B, Q, C)
+            "object": fea, # (B, T, C)
+        }
         
+        for i in range(self.num_layers):
+            modal_dict = self.inter_decoder_layers[i](modal_dict) # (B, ..., C2)
         
+        query = modal_dict['subject'] # (B, Q, C)
+        return query
+
+    def get_pitch_cost(self, pitch_logits, pitch_tar):
+        """
+            pitch_prob: (Q, P) prob, after softmax
+            pitch_tar: (N, P) one_hot
+        """
+        pitch_prob = torch.softmax(pitch_logits, dim=-1)
+        harmony_prior = self.harmony_prior # (P, P)
+        cost_matrix = pitch_tar @ harmony_prior @ pitch_prob.T
+        return cost_matrix
         
+    def get_exist_cost(self, exist_logits, N):
+        """
+            exist_logits: (Q, 1)
+            N: int
+        """
+        exist_neg_log_prob = - F.logsigmoid(exist_logits) # (Q, 1)
+        return exist_neg_log_prob.expand(1,N).T # (N, Q)
+    
+    def get_sample_loss(self, x, target):
+        """
+        x: (Q, C)
+        target: {
+            "exist": (1,) 0~1
+            "midi": (N,) int
+            "midi_vec": (N, P) 0~1
+        }
+        """
+        exist_logits = self.exist_head(x) # (Q, 1)
+        
+        exist_gt = target['exist']
+        if not exist_gt.item():
+            # 所有 query 预测 0
+            exist_gt = exist_gt[None,:].expand(self.Q, 1)
+            loss = F.binary_cross_entropy_with_logits(exist_logits, exist_gt)
+            return loss
+        
+        pitch_logits = self.pitch_head(x) # (Q, P)
+        pitch_tar = target['midi_vec'] # (N, P)
+        pitch_cost = self.get_pitch_cost(pitch_logits, pitch_tar)
+        
+        N = pitch_tar.shape[0]
+        exist_cost = self.get_exist_cost(exist_logits, N)
+        
+        total_cost = pitch_cost * self.cost_weights['pitch'] +\
+                    exist_cost * self.cost_weights['exist']
+            
+        cost_np = total_cost.detach().cpu().numpy() # (N, Q)
+        N_ids, Q_ids = linear_sum_assignment(cost_np)
+        
+        assert Q_ids.shape[0]==N, f"too much pitch num: {Q_ids.shape[0]}, with Query {self.Q}"
+        
+        Q_exist_target = torch.zeros((self.Q,1), device=x.device) # (Q,1)
+        Q_exist_target[Q_ids] = 1
+        
+        loss_exist = F.binary_cross_entropy_with_logits(exist_logits, Q_exist_target)
+        
+        # loss_pitch = pitch_cost[N_ids, Q_ids].mean() # 这样确保 query n 以不和谐度的路径靠近 pitch
+        pitch_logits_select = pitch_logits[Q_ids, :] # (M, P)
+        pitch_tar_select = pitch_tar[N_ids, :] # (M, P)
+        pitch_tar_idx = pitch_tar_select.argmax(-1) # (M)
+        loss_pitch = F.cross_entropy(pitch_logits_select, pitch_tar_idx)
+        
+        loss = self.loss_weights['exist'] * loss_exist +\
+                self.loss_weights['pitch'] * loss_pitch
+        return loss
+    def get_loss(self, x, targets):
+        """
+        targets: List Dict
+        x: (B, Q, C)
+        """
+        B, Q, C = x.shape
+        total_loss = 0
+        for b in range(B):
+            loss = self.get_sample_loss(x[b,...], targets[b])
+            total_loss += loss
+        total_loss /= B
+        return total_loss
+
+    @torch.no_grad()
+    def infer(self, x, threshold=0.5):
+        """
+        (1, Q, C)
+        return: Dict {
+            "midi_idx": (N,)
+        }
+        """
+        assert x.shape[0]==1
+        
+        exist_logits = self.exist_head(x)
+        exist_prob = torch.sigmoid(exist_logits) # (1, Q, 1)
+        exist = exist_prob > threshold # (1, Q, 1)
+        
+        pitch_logits = self.pitch_head(x) # (1, Q, P)
+        pitch_idx = torch.softmax(pitch_logits, -1) # (1, Q, P)
+        pitch_idx = pitch_logits.argmax(-1) # (1, Q)
+        
+        exist = exist[0,:,0] # (Q)
+        pitch_idx = pitch_idx[0,:]
+        pitch_exist = pitch_idx[exist] # (M)
+        result = {
+            "midi": pitch_exist.detach().cpu(),
+            "exist_prob": exist_prob.detach().cpu(),
+            "pitch_prob": pitch_idx.detach().cpu(),
+        }
+        return result
+
 
 from spec import wav2cqt_2C, wav2spec_2C
 from configs.cell_cls import CellCls
@@ -1401,7 +1562,7 @@ class PitchTransformer(nn.Module):
         self.loss_weight = cfg.detr2_loss_weight
         
         self.infer_threshold = cfg.infer_threshold
-	min_midi, max_midi = cfg.min_midi, cfg.max_midi
+        min_midi, max_midi = cfg.min_midi, cfg.max_midi
         
         freqs = get_freqs(min_midi, max_midi)
         self.preprocessor = MultiWindowCQT(freqs, cfg.sr, cfg.window_num, cfg.min_cycle,

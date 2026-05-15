@@ -39,3 +39,33 @@ def pitch_dist_euler(p1, p2, max_den=12):
     # 3️⃣ Euler 不和谐度
     return euler_dissonance_from_ratio(a, b)
 
+
+import torch
+
+def build_euler_cost_matrix(freqs, max_den=12):
+    """
+    freqs: (F,)
+    return:
+        cost: (F, F)
+    """
+
+    freqs = np.asarray(freqs)
+    F = len(freqs)
+
+    cost = np.zeros((F, F), dtype=np.float32)
+
+    pitches = 69 + 12 * np.log2(freqs / 440.0)
+
+    for i in range(F):
+        for j in range(i, F):
+
+            d = pitch_dist_euler(
+                pitches[i],
+                pitches[j],
+                max_den=max_den
+            )
+
+            cost[i, j] = d
+            cost[j, i] = d
+
+    return torch.tensor(cost)

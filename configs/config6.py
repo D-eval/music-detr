@@ -68,11 +68,35 @@ def get_config():
     cfg.harmony_conv.infer_threshold = 0.3
     
     cfg.envelope_conv = argparse.Namespace()
-    cfg.envelope_conv.receptive_field = 0.5
+    cfg.envelope_conv.receptive_field = 0.05
     cfg.envelope_conv.rep_dim = 512
     
     cfg.pitchDetr = argparse.Namespace()
     cfg.pitchDetr.query_num = 20 # max pitch
+    cfg.pitchDetr.num_layers = 3
+    cfg.pitchDetr.detr_d_model_list = [512] * 3
+    cfg.pitchDetr.pool_stride = [None] * 3
+    cfg.pitchDetr.head_dim_list = [128] * 3
+    assert len(cfg.pitchDetr.detr_d_model_list) == cfg.pitchDetr.num_layers
+    cfg.pitchDetr.ffn_dim_up = [1] * 3
+    cfg.pitchDetr.ffn_intermediate_up_list = [2] * 3
+    cfg.pitchDetr.n_attn_heads = 8
+    cfg.pitchDetr.attention_dropout = 0.1
+    cfg.pitchDetr.d_model = 512
+    cfg.pitchDetr.intermediate_size = 128
+    cfg.pitchDetr.n_kv_heads = 4
+    cfg.pitchDetr.head_dim = 64
+    cfg.pitchDetr.rms_norm_eps = 1e-6
+    cfg.pitchDetr.attn_type = "flash"
+    
+    cfg.pitchDetr.cost_weights = {
+        "exist":0,
+        "pitch":1,
+    }
+    cfg.pitchDetr.loss_weights = {
+        "exist":1,
+        "pitch":1,
+    }
     
     cfg.pitch_vocab_size = cfg.max_midi - cfg.min_midi + 1
     cfg.music_scale = "12tone"
