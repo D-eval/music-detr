@@ -695,9 +695,59 @@ def pitch_encoding_init(N, D):
     emb = emb / emb.std()
     return emb
 
-
+ChordClassifierMixin_modes = ['symbol', 'pitch']
 class ChordClassifierMixin:
-    def get_loss(self, x, target):
+    def set_mode(self, mode):
+        assert mode in ChordClassifierMixin_modes
+        self.mode = mode
+    def get_loss(self, **kw_args):
+        if self.mode=="symbol":
+            return self.get_symbol_loss(**kw_args)
+        elif self.mode=="pitch":
+            return self.get_pitch_loss(**kw_args)
+        else:
+            raise ValueError('wtf')
+    def get_pitch_loss(self, x, target):
+        """
+        target: List Dict{
+            "root": (1,), # 0~11
+            "pitch_cls_vec": (12,), # 0~1
+            "chord_idx": (1,), # 0~4, maj,min,dom,dim,aug
+        }
+        x: (B, T, D)
+        """
+        exists = [temp['exist'] for temp in target]
+        exists = torch.stack(exists, dim=0).squeeze(-1).long() # (B,)
+        
+        exist_tar = exists.unsqueeze(-1).float() # (B,1)
+        exist_logits = self.head_exist(x) # (B, T, 1)
+        exist_logits = exist_logits.mean(1) # (B,1)
+        
+        loss_exist = F.binary_cross_entropy_with_logits(exist_logits, exist_tar)
+        
+        target = [
+            t for t, e in zip(target, exists)
+            if e == 1
+        ]
+        
+        x = x[exists.bool(), :, :]
+        
+        B, T, D = x.shape
+        
+        # pitch
+        pitch_tar = [temp['pitch_cls_vec'] for temp in target]
+        pitch_tar = torch.stack(pitch_tar, dim=0) # (B,12)
+        
+        pitch_logits = self.head_pitch(x) # (B, T, 12)
+        pitch_logits = pitch_logits.mean(1) # (B, 12)
+        
+        loss_pitch = F.binary_cross_entropy_with_logits(pitch_logits, pitch_tar)
+        
+        loss = self.loss_weight['pitch'] * loss_pitch + \
+                self.loss_weight['exist'] * loss_exist
+        return loss
+        
+    def get_symbol_loss(self, x, target):
         """
         target: List Dict{
             "root": (1,), # 0~11
@@ -747,7 +797,84 @@ class ChordClassifierMixin:
         return loss
 
     @torch.no_grad()
-    def infer(self, x, exist_threshold=0.5):
+    def infer(self, **kw_args):
+        if self.mode=="symbol":
+            return self.infer_symbol(**kw_args)
+        elif self.mode=="pitch":
+            return self.infer_pitch(**kw_args)
+        else:
+            raise ValueError("wtf")
+
+    @torch.no_grad()
+    def infer_pitch(self, x, exist_threshold=0.5, pitch_threshold=0.5):
+        """
+        x: (B, T, D)
+        """
+
+        B, T, D = x.shape
+
+        pitch_names = [
+            "C", "C#", "D", "D#", "E", "F",
+            "F#", "G", "G#", "A", "A#", "B"
+        ]
+
+        # pitch
+        pitch_logits = self.head_pitch(x)      # (B,T,12)
+        pitch_logits = pitch_logits.mean(1)    # (B,12)
+
+        pitch_prob = torch.sigmoid(pitch_logits)  # (B,12)
+
+        pitch_binary = pitch_prob > pitch_threshold  # (B,12)
+
+        # exist
+        exist_logits = self.head_exist(x)      # (B,T,1)
+        exist_logits = exist_logits.mean(1).squeeze(-1)  # (B,)
+
+        exist_prob = torch.sigmoid(exist_logits)
+        exist = exist_prob > exist_threshold
+
+        results = []
+
+        for b in range(B):
+
+            active_pitch_idx = torch.nonzero(
+                pitch_binary[b],
+                as_tuple=False
+            ).squeeze(-1).tolist()
+
+            if isinstance(active_pitch_idx, int):
+                active_pitch_idx = [active_pitch_idx]
+
+            active_pitch_names = [
+                pitch_names[i]
+                for i in active_pitch_idx
+            ]
+
+            if exist[b]:
+                symbol = "[" + ",".join(active_pitch_names) + "]"
+            else:
+                symbol = "N"
+
+            results.append({
+                "exist": bool(exist[b].item()),
+                "exist_conf": float(exist_prob[b].item()),
+
+                "pitch_prob": pitch_prob[b].detach().cpu(),
+                "pitch_binary": pitch_binary[b].detach().cpu(),
+
+                "pitch_idx": active_pitch_idx,
+                "pitch_names": active_pitch_names,
+
+                "symbol": symbol,
+            })
+
+        if B == 1:
+            return results[0]
+
+        return results
+
+    @torch.no_grad()
+    def infer_symbol(self, x, exist_threshold=0.5):
         """
         x: (B, T, D)
         """
@@ -780,8 +907,8 @@ class ChordClassifierMixin:
 
         exist_logits = self.head_exist(x) # (B,T,1)
         exist_logits = exist_logits.mean(1).squeeze(-1) # (B) # 如果 < threshold, 返回 N
-        exist = exist_logits > exist_threshold # (B)
-
+        exist_prob = torch.sigmoid(exist_logits)
+        exist = exist_prob > exist_threshold
         results = []
 
         for b in range(B):
@@ -1220,13 +1347,15 @@ class EnvelopeConv(nn.Module):
         return result
 
 
-class T0p5(nn.Module):
+class PitchDetr(nn.Module):
     """
     induction through 0.5 s time
     """
     def __init__(self, cfg):
         super().__init__()
         self.backbone = CQTEncoder(cfg)
+        self.query_num = cfg.pitchDetr.query_num
+        
         
     def forward(self, x):
         """
@@ -1272,21 +1401,17 @@ class PitchTransformer(nn.Module):
         self.loss_weight = cfg.detr2_loss_weight
         
         self.infer_threshold = cfg.infer_threshold
-            
-
-        min_midi, max_midi = cfg.min_midi, cfg.max_midi
+	min_midi, max_midi = cfg.min_midi, cfg.max_midi
         
         freqs = get_freqs(min_midi, max_midi)
         self.preprocessor = MultiWindowCQT(freqs, cfg.sr, cfg.window_num, cfg.min_cycle,
                                            trainable=False, stride=cfg.cqt_stride)
         self.register_buffer("freqs", freqs)
-        
         self.backbone = CQTEncoder(cfg)
-        
         assert cfg.backbone_output_dim == self.d_model_list[0], "backbone输出维度必须等于decoder输入维度"
-        
+
         self.pretrain_head = nn.Linear(cfg.backbone_output_dim, 5 + 1) # maj,min,dom,dim,arg + None
-        
+
     def load_pretrain(self, pretrained_path):
         state_dict = torch.load(pretrained_path, map_location="cpu")
         self.backbone.load_state_dict(state_dict)

@@ -54,6 +54,7 @@ loader = DataLoader(
     collate_fn=collate_fn,
     pin_memory=True
 )
+assert 0
 
 from models.detr6 import CQTEncoder
 from spec import wav2cqt_2C, wav2spec_2C

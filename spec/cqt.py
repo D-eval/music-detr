@@ -201,10 +201,10 @@ class MultiWindowCQT(nn.Module):
     Multi-window learnable CQT-like frontend
 
     输入:
-        wav: (B, L)
+        wav: (B, L, 2)
 
     输出:
-        energy: (B, T, F, W)
+        energy: (B, T, F, W*2)
 
     其中:
         B: batch
@@ -320,6 +320,14 @@ class MultiWindowCQT(nn.Module):
             (B, T, F, W*2), (T,) (F,)
         """
         wav = wav.permute(0,2,1) # (B, 2, L)
+        
+        # begin norm
+        wav_mid = wav.mean(1) # (B,L)
+        wav_mu = wav_mid.mean(-1)[:,None,None] # (B,1,1)
+        wav_sigma = wav_mid.std(-1)[:,None,None] # (B,1,1)
+        wav = (wav - wav_mu) / (wav_sigma + 1e-6) # (B, 2, L)
+        # end norm
+        
         B, C, L = wav.shape
         assert C == 2, "输入必须是双声道"
         wav = wav.flatten(0,1) # (B*2, L)

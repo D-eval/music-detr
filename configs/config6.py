@@ -71,6 +71,9 @@ def get_config():
     cfg.envelope_conv.receptive_field = 0.5
     cfg.envelope_conv.rep_dim = 512
     
+    cfg.pitchDetr = argparse.Namespace()
+    cfg.pitchDetr.query_num = 20 # max pitch
+    
     cfg.pitch_vocab_size = cfg.max_midi - cfg.min_midi + 1
     cfg.music_scale = "12tone"
 
