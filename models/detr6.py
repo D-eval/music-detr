@@ -1531,6 +1531,24 @@ class PitchDetr(nn.Module):
         }
         return result
 
+    def load_pretrain(self, checkpoint_path):
+        current_state = self.backbone.state_dict()
+        state_dict = torch.load(checkpoint_path)
+
+        # 过滤不匹配的参数
+        filtered_state = {}
+        for k, v in state_dict.items():
+            if k not in current_state:
+                continue
+            if v.shape != current_state[k].shape:
+                print("skip shape mismatch:", k)
+                continue
+            filtered_state[k] = v
+        # 装载
+        self.backbone.load_state_dict(state_dict=filtered_state, strict=False)
+        print(f"成功加载预训练权重: {checkpoint_path}")
+       
+
 
 from spec import wav2cqt_2C, wav2spec_2C
 from configs.cell_cls import CellCls
@@ -1573,10 +1591,22 @@ class PitchTransformer(nn.Module):
 
         self.pretrain_head = nn.Linear(cfg.backbone_output_dim, 5 + 1) # maj,min,dom,dim,arg + None
 
-    def load_pretrain(self, pretrained_path):
-        state_dict = torch.load(pretrained_path, map_location="cpu")
-        self.backbone.load_state_dict(state_dict)
-        print(f"成功加载预训练权重: {pretrained_path}")
+    def load_pretrain(self, checkpoint_path):
+        current_state = self.backbone.state_dict()
+        state_dict = torch.load(checkpoint_path)
+
+        # 过滤不匹配的参数
+        filtered_state = {}
+        for k, v in state_dict.items():
+            if k not in current_state:
+                continue
+            if v.shape != current_state[k].shape:
+                print("skip shape mismatch:", k)
+                continue
+            filtered_state[k] = v
+        # 装载
+        self.backbone.load_state_dict(state_dict=filtered_state, strict=False)
+        print(f"成功加载预训练权重: {checkpoint_path}")
        
     def freeze_backbone(self):
         for param in self.backbone.parameters():

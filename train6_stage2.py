@@ -76,22 +76,23 @@ model = PitchDetr(cfg).to(device)
 
 
 # teacher = Teacher()
-current_state = model.state_dict()
+# current_state = model.backbone.state_dict()
 
-checkpoint_path = "../params/detr6/baby4.pt"
-state_dict = torch.load(checkpoint_path)
+# checkpoint_path = "../params/detr6/baby4.pt"
+# state_dict = torch.load(checkpoint_path)
 
-# 过滤不匹配的参数
-filtered_state = {}
-for k, v in state_dict.items():
-    if k not in current_state:
-        continue
-    if v.shape != current_state[k].shape:
-        print("skip shape mismatch:", k)
-        continue
-    filtered_state[k] = v
-# 装载
-model.load_state_dict(state_dict=filtered_state, strict=False)
+# # 过滤不匹配的参数
+# filtered_state = {}
+# for k, v in state_dict.items():
+#     if k not in current_state:
+#         continue
+#     if v.shape != current_state[k].shape:
+#         print("skip shape mismatch:", k)
+#         continue
+#     filtered_state[k] = v
+# # 装载
+# model.backbone.load_state_dict(state_dict=filtered_state, strict=False)
+model.load_pretrain("../params/detr6/baby4.pt")
 
 # -------- optimizer --------
 optimizer = optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=1e-4)
@@ -160,13 +161,13 @@ for epoch in range(start_epoch+1, num_epochs):
                 # f.write("root:"+str(target[0]['root'])+"\n")
                 # f.write("cls:"+str(target[0]['chord_cls_name'])+"\n")
                 # f.write("pitch:"+str(target[0]['pitch_cls'])+"\n")
-                f.write("chord:"+str(target[0]['midi'])+"\n")
+                f.write("midi:"+str(target[0]['midi'])+"\n")
 
                 f.write("infer:\n")
                 # f.write("root:"+str(infer_output['root_idx'])+"\n")
                 # f.write("cls:"+str(infer_output['chord_name'])+"\n")
                 # f.write("pitch:"+str(infer_output['pitch_cls'])+"\n")
-                f.write("chord:"+str(infer_output['midi'])+"\n")
+                f.write("midi:"+str(infer_output['midi'])+"\n")
                 
     print(f"==== Epoch {epoch} avg loss: {total_loss / (step+1):.4f} ====")
     # ---------- 保存 ----------
