@@ -68,4 +68,4 @@ def build_euler_cost_matrix(freqs, max_den=12):
             cost[i, j] = d
             cost[j, i] = d
 
-    return torch.tensor(cost)
+    return torch.tensor(cost).log()

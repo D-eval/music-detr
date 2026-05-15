@@ -4,4 +4,63 @@ device: cuda
 初始化注意力模块
 初始化注意力模块
 成功加载预训练权重: ../params/detr6/baby4.pt
-[Epoch 5] step 0 loss: 3.9473
+[Epoch 11] step 0 loss: 4.7692
+[Epoch 11] step 10 loss: 4.6068
+[Epoch 11] step 20 loss: 4.4323
+[Epoch 11] step 30 loss: 3.8764
+[Epoch 11] step 40 loss: 2.8579
+[Epoch 11] step 50 loss: 3.3703
+[Epoch 11] step 60 loss: 3.4812
+[Epoch 11] step 70 loss: 3.2008
+[Epoch 11] step 80 loss: 3.5123
+[Epoch 11] step 90 loss: 2.7595
+[Epoch 11] step 100 loss: 2.8318
+[Epoch 11] step 110 loss: 2.3259
+[Epoch 11] step 120 loss: 3.0985
+[Epoch 11] step 130 loss: 2.8345
+[Epoch 11] step 140 loss: 2.6757
+[Epoch 11] step 150 loss: 2.8104
+[Epoch 11] step 160 loss: 3.1849
+[Epoch 11] step 170 loss: 2.9344
+==== Epoch 11 avg loss: 3.1853 ====
+[Epoch 12] step 0 loss: 2.8065
+[Epoch 12] step 10 loss: 3.0578
+[Epoch 12] step 20 loss: 2.8731
+[Epoch 12] step 30 loss: 2.8470
+[Epoch 12] step 40 loss: 2.7177
+[Epoch 12] step 50 loss: 3.3301
+[Epoch 12] step 60 loss: 3.2539
+[Epoch 12] step 70 loss: 2.9040
+[Epoch 12] step 80 loss: 2.6402
+[Epoch 12] step 90 loss: 2.6392
+[Epoch 12] step 100 loss: 3.3270
+[Epoch 12] step 110 loss: 2.6820
+[Epoch 12] step 120 loss: 2.6950
+[Epoch 12] step 130 loss: 2.6631
+[Epoch 12] step 140 loss: 2.7011
+[Epoch 12] step 150 loss: 3.1970
+[Epoch 12] step 160 loss: 3.0633
+[Epoch 12] step 170 loss: 2.7190
+==== Epoch 12 avg loss: 2.7844 ====
+[Epoch 13] step 0 loss: 2.4856
+[Epoch 13] step 10 loss: 2.5370
+[Epoch 13] step 20 loss: 2.8118
+[Epoch 13] step 30 loss: 2.6530
+[Epoch 13] step 40 loss: 2.2780
+[Epoch 13] step 50 loss: 2.7804
+[Epoch 13] step 60 loss: 2.8605
+[Epoch 13] step 70 loss: 2.4034
+[Epoch 13] step 80 loss: 2.7284
+[Epoch 13] step 90 loss: 2.3264
+[Epoch 13] step 100 loss: 2.3450
+[Epoch 13] step 110 loss: 3.1453
+[Epoch 13] step 120 loss: 3.0826
+[Epoch 13] step 130 loss: 2.9096
+[Epoch 13] step 140 loss: 3.1793
+[Epoch 13] step 150 loss: 2.7205
+[Epoch 13] step 160 loss: 2.7558
+[Epoch 13] step 170 loss: 2.9307
+==== Epoch 13 avg loss: 2.7019 ====
+[Epoch 14] step 0 loss: 3.1282
+[Epoch 14] step 10 loss: 2.9628
+[Epoch 14] step 20 loss: 2.0719

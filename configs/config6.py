@@ -90,11 +90,11 @@ def get_config():
     cfg.pitchDetr.attn_type = "flash"
     cfg.pitchDetr.time_mask_len = 13
     cfg.pitchDetr.cost_weights = {
-        "exist":0.1,
+        "exist":1,
         "pitch":1,
     }
     cfg.pitchDetr.loss_weights = {
-        "exist":0.5,
+        "exist":1,
         "pitch":1,
     }
     
