@@ -1300,7 +1300,7 @@ class Tiny(ChordClassifierMixin, nn.Module):
 
 
 
-
+# 300 epoch 即可收敛
 # 归纳不同包络特质的音色
 # 另外，提升frame wise任务的时间分辨率
 class EnvelopeConv(nn.Module):

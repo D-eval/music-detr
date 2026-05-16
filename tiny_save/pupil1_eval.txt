@@ -1,0 +1,8 @@
+========== Evaluation ==========
+exist acc: 1.0000
+precision: 0.9998
+recall:    0.9995
+f1:        0.9997
+TP: 10383
+FP: 2
+FN: 5
