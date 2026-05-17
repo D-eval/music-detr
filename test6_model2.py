@@ -25,7 +25,7 @@ cfg = get_config()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = PitchDetr(cfg).to(device)
 state_dict = torch.load(checkpoint_path, map_location="cpu")
-model.load_state_dict(state_dict=state_dict)
+model.load_state_dict(state_dict=state_dict, strict=False)
 model.eval()
 
 audio, sr = librosa.load(audio_path, mono=False, sr=sr)

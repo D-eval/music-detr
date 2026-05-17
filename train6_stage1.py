@@ -78,7 +78,7 @@ model = CQTEncoder(cfg).to(device)
 # teacher = Teacher()
 current_state = model.state_dict()
 
-checkpoint_path = "../params/detr6/baby3.pt"
+checkpoint_path = "../params/detr6/baby4.pt"
 state_dict = torch.load(checkpoint_path)
 
 # 过滤不匹配的参数
@@ -95,14 +95,15 @@ model.load_state_dict(state_dict=filtered_state, strict=False)
 
 # -------- optimizer --------
 optimizer = optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=1e-4)
-recorder = TrainingRecorder(cfg, "baby3")
+recorder = TrainingRecorder(cfg, "baby5")
 recorder.load()
 # -------- 混合精度（强烈建议）--------
 scaler = torch.cuda.amp.GradScaler()
 
 # -------- 训练 --------
 model.train()
-
+model.set_mode("midi")
+model.retain_P = True
 
 num_epochs = 50000
 
@@ -160,19 +161,20 @@ for epoch in range(start_epoch+1, num_epochs):
                 # f.write("root:"+str(target[0]['root'])+"\n")
                 # f.write("cls:"+str(target[0]['chord_cls_name'])+"\n")
                 # f.write("pitch:"+str(target[0]['pitch_cls'])+"\n")
-                f.write("chord:"+str(target[0]['symbol'])+"\n")
+                # f.write("chord:"+str(target[0]['symbol'])+"\n")
+                f.write("midi:"+str(target[0]['midi'])+"\n")
 
                 f.write("infer:\n")
                 # f.write("root:"+str(infer_output['root_idx'])+"\n")
                 # f.write("cls:"+str(infer_output['chord_name'])+"\n")
                 # f.write("pitch:"+str(infer_output['pitch_cls'])+"\n")
-                f.write("chord:"+str(infer_output['symbol'])+"\n")
+                f.write("midi:"+str(infer_output['midi'])+"\n")
                 
     print(f"==== Epoch {epoch} avg loss: {total_loss / (step+1):.4f} ====")
     # ---------- 保存 ----------
     if epoch % cfg.save_epoch == 0:
         os.makedirs(cfg.large_save_dir, exist_ok=True)
-        torch.save(model.state_dict(), os.path.join(cfg.large_save_dir, f"baby4.pt"))
+        torch.save(model.state_dict(), os.path.join(cfg.large_save_dir, f"baby5.pt"))
         recorder.update(total_loss / (step+1), cfg.lr)
         recorder.save()
 

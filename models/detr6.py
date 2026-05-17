@@ -408,6 +408,7 @@ class TFDecoderLayer(nn.Module):
     def forward(
         self,
         modal_dict: Dict[str, torch.Tensor],
+        only_object = False, # 只当作 transformer encoder
         # attention_mask: Optional[torch.Tensor] = None,
         # position_ids: Optional[torch.LongTensor] = None,
         # past_key_values: Optional[Cache] = None,
@@ -423,9 +424,16 @@ class TFDecoderLayer(nn.Module):
         _B, Q, _C = text.shape
         assert _C==C
         
+        if only_object:
+            Q=0
+        
         TaQ = T + Q
         
-        hidden = torch.concat([pitch, text], dim=1) # (B, TaQ, C)
+        if only_object:
+            hidden = pitch
+        else:
+            hidden = torch.concat([pitch, text], dim=1) # (B, TaQ, C)
+
         residual = hidden
         
         hidden = self.input_layernorm(hidden)
@@ -580,8 +588,8 @@ class HarmonyConv(nn.Module):
         self.register_buffer("envelopes", torch.stack(envelopes, dim=0)[:,None,:]) # (C_out, 1, kernel_size)
     def forward(self, cqt):
         """
-            cqt: (B, 1, P)
-            return: (B, H, P)
+            cqt: (B*D*T, 1, P)
+            return: (B*D*T, H, P)
         """
         kernel_size = self.kernels.shape[2]
         padding_len = kernel_size - 1
@@ -591,6 +599,50 @@ class HarmonyConv(nn.Module):
         x = F.pad(cqt, (0, padding_len))
         y = F.conv1d(x, kernels, padding=0) # (B*T, harmony, P)
         return y
+
+
+
+# 300 epoch 即可收敛
+# 归纳不同包络特质的音色
+# 另外，提升frame wise任务的时间分辨率
+class EnvelopeConv(nn.Module):
+    def __init__(self, cfg):
+        super().__init__()
+        # mlp + pitch wise conv + ffn residual + time pool -> (B, P, D)
+        # P 个独立的卷积
+        # kernel长度取波形的3个周期
+        kernel_size = int(cfg.envelope_conv.receptive_field / cfg.cqt_stride)
+        # 保证奇数
+        kernel_size = kernel_size+1 if kernel_size%2==0 else kernel_size
+        
+        E = cfg.envelope_conv.rep_dim
+        
+        # 分 P 卷积
+        P = cfg.max_midi - cfg.min_midi + 1
+        self.P = P
+        kernels = torch.empty(P, E, 1, kernel_size)
+        nn.init.kaiming_normal_(kernels, mode="fan_in", nonlinearity="linear")
+        self.kernels = nn.Parameter(kernels)
+        
+    def forward(self, x):
+        """
+        x: (P, B*D, 1, T)
+        P 分布在 T 上没有差异
+        但是 T 分布在 P 上有差异
+        所以要区分 P 个通道
+        每个通道有 E 种模式 (envelope)
+        
+        return: (P, B*D, E, T)
+        """
+        P,B,c,T = x.shape
+        assert c==1
+        assert P==self.P
+        ys = []
+        for p in range(P):
+            y = F.conv1d(x[p,...], self.kernels[p,...]) # (B*D, E, T)
+            ys.append(y)
+        ys = ys.stack(ys,dim=0) # (P, B*D, E, T)
+        return ys
 
 
 class MLP(nn.Module):
@@ -654,6 +706,9 @@ class HarmonyBlock(nn.Module):
         return x
 
 
+
+
+
 def dilation_pool(x, dilation):
     # x: (B, P, C) -> (B, dilation, C)
     assert x.dim()==3
@@ -691,7 +746,7 @@ def pitch_encoding_init(N, D):
     emb = emb / emb.std()
     return emb
 
-ChordClassifierMixin_modes = ['symbol', 'pitch']
+ChordClassifierMixin_modes = ['symbol', 'pitch', 'midi']
 class ChordClassifierMixin:
     def set_mode(self, mode):
         assert mode in ChordClassifierMixin_modes
@@ -701,8 +756,58 @@ class ChordClassifierMixin:
             return self.get_symbol_loss(**kw_args)
         elif self.mode=="pitch":
             return self.get_pitch_loss(**kw_args)
+        elif self.mode=="midi":
+            return self.get_midi_loss(**kw_args)
         else:
             raise ValueError('wtf')
+    def get_midi_loss(self, x, target):
+        """
+        target: List Dict{
+            "midi": (N,) int
+            "midi_manyhot": (P,) 0~1
+        }
+        x: (B, T, P, D)
+        """
+        B, T, P, D = x.shape
+        assert P==self.P
+        
+        exists = [temp['exist'] for temp in target]
+        exists = torch.stack(exists, dim=0).squeeze(-1).long() # (B,)
+        
+        exist_tar = exists.unsqueeze(-1).float() # (B,1)
+        exist_logits = self.head_exist(x) # (B, T, 1)
+        exist_logits = exist_logits.mean(1) # (B,1)
+        
+        loss_exist = F.binary_cross_entropy_with_logits(exist_logits, exist_tar)
+        
+        target = [
+            t for t, e in zip(target, exists)
+            if e == 1
+        ]
+        
+        x = x[exists.bool(), ...] # (B, T, P, D)
+        
+        midi_logits = self.head_midi(x) # (B, T, P)
+        midi_logits = midi_logits.mean(1) # (B, P)
+        # midi_logits = midi_logits**2
+        midi_logits = F.softplus(midi_logits) # (B, P) float 0~1
+        midi_direction = midi_logits / torch.norm(midi_logits, dim=-1, keepdim=True)
+        
+        midi_tar = [temp['midi_manyhot'] for temp in target]
+        midi_tar = torch.stack(midi_tar, dim=0) # (B, P)
+        midi_tar = midi_tar / torch.norm(midi_tar, dim=-1, keepdim=True)
+        
+        harmony_prior = self.harmony_prior # (P, P)
+        
+        dist_of_each = midi_tar @ harmony_prior # (B, P)
+        dist = (dist_of_each * midi_direction).sum(-1) # (B,)
+        loss_midi = dist.mean()
+        
+        loss = self.loss_weight['midi'] * loss_midi + \
+                self.loss_weight['exist'] * loss_exist
+        
+        return loss
+
     def get_pitch_loss(self, x, target):
         """
         target: List Dict{
@@ -798,8 +903,56 @@ class ChordClassifierMixin:
             return self.infer_symbol(**kw_args)
         elif self.mode=="pitch":
             return self.infer_pitch(**kw_args)
+        elif self.mode=="midi":
+            return self.infer_midi(**kw_args)
         else:
             raise ValueError("wtf")
+
+    @torch.no_grad()
+    def infer_midi(self, x, exist_threshold=0.5, midi_threshold=0.5):
+        """
+        x: (B, T, P, D)
+        """
+        B, T, P, D = x.shape
+
+        midi_logits = self.head_midi(x)  # (B,T,P)
+        midi_logits = midi_logits.mean(1)  # (B,P)
+        midi_prob = torch.sigmoid(midi_logits)  # (B,P)
+        midi_binary = midi_prob > midi_threshold  # (B,P)
+
+        exist_logits = self.head_exist(x)  # (B,T,1)
+        exist_logits = exist_logits.mean(1).squeeze(-1)  # (B,)
+        exist_prob = torch.sigmoid(exist_logits)
+        exist = exist_prob > exist_threshold
+
+        results = []
+        for b in range(B):
+            active_midi_idx = (torch.nonzero(
+                midi_binary[b],
+                as_tuple=False
+            ).squeeze(-1) + self.min_midi).tolist()
+
+            if isinstance(active_midi_idx, int):
+                active_midi_idx = [active_midi_idx]
+
+            symbol = "[" + ",".join(map(str, active_midi_idx)) + "]" if exist[b] else "N"
+
+            results.append({
+                "exist": bool(exist[b].item()),
+                "exist_conf": float(exist_prob[b].item()),
+
+                "midi_prob": midi_prob[b].detach().cpu(),
+                "midi_binary": midi_binary[b].detach().cpu(),
+                "midi": active_midi_idx,
+
+                "symbol": symbol,
+            })
+
+        if B == 1:
+            return results[0]
+
+        return results
+        
 
     @torch.no_grad()
     def infer_pitch(self, x, exist_threshold=0.5, pitch_threshold=0.5):
@@ -944,6 +1097,8 @@ class CQTEncoder(ChordClassifierMixin, nn.Module):
         D = cfg.harmony_conv.backbone_output_dim
         self.D = D
         
+        self.min_midi = cfg.min_midi
+        
         self.prior_affine = nn.Linear(cfg.input_dim, D)
         self.layers = nn.ModuleList([
             HarmonyBlock(
@@ -975,6 +1130,10 @@ class CQTEncoder(ChordClassifierMixin, nn.Module):
         
         freqs = get_freqs(cfg.min_midi, cfg.max_midi)
         self.register_buffer("freqs", freqs)
+        
+        harmony_prior = build_euler_cost_matrix(freqs.numpy()) # (P,P)
+        self.register_buffer("harmony_prior", harmony_prior)
+        
         num_freqs = freqs.shape[0]
         self.num_freqs=num_freqs
         
@@ -1025,23 +1184,35 @@ class CQTEncoder(ChordClassifierMixin, nn.Module):
             nn.Linear(D, 1) # N, chord
         )
         
-        # self.pitch_head = nn.Sequential(
-        #     nn.Linear(D, D),
-        #     nn.GELU(),
-        #     nn.Linear(D, 1)
-        # )
+        self.head_pitch = nn.Sequential(
+            nn.Linear(D, D),
+            nn.GELU(),
+            nn.Linear(D, 1)
+        )
+        
+        self.head_midi = nn.Sequential(
+            nn.Linear(D, D),
+            nn.GELU(),
+            nn.Linear(D, 1)
+        )
         
         self.loss_weight = cfg.harmony_conv.loss_weight
         self.threshold = cfg.harmony_conv.infer_threshold
+        
+        self.retain_P = True
 
-    def forward(self, x, retain_P=False):
+    def forward(self, x):
         """
             x: (B, T, P, C)
             return: (B, T, D)
+            retain_P: (B, T, P, D)
         """
+        retain_P = self.retain_P
+        
         B, T, P, C = x.shape
         assert P==self.num_freqs
         x = self.prior_affine(x) # (B, T, P, D)
+        # 对于 harmony 和 envelop 应该用 2个 affine
  
         # # pitch embedding
         # midi = torch.arange(P, device=x.device)
@@ -1300,50 +1471,6 @@ class Tiny(ChordClassifierMixin, nn.Module):
 
 
 
-# 300 epoch 即可收敛
-# 归纳不同包络特质的音色
-# 另外，提升frame wise任务的时间分辨率
-class EnvelopeConv(nn.Module):
-    def __init__(self, cfg):
-        super().__init__()
-        # mlp + pitch wise conv + ffn residual + time pool -> (B, P, D)
-        # P 个独立的卷积
-        # kernel长度取波形的3个周期
-        sr = cfg.sr
-        freqs = get_freqs(cfg.min_midi, cfg.max_midi)
-        self.register_buffer("freqs", freqs)
-        
-        kernel_size = int(cfg.envelope_conv.receptive_field / cfg.cqt_stride)
-        # 保证奇数
-        kernel_size = kernel_size+1 if kernel_size%2==0 else kernel_size
-        
-        C = cfg.envelope_conv.rep_dim
-        
-        # 分 P 卷积
-        kernels = torch.randn(12, C, C, kernel_size)
-        self.kernels = nn.Parameter(kernels)
-        
-    def forward(self, x):
-        """
-        x: (B, T, P, C)
-        """
-        B,T,P,C = x.shape
-        assert P==12
-        result = []
-        for p in range(12):
-            result_p = []
-            for c in range(C):
-                xpc = x[:,:,p,c] # (B,T)
-                xpc = xpc.unsqueeze(1) # (B,1,T)
-                kernel = self.kernels[p,c,:,:] # (C,T)
-                kernel = kernel[None,:,:] # (1,C,T)
-                ypc = F.conv1d(xpc, kernel) # (B,C,T)
-                result_p.append(ypc)
-            result_p = torch.stack(result_p, dim=-1)
-        result = torch.stack(result, dim=-1) # (B,C,T,P)
-        result = result.permute(0,2,3,1) # (B,T,P,C)
-        return result
-
 
 from utils.pitchDist import build_euler_cost_matrix
 
@@ -1387,6 +1514,12 @@ class PitchDetr(nn.Module):
             nn.Linear(D, P)
         )
         
+        self.pitch_head_object = nn.Sequential(
+            nn.Linear(D, D),
+            nn.GELU(),
+            nn.Linear(D, 1)
+        )
+        
         harmony_prior = build_euler_cost_matrix(freqs.numpy()) # (P,P)
         self.register_buffer("harmony_prior", harmony_prior)
         # pitch_vec (B, P), harmony_prior (P, P), pitch_tar, (B, P) one hot
@@ -1403,9 +1536,13 @@ class PitchDetr(nn.Module):
         
         self.min_midi = min_midi
         
-    def forward(self, audio):
+    def forward(self, audio, only_object=False):
         """
         audio: (B, T1, 2)
+        
+        only_object:
+        忽略query, 只当作 transformer encoder 使用
+        只有 modal_dict['object'] 有意义
         """
         cqt, _, _ = self.preprocessor(audio) # (B, T, P, 2*W)
         fea = self.backbone(cqt, retain_P=True) # (B, T, P, D)
@@ -1418,14 +1555,22 @@ class PitchDetr(nn.Module):
         
         modal_dict = {
             "subject": query, # (B, Q, C)
-            "object": fea, # (B, T, C)
+            "object": fea, # (B, P, C)
         }
         
         for i in range(self.num_layers):
-            modal_dict = self.inter_decoder_layers[i](modal_dict) # (B, ..., C2)
+            modal_dict = self.inter_decoder_layers[i](modal_dict, only_object=only_object) # (B, ..., C2)
         
-        query = modal_dict['subject'] # (B, Q, C)
-        return query
+        if only_object:
+            return modal_dict['object'] # (B, P, C)
+        
+        # query = modal_dict['subject'] # (B, Q, C)
+        return modal_dict
+
+    # def object_mode(self):
+    #     # 设置为
+    #     super(self, ChordClassifierMixin).__init__()
+    #     self.pitch_head = self.pitch_head_object
 
     def get_pitch_cost(self, pitch_logits, pitch_tar):
         """
@@ -1549,7 +1694,7 @@ class PitchDetr(nn.Module):
         # 装载
         self.backbone.load_state_dict(state_dict=filtered_state, strict=False)
         print(f"成功加载预训练权重: {checkpoint_path}")
-       
+
 
 
 from spec import wav2cqt_2C, wav2spec_2C

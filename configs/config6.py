@@ -66,7 +66,7 @@ def get_config():
     cfg.harmony_conv.share_pitch_affine = True
     
     cfg.harmony_conv.infer_threshold = 0.3
-    
+    cfg.use_envelope_conv = False    
     cfg.envelope_conv = argparse.Namespace()
     cfg.envelope_conv.receptive_field = 0.05
     cfg.envelope_conv.rep_dim = 512
