@@ -771,7 +771,29 @@ class ChordClassifierMixin:
         else:
             raise ValueError('wtf')
 
-    def get_midi_loss(self, x, target):
+
+    def get_midi_loss(self, x, target, eps=1e-20):
+        """
+        target: List Dict{
+            "midi": (N,) int
+            "midi_manyhot": (P,) 0~1
+        }
+        x: (B, T, P, D)
+        """
+        B, T, P, D = x.shape
+        assert P==self.P
+        
+        midi_tar = [temp['midi_manyhot'] for temp in target]
+        midi_tar = torch.stack(midi_tar, dim=0) # (B, P)
+        
+        midi_logits = self.head_midi(x.mean(1)).squeeze(-1) # (B, P)
+        loss = F.binary_cross_entropy_with_logits(midi_logits, midi_tar)
+        
+        # harmony_prior = self.harmony_prior # (P, P) 确保 (diag()==0).all()
+        
+        return loss
+
+    def _get_midi_loss(self, x, target, eps=1e-20):
         """
         target: List Dict{
             "midi": (N,) int
@@ -796,10 +818,15 @@ class ChordClassifierMixin:
         exists = exists.bool() & midi_tar_norm.bool()
         exist_tar = exists.unsqueeze(-1).float() # (B,1)
         
-        exist_logits = self.head_midi(x) # (B, T, P, 1)
+        exist_logits = self.head_midi(x) # (B, T, P)
+        exist_logits = exist_logits.mean(1) # (B, P)
+        exist_logits = F.softplus(exist_logits) # (B, P) float 0~1
         # exist_logits = exist_logits.max(1).values.max(1).values # (B, 1) mean = or
-        exist_logits = exist_logits.mean(1).mean(1) # (B, 1) mean = or
-        loss_exist = F.binary_cross_entropy_with_logits(exist_logits, exist_tar)
+        exist_logits = torch.norm(exist_logits, dim=1) # (B, 1) mean = or
+        loss_exist = F.mse_loss(exist_logits, exist_tar)
+        
+        # print(exist_logits, exist_tar)
+        assert (exist_logits.abs() < 1e4).all(), exist_logits
         
         if (~exists).all():
             print(exists)
@@ -812,17 +839,17 @@ class ChordClassifierMixin:
         
         midi_logits = self.head_midi(x).squeeze(-1) # (B, T, P)
         midi_logits = midi_logits.mean(1) # (B, P)
-        midi_logits = F.softplus(midi_logits) # (B, P) float 0~1
+        midi_logits = F.sigmoid(midi_logits) # (B, P) float 0~1
         midi_logits_norm = torch.norm(midi_logits, dim=-1, keepdim=True) # (B, 1)
 
-        midi_direction = midi_logits / (midi_logits_norm + 1e-6)
-        midi_tar = midi_tar / (midi_tar_norm + 1e-6) # (B1, P)
+        midi_direction = midi_logits # / (midi_logits_norm + eps)
+        midi_tar = midi_tar # / (midi_tar_norm + eps) # (B1, P)
         
         harmony_prior = self.harmony_prior # (P, P) 确保 (diag()==0).all()
         
         dist_of_each = midi_tar @ harmony_prior # (B, P)
         dist = (dist_of_each * midi_direction).sum(-1) # (B,)
-        assert ~torch.isnan(dist).any(), f"{dist}, {midi_logits_norm}, {midi_tar_norm}"
+        assert (~torch.isnan(dist)).any(), f"{dist}, {midi_logits_norm}, {midi_tar_norm}"
         loss_midi = dist.mean()
         
         # 用音符数正则化, 避免midi_logits_norm为0
@@ -836,15 +863,21 @@ class ChordClassifierMixin:
         # )
         
         # 全局, 输出的整体不和谐度要符合输入
-        ed_pred = ((midi_direction @ harmony_prior) * midi_direction).sum(-1)
-        ed_gt = ((midi_tar @ harmony_prior) * midi_tar).sum(-1)
-        loss_dissonance = F.mse_loss(ed_pred, ed_gt)
         
+        # ed_pred = ((midi_direction @ harmony_prior) * midi_direction).sum(-1)
+        # ed_gt = ((midi_tar @ harmony_prior) * midi_tar).sum(-1)
+        # loss_dissonance = F.mse_loss(ed_pred, ed_gt)
+        # assert (~torch.isnan(ed_pred)).any(), ed_pred
+
         # print(dist)
         # print(exist_logits)
-        loss = self.loss_weight['midi'] * loss_midi \
-               + self.loss_weight['exist'] * loss_exist \
-                + self.loss_weight['dissonance'] * loss_dissonance
+        
+        loss_midi_w = self.loss_weight['midi'] * loss_midi
+        loss_exist_w = self.loss_weight['exist'] * loss_exist
+        loss_dissonance_w = 0 #self.loss_weight['dissonance'] * loss_dissonance
+        print(loss_midi_w.item(), loss_exist_w.item())#, loss_dissonance_w.item())
+        
+        loss = loss_midi_w + loss_exist_w + loss_dissonance_w
                 # + self.loss_weight['energy'] * loss_energy
         
         return loss
@@ -966,42 +999,11 @@ class ChordClassifierMixin:
         # harmonic field
         # =========================
 
-        midi_logits = self.head_midi(x).squeeze(-1) # (B,T,P)
-        midi_logits = midi_logits.mean(1) # (B,P)
-
-        exist_logits = self.head_midi(x).squeeze(-1) # (B, T, P)
-        exist_logits = exist_logits.mean(-1).mean(-1) # (B,)
-
-        midi_act = F.softplus(midi_logits)
-
-        # =========================
-        # exist from norm
-        # =========================
-
-        midi_norm = torch.norm(
-            midi_act,
-            dim=-1
-        ) # (B)
-
-        exist_logits = self.exist_affine(midi_norm)
-        exist_prob = torch.sigmoid(exist_logits)
-
-        exist = exist_prob > exist_threshold
-
-        # =========================
-        # normalized direction
-        # =========================
-
-        midi_direction = midi_act / (
-            torch.norm(
-                midi_act,
-                dim=-1,
-                keepdim=True
-            ) + 1e-8
-        )
+        midi_logits = self.head_midi(x.mean(1)).squeeze(-1) # (B,P)
+        midi_prob = torch.sigmoid(midi_logits)
 
         # threshold on direction
-        midi_binary = midi_direction > midi_threshold
+        midi_binary = midi_prob > midi_threshold
 
         results = []
 
@@ -1020,21 +1022,9 @@ class ChordClassifierMixin:
 
             symbol = (
                 "[" + ",".join(map(str, active_midi_idx)) + "]"
-                if exist[b]
-                else "N"
             )
 
             results.append({
-                "exist": bool(exist[b].item()),
-
-                "exist_conf":
-                    float(exist_prob[b].item()),
-
-                "midi_direction":
-                    midi_direction[b].detach().cpu(),
-
-                "midi_norm":
-                    float(midi_norm[b].item()),
 
                 "midi_binary":
                     midi_binary[b].detach().cpu(),

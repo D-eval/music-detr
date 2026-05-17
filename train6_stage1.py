@@ -78,7 +78,7 @@ model = CQTEncoder(cfg).to(device)
 # teacher = Teacher()
 current_state = model.state_dict()
 
-checkpoint_path = "../params/detr6/baby5.pt"
+checkpoint_path = "../params/detr6/baby4.pt"
 state_dict = torch.load(checkpoint_path)
 
 # 过滤不匹配的参数
