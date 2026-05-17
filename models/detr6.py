@@ -746,6 +746,16 @@ def pitch_encoding_init(N, D):
     emb = emb / emb.std()
     return emb
 
+
+class Affine(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.scale = nn.Parameter(torch.randn(1))
+        self.bias = nn.Parameter(torch.randn(1))
+    def forward(self, x):
+        return self.scale * x + self.bias
+        
+
 ChordClassifierMixin_modes = ['symbol', 'pitch', 'midi']
 class ChordClassifierMixin:
     def set_mode(self, mode):
@@ -760,6 +770,7 @@ class ChordClassifierMixin:
             return self.get_midi_loss(**kw_args)
         else:
             raise ValueError('wtf')
+
     def get_midi_loss(self, x, target):
         """
         target: List Dict{
@@ -771,40 +782,70 @@ class ChordClassifierMixin:
         B, T, P, D = x.shape
         assert P==self.P
         
+        midi_tar = [temp['midi_manyhot'] for temp in target]
+        midi_tar = torch.stack(midi_tar, dim=0) # (B, P)
+        midi_tar_norm = torch.norm(
+            midi_tar,
+            dim=-1,
+            keepdim=False
+        ) # (B, 1)
+        
         exists = [temp['exist'] for temp in target]
         exists = torch.stack(exists, dim=0).squeeze(-1).long() # (B,)
         
+        exists = exists.bool() & midi_tar_norm.bool()
         exist_tar = exists.unsqueeze(-1).float() # (B,1)
-        exist_logits = self.head_exist(x) # (B, T, 1)
-        exist_logits = exist_logits.mean(1) # (B,1)
         
+        exist_logits = self.head_midi(x) # (B, T, P, 1)
+        # exist_logits = exist_logits.max(1).values.max(1).values # (B, 1) mean = or
+        exist_logits = exist_logits.mean(1).mean(1) # (B, 1) mean = or
         loss_exist = F.binary_cross_entropy_with_logits(exist_logits, exist_tar)
         
-        target = [
-            t for t, e in zip(target, exists)
-            if e == 1
-        ]
+        if (~exists).all():
+            print(exists)
+            return loss_exist
+
+        midi_tar_norm = midi_tar_norm.unsqueeze(-1)
+        midi_tar = midi_tar[exists,...]
+        midi_tar_norm = midi_tar_norm[exists,...]
+        x = x[exists,...]
         
-        x = x[exists.bool(), ...] # (B, T, P, D)
-        
-        midi_logits = self.head_midi(x) # (B, T, P)
+        midi_logits = self.head_midi(x).squeeze(-1) # (B, T, P)
         midi_logits = midi_logits.mean(1) # (B, P)
-        # midi_logits = midi_logits**2
         midi_logits = F.softplus(midi_logits) # (B, P) float 0~1
-        midi_direction = midi_logits / torch.norm(midi_logits, dim=-1, keepdim=True)
+        midi_logits_norm = torch.norm(midi_logits, dim=-1, keepdim=True) # (B, 1)
+
+        midi_direction = midi_logits / (midi_logits_norm + 1e-6)
+        midi_tar = midi_tar / (midi_tar_norm + 1e-6) # (B1, P)
         
-        midi_tar = [temp['midi_manyhot'] for temp in target]
-        midi_tar = torch.stack(midi_tar, dim=0) # (B, P)
-        midi_tar = midi_tar / torch.norm(midi_tar, dim=-1, keepdim=True)
-        
-        harmony_prior = self.harmony_prior # (P, P)
+        harmony_prior = self.harmony_prior # (P, P) 确保 (diag()==0).all()
         
         dist_of_each = midi_tar @ harmony_prior # (B, P)
         dist = (dist_of_each * midi_direction).sum(-1) # (B,)
+        assert ~torch.isnan(dist).any(), f"{dist}, {midi_logits_norm}, {midi_tar_norm}"
         loss_midi = dist.mean()
         
-        loss = self.loss_weight['midi'] * loss_midi + \
-                self.loss_weight['exist'] * loss_exist
+        # 用音符数正则化, 避免midi_logits_norm为0
+        # target_energy = midi_tar.sum(
+        #     dim=-1,
+        #     keepdim=True
+        # ).float()
+        # loss_energy = F.mse_loss(
+        #     midi_logits_norm,
+        #     torch.ones_like(midi_logits_norm, device=midi_logits_norm.device)
+        # )
+        
+        # 全局, 输出的整体不和谐度要符合输入
+        ed_pred = ((midi_direction @ harmony_prior) * midi_direction).sum(-1)
+        ed_gt = ((midi_tar @ harmony_prior) * midi_tar).sum(-1)
+        loss_dissonance = F.mse_loss(ed_pred, ed_gt)
+        
+        # print(dist)
+        # print(exist_logits)
+        loss = self.loss_weight['midi'] * loss_midi \
+               + self.loss_weight['exist'] * loss_exist \
+                + self.loss_weight['dissonance'] * loss_dissonance
+                # + self.loss_weight['energy'] * loss_energy
         
         return loss
 
@@ -909,43 +950,100 @@ class ChordClassifierMixin:
             raise ValueError("wtf")
 
     @torch.no_grad()
-    def infer_midi(self, x, exist_threshold=0.5, midi_threshold=0.5):
+    def infer_midi(
+        self,
+        x,
+        exist_threshold=0.3,
+        midi_threshold=0.15
+    ):
         """
         x: (B, T, P, D)
         """
+
         B, T, P, D = x.shape
 
-        midi_logits = self.head_midi(x)  # (B,T,P)
-        midi_logits = midi_logits.mean(1)  # (B,P)
-        midi_prob = torch.sigmoid(midi_logits)  # (B,P)
-        midi_binary = midi_prob > midi_threshold  # (B,P)
+        # =========================
+        # harmonic field
+        # =========================
 
-        exist_logits = self.head_exist(x)  # (B,T,1)
-        exist_logits = exist_logits.mean(1).squeeze(-1)  # (B,)
+        midi_logits = self.head_midi(x).squeeze(-1) # (B,T,P)
+        midi_logits = midi_logits.mean(1) # (B,P)
+
+        exist_logits = self.head_midi(x).squeeze(-1) # (B, T, P)
+        exist_logits = exist_logits.mean(-1).mean(-1) # (B,)
+
+        midi_act = F.softplus(midi_logits)
+
+        # =========================
+        # exist from norm
+        # =========================
+
+        midi_norm = torch.norm(
+            midi_act,
+            dim=-1
+        ) # (B)
+
+        exist_logits = self.exist_affine(midi_norm)
         exist_prob = torch.sigmoid(exist_logits)
+
         exist = exist_prob > exist_threshold
 
+        # =========================
+        # normalized direction
+        # =========================
+
+        midi_direction = midi_act / (
+            torch.norm(
+                midi_act,
+                dim=-1,
+                keepdim=True
+            ) + 1e-8
+        )
+
+        # threshold on direction
+        midi_binary = midi_direction > midi_threshold
+
         results = []
+
         for b in range(B):
-            active_midi_idx = (torch.nonzero(
-                midi_binary[b],
-                as_tuple=False
-            ).squeeze(-1) + self.min_midi).tolist()
+
+            active_midi_idx = (
+                torch.nonzero(
+                    midi_binary[b],
+                    as_tuple=False
+                ).squeeze(-1)
+                + self.min_midi
+            ).tolist()
 
             if isinstance(active_midi_idx, int):
                 active_midi_idx = [active_midi_idx]
 
-            symbol = "[" + ",".join(map(str, active_midi_idx)) + "]" if exist[b] else "N"
+            symbol = (
+                "[" + ",".join(map(str, active_midi_idx)) + "]"
+                if exist[b]
+                else "N"
+            )
 
             results.append({
                 "exist": bool(exist[b].item()),
-                "exist_conf": float(exist_prob[b].item()),
 
-                "midi_prob": midi_prob[b].detach().cpu(),
-                "midi_binary": midi_binary[b].detach().cpu(),
-                "midi": active_midi_idx,
+                "exist_conf":
+                    float(exist_prob[b].item()),
 
-                "symbol": symbol,
+                "midi_direction":
+                    midi_direction[b].detach().cpu(),
+
+                "midi_norm":
+                    float(midi_norm[b].item()),
+
+                "midi_binary":
+                    midi_binary[b].detach().cpu(),
+
+                "midi":
+                    active_midi_idx,
+
+                "symbol":
+                    symbol,
             })
 
         if B == 1:
@@ -1136,6 +1234,7 @@ class CQTEncoder(ChordClassifierMixin, nn.Module):
         
         num_freqs = freqs.shape[0]
         self.num_freqs=num_freqs
+        self.P=num_freqs
         
         num_octave = math.ceil(num_freqs / 12)
         self.num_octave = num_octave
@@ -1195,6 +1294,8 @@ class CQTEncoder(ChordClassifierMixin, nn.Module):
             nn.GELU(),
             nn.Linear(D, 1)
         )
+        
+        self.exist_affine = Affine()
         
         self.loss_weight = cfg.harmony_conv.loss_weight
         self.threshold = cfg.harmony_conv.infer_threshold

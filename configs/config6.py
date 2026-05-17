@@ -62,6 +62,9 @@ def get_config():
         "chord":1,
         "root":1,
         "exist":1,
+        "midi":1,
+        "energy":1,
+        "dissonance":1,
     }
     cfg.harmony_conv.share_pitch_affine = True
     

@@ -1,4 +1,4 @@
 target:
-midi:[55, 62, 66, 69, 74]
+midi:N
 infer:
-midi:tensor([55, 69, 62, 74, 66])
+midi:[38, 55, 67, 74]

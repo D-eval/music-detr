@@ -45,7 +45,7 @@ from torch.utils.data import DataLoader
 #                                   min_midi=cfg.min_midi,
 #                                   max_midi=cfg.max_midi)
 
-dataset = StackDataset(cfg.sr)
+dataset = StackDataset(cfg.sr,cfg.min_midi,cfg.max_midi)
 loader = DataLoader(
     dataset,
     batch_size=16,
@@ -54,7 +54,7 @@ loader = DataLoader(
     collate_fn=collate_fn,
     pin_memory=True
 )
-assert 0
+
 
 from models.detr6 import CQTEncoder
 from spec import wav2cqt_2C, wav2spec_2C
@@ -78,7 +78,7 @@ model = CQTEncoder(cfg).to(device)
 # teacher = Teacher()
 current_state = model.state_dict()
 
-checkpoint_path = "../params/detr6/baby4.pt"
+checkpoint_path = "../params/detr6/baby5.pt"
 state_dict = torch.load(checkpoint_path)
 
 # 过滤不匹配的参数
@@ -119,8 +119,8 @@ for epoch in range(start_epoch+1, num_epochs):
         with torch.amp.autocast("cuda"):
             x, _, freqs = preprocessor(audio.to(device))
             output = model(x)
-            loss = model.get_loss(output, target)
-            assert ~torch.isnan(loss)
+            loss = model.get_loss(x=output, target=target)
+            assert ~torch.isnan(loss), output
         # ---------- backward ----------
         optimizer.zero_grad()
 
@@ -142,7 +142,7 @@ for epoch in range(start_epoch+1, num_epochs):
                 x, _, freqs = preprocessor(audio.to(device))
                 model.eval()
                 output = model(x)
-                infer_output = model.infer(output)
+                infer_output = model.infer(x=output)
                 model.train()
             # infer_output, target : Dict{
             #     "root": root_pred, # (M) 0~11
