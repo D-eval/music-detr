@@ -67,6 +67,7 @@ def get_config():
         "octave":0,#0.1,
         "pitch":0,#0.1,
     }
+    cfg.harmony_conv.pos_weight = 0.8 # 提升 precision, 偏向 neg
     cfg.harmony_conv.share_pitch_affine = True
     
     cfg.use_log_euler_dissonance = False

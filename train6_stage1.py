@@ -48,9 +48,9 @@ from torch.utils.data import DataLoader
 dataset = StackDataset(cfg.sr,cfg.min_midi,cfg.max_midi)
 loader = DataLoader(
     dataset,
-    batch_size=16,
+    batch_size=32,
     shuffle=True,
-    num_workers=8,
+    num_workers=16,
     collate_fn=collate_fn,
     pin_memory=True
 )

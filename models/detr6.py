@@ -817,7 +817,9 @@ class ChordClassifierMixin:
         midi_tar = torch.stack(midi_tar, dim=0) # (B, P)
         
         midi_logits = self.head_midi(x).squeeze(-1) # (B, P)
-        loss_midi = F.binary_cross_entropy_with_logits(midi_logits, midi_tar)
+        # 偏向 neg, 提升 precision
+        loss_midi = F.binary_cross_entropy_with_logits(midi_logits, midi_tar,
+                                                        pos_weight=torch.tensor(0.5 ,device=x.device))
         
         
         pitch_tar = dilation_pool(midi_tar.unsqueeze(-1), 12).squeeze(-1).bool().float() # (B, 12)
