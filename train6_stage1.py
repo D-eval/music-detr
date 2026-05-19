@@ -48,9 +48,9 @@ from torch.utils.data import DataLoader
 dataset = StackDataset(cfg.sr,cfg.min_midi,cfg.max_midi)
 loader = DataLoader(
     dataset,
-    batch_size=1,
+    batch_size=16,
     shuffle=True,
-    num_workers=0,
+    num_workers=8,
     collate_fn=collate_fn,
     pin_memory=True
 )
@@ -76,9 +76,11 @@ model = CQTEncoder(cfg).to(device)
 
 
 # teacher = Teacher()
+
+
 current_state = model.state_dict()
 
-checkpoint_path = "../params/detr6/baby5.pt"
+checkpoint_path = "../params/detr6/baby6.pt"
 state_dict = torch.load(checkpoint_path, map_location="cpu")
 
 # 过滤不匹配的参数
@@ -95,7 +97,7 @@ model.load_state_dict(state_dict=filtered_state, strict=False)
 
 # -------- optimizer --------
 optimizer = optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=1e-4)
-recorder = TrainingRecorder(cfg, "baby5")
+recorder = TrainingRecorder(cfg, "baby6")
 recorder.load()
 # -------- 混合精度（强烈建议）--------
 scaler = torch.cuda.amp.GradScaler()
@@ -113,7 +115,6 @@ for epoch in range(start_epoch+1, num_epochs):
     total_loss = 0
     for step, batch in enumerate(loader):
         audio, target = batch
-        assert 0
         audio = audio.to(device)
         target = to_device(target, device)
         # ---------- forward + loss（AMP）----------
@@ -175,7 +176,7 @@ for epoch in range(start_epoch+1, num_epochs):
     # ---------- 保存 ----------
     if epoch % cfg.save_epoch == 0:
         os.makedirs(cfg.large_save_dir, exist_ok=True)
-        torch.save(model.state_dict(), os.path.join(cfg.large_save_dir, f"baby5.pt"))
+        torch.save(model.state_dict(), os.path.join(cfg.large_save_dir, f"baby6.pt"))
         recorder.update(total_loss / (step+1), cfg.lr)
         recorder.save()
 

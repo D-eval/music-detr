@@ -42,7 +42,7 @@ def pitch_dist_euler(p1, p2, max_den=12):
 
 import torch
 
-def build_euler_cost_matrix(freqs, max_den=12, return_log=False):
+def build_euler_cost_matrix(freqs, max_den=12, return_log=True):
     """
     freqs: (F,)
     return:
@@ -68,10 +68,21 @@ def build_euler_cost_matrix(freqs, max_den=12, return_log=False):
             cost[i, j] = d
             cost[j, i] = d
 
+    cost = torch.tensor(cost)
+    eigvals = torch.linalg.eigvalsh(cost)
+    # assert eigvals.min() > 0, eigvals
+
+    log_cost = torch.tensor(cost).log()
+    cost_m1 = cost - 1
+    
     if return_log:
-        return torch.tensor(cost).log()
+        eigvals = torch.linalg.eigvalsh(log_cost)
+        # assert eigvals.min() > 0, eigvals
+        return log_cost
     else:
-        return torch.tensor(cost) - 1
+        eigvals = torch.linalg.eigvalsh(cost_m1)
+        # assert eigvals.min() > 0, eigvals
+        return cost_m1
 
 # loss(A3 | C4) > loss(C4 | A3)
 # 根音预测失误，需要有更严重的惩罚

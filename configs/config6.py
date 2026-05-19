@@ -60,18 +60,22 @@ def get_config():
     
     cfg.harmony_conv.loss_weight = {
         "chord":1,
-        "root":1,
         "exist":1,
         "midi":1,
-        "dissonance":0#0.03,
+        "dissonance":0, #0.03,
+        "root":0,#0.1,
+        "octave":0,#0.1,
+        "pitch":0,#0.1,
     }
     cfg.harmony_conv.share_pitch_affine = True
+    
+    cfg.use_log_euler_dissonance = False
     
     cfg.harmony_conv.infer_threshold = 0.3
     cfg.use_envelope_conv = False    
     cfg.envelope_conv = argparse.Namespace()
-    cfg.envelope_conv.receptive_field = 0.05
-    cfg.envelope_conv.rep_dim = 512
+    cfg.envelope_conv.receptive_field = 0.3
+    cfg.envelope_conv.rep_dim = 8
     
     cfg.pitchDetr = argparse.Namespace()
     cfg.pitchDetr.query_num = 20 # max pitch
