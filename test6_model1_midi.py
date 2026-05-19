@@ -54,11 +54,13 @@ for i, start_idx in enumerate(time_starts_idx):
         all_pitchs.append([])
         continue
 
-    x, _, freqs = preprocessor(audio.to(device))
+    x, _, freqs = preprocessor(temp_audio.to(device))
     model.eval()
     output = model(x)
     infer_output = model.infer(x=output)
     pitchs = infer_output['midi']
+    print(pitchs)
+    all_pitchs.append(pitchs)
     
     # output = model(temp_audio)
     # temp_infer = model.infer(output)

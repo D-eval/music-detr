@@ -48,9 +48,9 @@ from torch.utils.data import DataLoader
 dataset = StackDataset(cfg.sr,cfg.min_midi,cfg.max_midi)
 loader = DataLoader(
     dataset,
-    batch_size=16,
+    batch_size=1,
     shuffle=True,
-    num_workers=4,
+    num_workers=0,
     collate_fn=collate_fn,
     pin_memory=True
 )
@@ -78,8 +78,8 @@ model = CQTEncoder(cfg).to(device)
 # teacher = Teacher()
 current_state = model.state_dict()
 
-checkpoint_path = "../params/detr6/baby4.pt"
-state_dict = torch.load(checkpoint_path)
+checkpoint_path = "../params/detr6/baby5.pt"
+state_dict = torch.load(checkpoint_path, map_location="cpu")
 
 # 过滤不匹配的参数
 filtered_state = {}
@@ -113,6 +113,7 @@ for epoch in range(start_epoch+1, num_epochs):
     total_loss = 0
     for step, batch in enumerate(loader):
         audio, target = batch
+        assert 0
         audio = audio.to(device)
         target = to_device(target, device)
         # ---------- forward + loss（AMP）----------

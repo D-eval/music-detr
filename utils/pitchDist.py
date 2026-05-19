@@ -75,3 +75,22 @@ def build_euler_cost_matrix(freqs, max_den=12, return_log=False):
 
 # loss(A3 | C4) > loss(C4 | A3)
 # 根音预测失误，需要有更严重的惩罚
+
+# 我觉得可以直接做一个人为的双向变换
+# 也就是人工 embedding pitch_vec
+# 那么问题就在于，embedding 之后，用 mse 去接近吗?
+# 如果分的足够开，这应该是可以的
+# 不行，bce 之所以能够积累训练中的经验，不遗忘，就是因为 sigmoid 允许 logits 很大，对于深信不疑的事情，sigmoid 梯度传回去的很少
+# 但是 bce 就没有这个特点
+# 也就是说 embedding 空间也必须是 many hot 的形式
+
+# 波形本身可以作为他的表示吗？
+# 每个人和他自己的乘积，只和区间长度有关吧，如果边界处为0，也就是说，和他是谁没有关系
+# 怎么样让预测能够
+
+# sigmoid + bce 有 logits 累计，不容易遗忘，但是无法规避 incorrect label
+# harmony piror 矩阵作为内积空间，能 explict 建模音符距离，但是 many hot 无法收敛，因为 cosine 需要约束到单位圆上
+# 这必然导致 norm 的发散，即使加入正则化，无法处理 0 label 的情况
+# 就算你用小 norm 去预测 0 label，最终所有 norm 都会降低到分母的 eps 上，导致 cosine 为 0
+
+# detr
