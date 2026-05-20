@@ -37,7 +37,7 @@ from configs.config6 import get_config
 cfg = get_config()
 
 import sys
-sys.path.append(str(cfg.dataset_read_py_path_stage2_ytb))
+sys.path.append(str(cfg.dataset_read_py_path_stage1_ytb2))
 
 from read1 import ChordTransDataset, collate_fn
 from torch.utils.data import DataLoader
@@ -50,9 +50,9 @@ from torch.utils.data import DataLoader
 dataset = ChordTransDataset(cfg.sr,cfg.min_midi,cfg.max_midi)
 loader = DataLoader(
     dataset,
-    batch_size=32,
+    batch_size=16,
     shuffle=True,
-    num_workers=16,
+    num_workers=8,
     collate_fn=collate_fn,
     pin_memory=True
 )
@@ -83,7 +83,7 @@ model.outputShape = "BTD"
 
 current_state = model.state_dict()
 
-checkpoint_path = "../params/detr6/baby6.pt"
+checkpoint_path = "../params/detr6/baby7.pt"
 state_dict = torch.load(checkpoint_path, map_location="cpu")
 
 # 过滤不匹配的参数
@@ -100,7 +100,7 @@ model.load_state_dict(state_dict=filtered_state, strict=False)
 
 # -------- optimizer --------
 optimizer = optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=1e-4)
-recorder = TrainingRecorder(cfg, "baby6")
+recorder = TrainingRecorder(cfg, "baby7")
 recorder.load()
 # -------- 混合精度（强烈建议）--------
 scaler = torch.cuda.amp.GradScaler()
@@ -161,19 +161,34 @@ for epoch in range(start_epoch+1, num_epochs):
             infer_output = to_device(infer_output, torch.device("cpu"))
             
             plt.plot(infer_output['prob'])
-            for o in infer_output['onsets']:
+            for i, o in enumerate(infer_output['onsets']):
                 plt.axvline(
                     o['frame'],
-                    linestyle='--'
+                    linestyle='--',
+                    alpha=0.7,
+                    label="pred onset" if i == 0 else None,
                 )
-                            
-            for t in target[0]["start"]:
-                plt.axvline(
-                    t / cfg.sr * cfg.cqt_stride,
-                    alpha=0.3
-                )
+                 
+            if len(target[0]["start"])==0:
+                plt.title("no onset")
+            else:
+                for i, t in enumerate(target[0]["start"]):
+                    plt.axvline(
+                        int(t / cfg.cqt_stride),
+                        alpha=0.3,
+                        label="gt onset" if i == 0 else None,
+                    )
+                plt.title("Onset Detection")
+
+            plt.xlabel("Frame")
+            plt.ylabel("Probability")
+            
+            plt.legend()
+            plt.tight_layout()
 
             plt.savefig("./tiny_save/onset.pdf")
+            plt.close()
+            
             # plot_pianoroll_event(infer_output, target[0])
             # with open("./tiny_save/temp.txt", "w") as f:
             #     f.write("target:\n")
@@ -195,7 +210,7 @@ for epoch in range(start_epoch+1, num_epochs):
     # ---------- 保存 ----------
     if epoch % cfg.save_epoch == 0:
         os.makedirs(cfg.large_save_dir, exist_ok=True)
-        torch.save(model.state_dict(), os.path.join(cfg.large_save_dir, f"baby6.pt"))
+        torch.save(model.state_dict(), os.path.join(cfg.large_save_dir, f"baby7.pt"))
         recorder.update(total_loss / (step+1), cfg.lr)
         recorder.save()
 

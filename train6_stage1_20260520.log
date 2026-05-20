@@ -1,0 +1,14 @@
+nohup: ignoring input
+device: cuda
+[Epoch 4] step 0 loss: 0.2048
+[Epoch 4] step 10 loss: 0.1470
+[Epoch 4] step 20 loss: 0.1197
+[Epoch 4] step 30 loss: 0.1855
+[Epoch 4] step 40 loss: 0.1548
+[Epoch 4] step 50 loss: 0.1179
+[Epoch 4] step 60 loss: 0.1670
+[Epoch 4] step 70 loss: 0.1741
+[Epoch 4] step 80 loss: 0.1362
+[Epoch 4] step 90 loss: 0.1451
+[Epoch 4] step 100 loss: 0.1154
+[Epoch 4] step 110 loss: 0.1486

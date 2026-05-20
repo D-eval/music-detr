@@ -803,7 +803,7 @@ class ChordClassifierMixin:
         else:
             raise ValueError('wtf')
 
-    def get_onset_loss(self, x, target, sigma=1.5, radius=2):
+    def get_onset_loss(self, x, target, sigma=0.1, radius=1):
         """
         target: List Dict{
             "start": (N,) float
@@ -818,8 +818,8 @@ class ChordClassifierMixin:
         onset_target = torch.zeros((B, T, 1), device=x.device)
         for b in range(B):
             for t in target[b]['start']:
-                idx = int(t * sr / stride)
-                        
+                idx = int(t / stride)
+                                
                 for dt in range(-radius, radius+1):
 
                     j = idx + dt
@@ -1032,6 +1032,8 @@ class ChordClassifierMixin:
             return self.infer_pitch(**kw_args)
         elif self.mode=="midi":
             return self.infer_midi(**kw_args)
+        elif self.mode=="onset":
+            return self.infer_onset(**kw_args)
         else:
             raise ValueError("wtf")
 
@@ -1081,7 +1083,6 @@ class ChordClassifierMixin:
                         / sr
                     )
 
-                    peaks.append(sec)
                     peaks.append({
                         "frame": t,
                         "time": sec,
