@@ -14,9 +14,9 @@ def sec_to_tick(sec):
     return sec * ticks_per_beat * bpm / 60
 
 
-audio_path = '/Users/broyou/Music/Music/Media.localized/Music/tokyona/Cold Lilac Bloom Core, Pt. 1/Perpetual Descent.mp3'
+audio_path = '/Users/broyou/Music/网易云音乐/Dirty Androids,ぷにぷに電機 - On The West Coastline.mp3'
 
-checkpoint_path = "../params/detr6/baby5.pt"
+checkpoint_path = "../params/detr6/baby6.pt"
 
 sr = 44100
 
@@ -37,7 +37,7 @@ model.eval()
 
 audio, sr = librosa.load(audio_path, mono=False, sr=sr)
 audio = torch.tensor(audio).T[None,...]
-audio = audio.to(device)[:,:44100*10,:]
+audio = audio.to(device)[:,:,:]
 total_time = audio.shape[1]
 
 time_starts_idx = np.arange(0, total_time, window_len)
@@ -67,12 +67,88 @@ for i, start_idx in enumerate(time_starts_idx):
     # pitchs = temp_infer['midi'].cpu().tolist()
     # all_pitchs.append(pitchs)
 
+# mid = MidiFile()
+# track = MidiTrack()
+# mid.tracks.append(track)
+
+# for dt, ps in zip(ticks_interval, all_pitchs):
+#     if len(ps)==0:
+#         track.append(Message("note_on", note=None, velocity=64, time=delta))
+#     for i, p in enumerate(ps):
+#         delta = dt if i==0 else 0
+#         track.append(Message("note_on", note=p, velocity=64, time=delta))
+# mid.save("./temp.midi")
+
 mid = MidiFile()
 track = MidiTrack()
 mid.tracks.append(track)
 
+prev_ps = set()
+
 for dt, ps in zip(ticks_interval, all_pitchs):
-    for i, p in enumerate(ps):
-        delta = dt if i==0 else 0
-        track.append(Message("note_on", note=p, velocity=64, time=delta))
+
+    ps = set(ps)
+
+    note_on = ps - prev_ps
+    note_off = prev_ps - ps
+
+    first = True
+
+    # note off
+    for p in note_off:
+
+        delta = dt if first else 0
+
+        track.append(
+            Message(
+                "note_off",
+                note=int(p),
+                velocity=0,
+                time=int(delta)
+            )
+        )
+
+        first = False
+
+    # note on
+    for p in note_on:
+
+        delta = dt if first else 0
+
+        track.append(
+            Message(
+                "note_on",
+                note=int(p),
+                velocity=64,
+                time=int(delta)
+            )
+        )
+
+        first = False
+
+    # nothing changed
+    if first:
+        track.append(
+            Message(
+                "note_off",
+                note=0,
+                velocity=0,
+                time=int(dt)
+            )
+        )
+
+    prev_ps = ps
+
+# 最后关闭所有 note
+for p in prev_ps:
+
+    track.append(
+        Message(
+            "note_off",
+            note=int(p),
+            velocity=0,
+            time=0
+        )
+    )
+
 mid.save("./temp.midi")

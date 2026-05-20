@@ -786,7 +786,7 @@ class Affine(nn.Module):
         
 NoExistValue = 5
 ExistValue = 0
-ChordClassifierMixin_modes = ['symbol', 'pitch', 'midi']
+ChordClassifierMixin_modes = ['symbol', 'pitch', 'midi', "onset"]
 class ChordClassifierMixin:
     def set_mode(self, mode):
         assert mode in ChordClassifierMixin_modes
@@ -798,10 +798,49 @@ class ChordClassifierMixin:
             return self.get_pitch_loss(**kw_args)
         elif self.mode=="midi":
             return self.get_midi_loss(**kw_args)
+        elif self.mode=="onset":
+            return self.get_onset_loss(**kw_args)
         else:
             raise ValueError('wtf')
 
+    def get_onset_loss(self, x, target, sigma=1.5, radius=2):
+        """
+        target: List Dict{
+            "start": (N,) float
+        }
+        x: B, T, D
+        """
+        B, T, D = x.shape
+        
+        stride = self.stride
+        sr = self.sr
+        
+        onset_target = torch.zeros((B, T, 1), device=x.device)
+        for b in range(B):
+            for t in target[b]['start']:
+                idx = int(t * sr / stride)
+                        
+                for dt in range(-radius, radius+1):
 
+                    j = idx + dt
+
+                    if 0 <= j < T:
+
+                        v = math.exp(
+                            -0.5 * (dt / sigma) ** 2
+                        )
+
+                        onset_target[b, j, 0] = max(
+                            onset_target[b, j, 0],
+                            v
+                        )
+        
+        onset_logits = self.head_onset(x) # (B, T, 1)
+        
+        loss = F.binary_cross_entropy_with_logits(onset_logits, onset_target)
+        
+        return loss
+        
     def get_midi_loss(self, x, target, eps=1e-20):
         """
         target: List Dict{
@@ -995,6 +1034,71 @@ class ChordClassifierMixin:
             return self.infer_midi(**kw_args)
         else:
             raise ValueError("wtf")
+
+    @torch.no_grad()
+    def infer_onset(
+        self,
+        x,
+        threshold=0.5
+    ):
+        """
+        x: (B,T,D)
+        """
+
+        B,T,D = x.shape
+        assert B==1
+
+        stride = self.stride
+        sr = self.sr
+
+        onset_logits = self.head_onset(x)
+
+        onset_prob = torch.sigmoid(
+            onset_logits
+        ).squeeze(-1) # (B,T)
+
+        results = []
+
+        for b in range(B):
+
+            prob = onset_prob[b]
+
+            peaks = []
+
+            for t in range(1, T-1):
+
+                if (
+                    prob[t] > threshold
+                    and
+                    prob[t] >= prob[t-1]
+                    and
+                    prob[t] >= prob[t+1]
+                ):
+
+                    sec = (
+                        t
+                        * stride
+                        / sr
+                    )
+
+                    peaks.append(sec)
+                    peaks.append({
+                        "frame": t,
+                        "time": sec,
+                        "conf": float(
+                            prob[t].item()
+                        )
+                    })
+
+            results.append({
+                "onsets": peaks,
+                "prob": prob.detach().cpu(),
+            })
+
+        if B == 1:
+            return results[0]
+
+        return results
 
     @torch.no_grad()
     def infer_midi(
@@ -1325,6 +1429,9 @@ class CQTEncoder(ChordClassifierMixin, nn.Module):
         
         self.min_midi = cfg.min_midi
         
+        self.stride = cfg.cqt_stride
+        self.sr = cfg.sr
+        
         self.num_layers = cfg.harmony_conv.num_layers
 
         self.prior_affine = nn.Linear(cfg.input_dim, D)
@@ -1450,6 +1557,12 @@ class CQTEncoder(ChordClassifierMixin, nn.Module):
             nn.Linear(D, 1)
         )
         
+        self.head_onset = nn.Sequential(
+            nn.Linear(D, D),
+            nn.GELU(),
+            nn.Linear(D, 1)
+        )
+        
         self.exist_affine = Affine()
         
         self.loss_weight = cfg.harmony_conv.loss_weight
@@ -1533,7 +1646,10 @@ class CQTEncoder(ChordClassifierMixin, nn.Module):
             z = torch.stack(z, dim=-2) # (B,T,12,d)
         z = z.flatten(-2,-1)
         z = self.post_pitch_affine(z) # (B,T,D)
-        return z
+        if self.outputShape=="BTD":
+            return z
+        else:
+            raise ValueError("wtf")
 
     # @torch.no_grad()
     # def infer(self, x):

@@ -30,6 +30,7 @@ def get_config():
 
     cfg.dataset_read_py_path_stage1 = Path("../dataset/baby")
     cfg.dataset_read_py_path_stage1_ytb = Path("../dataset/ytbRand")
+    cfg.dataset_read_py_path_stage1_ytb2 = Path("../dataset/ytbRand2")
     
     # cfg.min_len = int(cfg.sr * 0.5)
     # cfg.max_len = int(cfg.sr * 1)
