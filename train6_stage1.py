@@ -35,7 +35,7 @@ from configs.config6 import get_config
 cfg = get_config()
 
 import sys
-sys.path.append(str(cfg.dataset_read_py_path_stage1_ytb))
+sys.path.append(str(cfg.dataset_read_py_path_stage1_union))
 
 from read import StackDataset, collate_fn
 from torch.utils.data import DataLoader
