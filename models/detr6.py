@@ -836,7 +836,7 @@ class ChordClassifierMixin:
                         )
         
         onset_logits = self.head_onset(x) # (B, T, 1)
-        
+        assert torch.isfinite(x).all(), "x bad"
         loss = F.binary_cross_entropy_with_logits(onset_logits, onset_target)
         
         return loss
@@ -1461,6 +1461,16 @@ class CQTEncoder(ChordClassifierMixin, nn.Module):
             for _ in range(cfg.harmony_conv.num_layers)
         ])
         
+        self.PNorm = nn.ModuleList([
+            Qwen2RMSNorm(D)
+            for _ in range(cfg.harmony_conv.num_layers)
+        ])
+        
+        self.TNorm = nn.ModuleList([
+            Qwen2RMSNorm(D)
+            for _ in range(cfg.harmony_conv.num_layers)
+        ])
+        
         self.FFNNorms = nn.ModuleList([
             Qwen2RMSNorm(D)
             for _ in range(cfg.harmony_conv.num_layers)
@@ -1578,6 +1588,9 @@ class CQTEncoder(ChordClassifierMixin, nn.Module):
             return: (B, T, D)
             retain_P: (B, T, P, D)
         """
+        
+        assert torch.isfinite(x).all(), "cqt bad"
+        
         B, T, P, C = x.shape
         assert P==self.num_freqs
         x = self.prior_affine(x) # (B, T, P, D)
@@ -1597,11 +1610,21 @@ class CQTEncoder(ChordClassifierMixin, nn.Module):
             residual = x
             x_p = self.Players[i](x) # (B, T, P, D)
             x_t = self.Tlayers[i](x) # (B, T, P, D)
-            x = x_p + x_t + residual
+            x_p = self.PNorm[i](x) # 防止爆炸
+            x_t = self.TNorm[i](x)
+            x = x_p + x_t
+            x = x + residual
+            assert torch.isfinite(x_p).all(), f"P bad: {i}"
+            assert torch.isfinite(x_t).all(), f"T bad: {i}"
+            
             residual = x
             x = self.FFNNorms[i](x)
             x = self.FFNlayers[i](x)
             x = x + residual # (B, T, P, D)
+            
+            assert torch.isfinite(x).all(), f"ffn bad: {i}"
+        
+        assert torch.isfinite(x).all(), "encoder bad"
         
         if self.outputShape=="BTPD":
             return x # (B, T, P, D)

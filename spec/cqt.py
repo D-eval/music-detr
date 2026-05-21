@@ -325,12 +325,15 @@ class MultiWindowCQT(nn.Module):
         wav_side = (wav[:, 0, :] - wav[:, 1, :]) / 2 # (B, L)
         wav = torch.stack([wav_middle, wav_side], dim=1) # (B, 2, L)
         
-        # begin norm
-        wav_mid = wav.mean(1) # (B,L)
-        wav_mu = wav_mid.mean(-1)[:,None,None] # (B,1,1)
-        wav_sigma = wav_mid.std(-1)[:,None,None] # (B,1,1)
-        wav = (wav - wav_mu) / (wav_sigma + 1e-6) # (B, 2, L)
-        # end norm
+        # # begin norm
+        # wav_mid = wav.mean(1) # (B,L)
+        # wav_mu = wav_mid.mean(-1)[:,None,None] # (B,1,1)
+        # wav_sigma = wav_mid.std(-1)[:,None,None] # (B,1,1)
+        # wav = (wav - wav_mu) / (wav_sigma + 1e-6) # (B, 2, L)
+        # assert wav.max() > 100
+        # # end norm
+        wav_max = wav.abs().max()
+        wav = wav / (wav_max + 1e-6)
         
         B, C, L = wav.shape
         assert C == 2, "输入必须是双声道"
