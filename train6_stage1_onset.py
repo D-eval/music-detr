@@ -72,7 +72,7 @@ print("device:",device)
 preprocessor = MultiWindowCQT(freqs, cfg.sr, cfg.window_num, cfg.min_cycle, stride=cfg.cqt_stride).to(device)
 model = CQTEncoder(cfg).to(device)
 
-model.outputShape = "BTD"
+
 # for audio, target in loader:
 #     x, _, freqs = preprocessor(audio.to(device))
 #     assert 0
@@ -108,7 +108,7 @@ scaler = torch.cuda.amp.GradScaler()
 # -------- 训练 --------
 model.train()
 model.set_mode("onset")
-model.retain_P = True
+model.outputShape = "BTD"
 
 num_epochs = 50000
 

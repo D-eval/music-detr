@@ -1071,10 +1071,10 @@ class ChordClassifierMixin:
 
                 if (
                     prob[t] > threshold
-                    and
-                    prob[t] >= prob[t-1]
-                    and
-                    prob[t] >= prob[t+1]
+                    # and
+                    # prob[t] >= prob[t-1]
+                    # and
+                    # prob[t] >= prob[t+1]
                 ):
 
                     sec = (
