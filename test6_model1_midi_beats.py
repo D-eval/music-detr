@@ -28,7 +28,6 @@ sr = 44100
 ticks_per_beat = 480
 bpm = 120
 
-# 1 sec -> ticks
 TICKS_PER_SECOND = ticks_per_beat * bpm / 60
 
 HIHAT = 42
@@ -38,7 +37,7 @@ HIHAT = 42
 # =========================================================
 
 def sec_to_tick(sec):
-    return sec * TICKS_PER_SECOND
+    return int(sec * TICKS_PER_SECOND)
 
 
 # =========================================================
@@ -112,26 +111,32 @@ print("beat tracking...")
 tempo, beat_samples = librosa.beat.beat_track(
     y=mono_audio,
     sr=sr,
-    units="samples"
+    units="samples",
+    trim=False
 )
 
-beat_samples = np.asarray(beat_samples)
+beat_samples = np.asarray(
+    beat_samples,
+    dtype=int
+)
 
 print("tempo:", tempo)
 print("beats:", len(beat_samples))
 
-# 至少两个 beat 才能形成 interval
 if len(beat_samples) < 2:
-    raise RuntimeError("Not enough beats detected.")
+    raise RuntimeError(
+        "Not enough beats detected."
+    )
 
 segment_starts = beat_samples[:-1]
 segment_ends = beat_samples[1:]
 
 beat_times = segment_starts / sr
 
-ticks_starts = sec_to_tick(
-    beat_times
-).astype(int)
+ticks_starts = np.array([
+    sec_to_tick(t)
+    for t in beat_times
+])
 
 ticks_interval = np.diff(
     np.pad(ticks_starts, (1, 0))
@@ -193,7 +198,7 @@ for i, (start_idx, end_idx) in enumerate(
 mid = MidiFile()
 
 # ---------------------------------------------------------
-# Track 1 : Beat
+# Beat Track
 # ---------------------------------------------------------
 
 beat_track = MidiTrack()
@@ -201,7 +206,7 @@ beat_track = MidiTrack()
 mid.tracks.append(beat_track)
 
 # ---------------------------------------------------------
-# Track 2 : Notes
+# Note Track
 # ---------------------------------------------------------
 
 note_track = MidiTrack()
@@ -212,7 +217,7 @@ mid.tracks.append(note_track)
 # Beat Track
 # =========================================================
 
-for i, dt in enumerate(ticks_interval):
+for dt in ticks_interval:
 
     beat_track.append(
         Message(
@@ -224,59 +229,18 @@ for i, dt in enumerate(ticks_interval):
         )
     )
 
-    beat_track.append(
-        Message(
-            "note_off",
-            channel=9,
-            note=HIHAT,
-            velocity=0,
-            time=20
-        )
-    )
-
 # =========================================================
 # Note Track
 # =========================================================
-
-prev_ps = set()
 
 for dt, ps in zip(
     ticks_interval,
     all_pitchs
 ):
 
-    ps = set(ps)
-
-    note_on = ps - prev_ps
-
-    note_off = prev_ps - ps
-
     first = True
 
-    # -----------------------------------------------------
-    # note off
-    # -----------------------------------------------------
-
-    for p in note_off:
-
-        delta = dt if first else 0
-
-        note_track.append(
-            Message(
-                "note_off",
-                note=int(p),
-                velocity=0,
-                time=int(delta)
-            )
-        )
-
-        first = False
-
-    # -----------------------------------------------------
-    # note on
-    # -----------------------------------------------------
-
-    for p in note_on:
+    for p in ps:
 
         delta = dt if first else 0
 
@@ -291,37 +255,17 @@ for dt, ps in zip(
 
         first = False
 
-    # -----------------------------------------------------
-    # nothing changed
-    # -----------------------------------------------------
-
+    # 如果没有音符
     if first:
 
         note_track.append(
             Message(
-                "note_off",
+                "note_on",
                 note=0,
                 velocity=0,
                 time=int(dt)
             )
         )
-
-    prev_ps = ps
-
-# =========================================================
-# Final Note Off
-# =========================================================
-
-for p in prev_ps:
-
-    note_track.append(
-        Message(
-            "note_off",
-            note=int(p),
-            velocity=0,
-            time=0
-        )
-    )
 
 # =========================================================
 # Save
