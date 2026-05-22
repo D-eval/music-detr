@@ -62,8 +62,11 @@ for i, start_idx in enumerate(time_starts_idx):
     model.eval()
     output = model(x)
     infer_output = model.infer(x=output)
-    times = infer_output['onset']['time']
-    times = [time + temp_time for time in times]
+    if len(infer_output['onsets']) > 0:
+        times = [temp['time'] for temp in infer_output['onsets']]
+        times = [time + temp_time for time in times]
+    else:
+        times = []
     print(times)
     all_onsets.append(times)
     
@@ -84,53 +87,41 @@ for i, start_idx in enumerate(time_starts_idx):
 #         track.append(Message("note_on", note=p, velocity=64, time=delta))
 # mid.save("./temp.midi")
 
+all_onsets = sum(all_onsets, [])
+
 merge_threshold = 0.05  # 50ms
 
 merged_onsets = []
 
 for t in all_onsets:
-
     if len(merged_onsets) == 0:
-
         merged_onsets.append(t)
-
         continue
-
     # 太近
     if (
         t
         - merged_onsets[-1]
         < merge_threshold
     ):
-
         # average merge
         merged_onsets[-1] = (
             merged_onsets[-1]
             + t
         ) / 2
-
     else:
-
         merged_onsets.append(t)
-        
+
 
 # mid
 mid = MidiFile()
-
 track = MidiTrack()
-
 mid.tracks.append(track)
-
 prev_tick = 0
-
 for sec in merged_onsets:
-
     tick = int(
         sec_to_tick(sec)
     )
-
     dt = tick - prev_tick
-
     track.append(
         Message(
             "note_on",
@@ -139,7 +130,6 @@ for sec in merged_onsets:
             time=dt
         )
     )
-
     track.append(
         Message(
             "note_off",
@@ -148,7 +138,5 @@ for sec in merged_onsets:
             time=30
         )
     )
-
     prev_tick = tick + 30
-
 mid.save("./onset.mid")
