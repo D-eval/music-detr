@@ -179,7 +179,8 @@ for i, (start_idx, end_idx) in enumerate(
             x=output
         )
 
-        pitchs = infer_output['midi']
+        pitchs = infer_output['pitch_idx']
+        pitchs = [pitch + 72 for pitch in pitchs]
 
     pitchs = list(set([
         int(p)

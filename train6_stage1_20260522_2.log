@@ -13398,3 +13398,87 @@ device: cuda
 [Epoch 324] step 250 loss: 0.1007
 [Epoch 324] step 260 loss: 0.1082
 [Epoch 324] step 270 loss: 0.1098
+[Epoch 324] step 280 loss: 0.0644
+[Epoch 324] step 290 loss: 0.1352
+[Epoch 324] step 300 loss: 0.0834
+[Epoch 324] step 310 loss: 0.0871
+[Epoch 324] step 320 loss: 0.1107
+[Epoch 324] step 330 loss: 0.1006
+[Epoch 324] step 340 loss: 0.0848
+[Epoch 324] step 350 loss: 0.1223
+[Epoch 324] step 360 loss: 0.1203
+[Epoch 324] step 370 loss: 0.0504
+[Epoch 324] step 380 loss: 0.1224
+[Epoch 324] step 390 loss: 0.1025
+[Epoch 324] step 400 loss: 0.0612
+[Epoch 324] step 410 loss: 0.1548
+[Epoch 324] step 420 loss: 0.1080
+[Epoch 324] step 430 loss: 0.1366
+[Epoch 324] step 440 loss: 0.0915
+[Epoch 324] step 450 loss: 0.0990
+[Epoch 324] step 460 loss: 0.0305
+[Epoch 324] step 470 loss: 0.1458
+[Epoch 324] step 480 loss: 0.1095
+[Epoch 324] step 490 loss: 0.0883
+[Epoch 324] step 500 loss: 0.1015
+[Epoch 324] step 510 loss: 0.0960
+[Epoch 324] step 520 loss: 0.0860
+[Epoch 324] step 530 loss: 0.1121
+[Epoch 324] step 540 loss: 0.0740
+[Epoch 324] step 550 loss: 0.1047
+[Epoch 324] step 560 loss: 0.1045
+[Epoch 324] step 570 loss: 0.0512
+[Epoch 324] step 580 loss: 0.0856
+[Epoch 324] step 590 loss: 0.1520
+[Epoch 324] step 600 loss: 0.1409
+[Epoch 324] step 610 loss: 0.0643
+[Epoch 324] step 620 loss: 0.1022
+[Epoch 324] step 630 loss: 0.2533
+[Epoch 324] step 640 loss: 0.0941
+[Epoch 324] step 650 loss: 0.1008
+[Epoch 324] step 660 loss: 0.1123
+[Epoch 324] step 670 loss: 0.1220
+[Epoch 324] step 680 loss: 0.0990
+[Epoch 324] step 690 loss: 0.1254
+[Epoch 324] step 700 loss: 0.0952
+[Epoch 324] step 710 loss: 0.0785
+[Epoch 324] step 720 loss: 0.1443
+[Epoch 324] step 730 loss: 0.0553
+[Epoch 324] step 740 loss: 0.0578
+[Epoch 324] step 750 loss: 0.0573
+[Epoch 324] step 760 loss: 0.1070
+[Epoch 324] step 770 loss: 0.0767
+[Epoch 324] step 780 loss: 0.1224
+[Epoch 324] step 790 loss: 0.0821
+[Epoch 324] step 800 loss: 0.1320
+[Epoch 324] step 810 loss: 0.1265
+==== Epoch 324 avg loss: 0.1087 ====
+[Epoch 325] step 0 loss: 0.1153
+[Epoch 325] step 10 loss: 0.0943
+[Epoch 325] step 20 loss: 0.1494
+[Epoch 325] step 30 loss: 0.0442
+Traceback (most recent call last):
+  File "/home/vipuser/miniconda3/envs/py39/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1285, in _try_get_data
+    data = self._data_queue.get(timeout=timeout)
+  File "/home/vipuser/miniconda3/envs/py39/lib/python3.9/queue.py", line 180, in get
+    self.not_empty.wait(remaining)
+  File "/home/vipuser/miniconda3/envs/py39/lib/python3.9/threading.py", line 316, in wait
+    gotit = waiter.acquire(True, timeout)
+  File "/home/vipuser/miniconda3/envs/py39/lib/python3.9/site-packages/torch/utils/data/_utils/signal_handling.py", line 73, in handler
+    _error_if_any_worker_fails()
+RuntimeError: DataLoader worker (pid 2152808) is killed by signal: Terminated. 
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/vipuser/wby/proj_params/music-detr/train6_stage1_pitch.py", line 116, in <module>
+    for step, batch in enumerate(loader):
+  File "/home/vipuser/miniconda3/envs/py39/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 734, in __next__
+    data = self._next_data()
+  File "/home/vipuser/miniconda3/envs/py39/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1492, in _next_data
+    idx, data = self._get_data()
+  File "/home/vipuser/miniconda3/envs/py39/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1444, in _get_data
+    success, data = self._try_get_data()
+  File "/home/vipuser/miniconda3/envs/py39/lib/python3.9/site-packages/torch/utils/data/dataloader.py", line 1298, in _try_get_data
+    raise RuntimeError(
+RuntimeError: DataLoader worker (pid(s) 2152808) exited unexpectedly

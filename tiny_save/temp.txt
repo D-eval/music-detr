@@ -1,4 +1,4 @@
 target:
-pitch:[1, 4, 11]
+pitch:[2, 7, 10]
 infer:
-pitch:[1, 4, 11]
+pitch:[2, 7, 10]
