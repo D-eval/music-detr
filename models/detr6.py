@@ -942,37 +942,22 @@ class ChordClassifierMixin:
             "pitch_cls_vec": (12,), # 0~1
             "chord_idx": (1,), # 0~4, maj,min,dom,dim,aug
         }
-        x: (B, T, D)
+        x: (B, T, P, D)
         """
-        exists = [temp['exist'] for temp in target]
-        exists = torch.stack(exists, dim=0).squeeze(-1).long() # (B,)
+        x = x.mean(1) # (B, P, D)
         
-        exist_tar = exists.unsqueeze(-1).float() # (B,1)
-        exist_logits = self.head_exist(x) # (B, T, 1)
-        exist_logits = exist_logits.mean(1) # (B,1)
-        
-        loss_exist = F.binary_cross_entropy_with_logits(exist_logits, exist_tar)
-        
-        target = [
-            t for t, e in zip(target, exists)
-            if e == 1
-        ]
-        
-        x = x[exists.bool(), :, :]
-        
-        B, T, D = x.shape
+        B, P, D = x.shape
+        assert P==12
         
         # pitch
-        pitch_tar = [temp['pitch_cls_vec'] for temp in target]
+        pitch_tar = [temp['pitch_vec'] for temp in target]
         pitch_tar = torch.stack(pitch_tar, dim=0) # (B,12)
         
-        pitch_logits = self.head_pitch(x) # (B, T, 12)
-        pitch_logits = pitch_logits.mean(1) # (B, 12)
+        pitch_logits = self.head_pitch(x).squeeze(-1) # (B, 12)
         
         loss_pitch = F.binary_cross_entropy_with_logits(pitch_logits, pitch_tar)
         
-        loss = self.loss_weight['pitch'] * loss_pitch + \
-                self.loss_weight['exist'] * loss_exist
+        loss = loss_pitch
         return loss
         
     def get_symbol_loss(self, x, target):
@@ -1288,30 +1273,21 @@ class ChordClassifierMixin:
     @torch.no_grad()
     def infer_pitch(self, x, exist_threshold=0.5, pitch_threshold=0.5):
         """
-        x: (B, T, D)
+        x: (B, T, 12, D)
         """
-
-        B, T, D = x.shape
+        x = x.mean(1) # (B, P, D)
+        B, P, D = x.shape
+        assert P==12
+        # pitch
+        pitch_logits = self.head_pitch(x).squeeze(-1)      # (B,12)
 
         pitch_names = [
             "C", "C#", "D", "D#", "E", "F",
             "F#", "G", "G#", "A", "A#", "B"
         ]
 
-        # pitch
-        pitch_logits = self.head_pitch(x)      # (B,T,12)
-        pitch_logits = pitch_logits.mean(1)    # (B,12)
-
         pitch_prob = torch.sigmoid(pitch_logits)  # (B,12)
-
         pitch_binary = pitch_prob > pitch_threshold  # (B,12)
-
-        # exist
-        exist_logits = self.head_exist(x)      # (B,T,1)
-        exist_logits = exist_logits.mean(1).squeeze(-1)  # (B,)
-
-        exist_prob = torch.sigmoid(exist_logits)
-        exist = exist_prob > exist_threshold
 
         results = []
 
@@ -1330,15 +1306,9 @@ class ChordClassifierMixin:
                 for i in active_pitch_idx
             ]
 
-            if exist[b]:
-                symbol = "[" + ",".join(active_pitch_names) + "]"
-            else:
-                symbol = "N"
+            symbol = "[" + ",".join(active_pitch_names) + "]"
 
             results.append({
-                "exist": bool(exist[b].item()),
-                "exist_conf": float(exist_prob[b].item()),
-
                 "pitch_prob": pitch_prob[b].detach().cpu(),
                 "pitch_binary": pitch_binary[b].detach().cpu(),
 
@@ -1579,7 +1549,7 @@ class CQTEncoder(ChordClassifierMixin, nn.Module):
         self.loss_weight = cfg.harmony_conv.loss_weight
         self.threshold = cfg.harmony_conv.infer_threshold
         
-        self.validShapes = ["BTPD", "BTD"]
+        self.validShapes = ["BTPD", "BTD", "BT12D"]
         self.outputShape = "BTPD"
 
     def forward(self, x):
@@ -1658,6 +1628,9 @@ class CQTEncoder(ChordClassifierMixin, nn.Module):
         y = torch.concat(y, dim=-1)
         y = self.post_affine(y) # (B,T,12,D)
         
+        if self.outputShape == "BT12D":
+            return y
+                
         if self.share_pitch_affine:
             z = self.pitch_affines(y) # (B,T,12,d)
         else:

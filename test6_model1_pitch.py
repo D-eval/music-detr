@@ -15,7 +15,7 @@ def sec_to_tick(sec):
 
 audio_path = '/Users/broyou/Music/Music/Media.localized/Music/tokyona/Cold Lilac Bloom Core, Pt. 1/Perpetual Descent.mp3'
 
-checkpoint_path = "../params/detr6/baby1.pt"
+checkpoint_path = "../params/detr6/baby8.pt"
 
 sr = 44100
 
